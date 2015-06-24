@@ -4,14 +4,19 @@ The results of `demo.py` should look something like:
 
 ![](example_images/Screenshot.png)
 
-Right now the interface looks something like:
+Assign some login parameters, these are local to your neo4j server.
 
+    neo4j_login = {
+        "username" : "neo4j",
+        "password" : "tulsa",
+        "url" : "http://localhost:7474"
+    }
 
 Create a new graph connection
 
     gdb = enchanced_GraphDatabase(**neo4j_login)
 
-Delete everything in the old graph. WARNING: this is really a hard reset and will wipe any existing neo4j database. It's useful here for testing purposes only.
+**WARNING**: this is a hard reset and will wipe any existing neo4j database. It's useful here for testing purposes only.
 
     gdb.hard_reset()
 
