@@ -14,7 +14,7 @@ Assign some login parameters, these are local to your neo4j server.
 
 Create a new graph connection
 
-    gdb = enchanced_GraphDatabase(**neo4j_login)
+    gdb = enhanced_GraphDatabase(**neo4j_login)
 
 **WARNING**: this is a hard reset and will wipe any existing neo4j database. It's useful here for testing purposes only.
 
@@ -27,7 +27,7 @@ Define some flows:
     f3 = gdb.new_flow(description = "sudo apt-get install pip")
     f4 = gdb.new_flow(description = "pip install neo4jrestclient")
 
-Assign the ddependencies.
+Assign the dependencies.
 
     f1.relationships.create("depends", f2)
     f2.relationships.create("depends", f3)
@@ -43,11 +43,10 @@ Add some validation steps:
 
     f2.relationships.create("validator", v)
 
-
     v = gdb.new_validation(
-        command='python -c "import neo4jrestclientx"',
+        command='python -c "import neo4jrestclient"',
         success="",
-        failure="ImportError: No module named neo4jrestclientx",
+        failure="ImportError: No module named neo4jrestclient",
         )
 
     v.relationships.create("validator", f1)

@@ -58,8 +58,7 @@ class validation(generic_node_container):
     }
     
 
-
-class enchanced_GraphDatabase(GraphDatabase):
+class enhanced_GraphDatabase(GraphDatabase):
     def __iter__(self):
         q = "START n=node(*) RETURN n;"
         for item in self.query(q):
@@ -98,35 +97,77 @@ class enchanced_GraphDatabase(GraphDatabase):
         node.labels.add("validation")
         return node
 
-gdb = enchanced_GraphDatabase(**neo4j_login)
+    def __iter__(self):
+        q = "START n=node(*) RETURN n;"
+        for item in self.query(q):
+            yield item
 
-gdb.hard_reset()
+    def scalar_query(self, q):
+        return iter(self.query(q)).next()[0]
 
-f1 = gdb.new_flow(description = "Install neo4j-rest-client")
-f2 = gdb.new_flow(description = "Install pip")
-f3 = gdb.new_flow(description = "sudo apt-get install pip")
-f4 = gdb.new_flow(description = "pip install neo4jrestclient")
+    def count_nodes(self):
+        q = "START n=node(*) return count(n);"
+        return self.scalar_query(q)
 
-f1.relationships.create("depends", f2)
-f2.relationships.create("depends", f3)
-f1.relationships.create("depends", f4)
+    def count_relationships(self):
+        q = "START r=rel(*) return count(r);"
+        return self.scalar_query(q)
 
-v = gdb.new_validation(
-    command="pip --version",
-    success="pip 7.0.3 ...",
-    failure="command not found",
-    )
+    def hard_reset(self):
+        q = '''
+        MATCH (n)
+        OPTIONAL MATCH (n)-[r]-()
+        DELETE n,r
+        '''
+        return self.query(q)
 
-f2.relationships.create("validator", v)
+    def new(self,**node_properties):
+        node = self.node(**node_properties)        
+        return node
+
+    def new_flow(self, **kwargs):
+        node = self.node(**flow(**kwargs))
+        node.labels.add("flow")
+        return node
+
+    def new_validation(self, **kwargs):
+        node = self.node(**validation(**kwargs))
+        node.labels.add("validation")
+        return node
 
 
-v = gdb.new_validation(
-    command='python -c "import neo4jrestclientx"',
-    success="",
-    failure="ImportError: No module named neo4jrestclientx",
-    )
+if __name__ == "__main__":
 
-v.relationships.create("validator", f1)
+    gdb = enhanced_GraphDatabase(**neo4j_login)
+    gdb.hard_reset()
 
-msg = "{} known nodes, {} known relationships."
-print msg.format(gdb.count_nodes(), gdb.count_relationships())
+    f1 = gdb.new_flow(description = "Install neo4j-rest-client")
+    f2 = gdb.new_flow(description = "Install pip")
+    f3 = gdb.new_flow(description = "sudo apt-get install pip")
+    f4 = gdb.new_flow(description = "pip install neo4jrestclient")
+
+    f1.relationships.create("depends", f2)
+    f2.relationships.create("depends", f3)
+    f1.relationships.create("depends", f4)
+
+    v = gdb.new_validation(
+        command="pip --version",
+        success="pip 7.0.3 ...",
+        failure="command not found",
+        )
+
+    f2.relationships.create("validator", v)
+
+
+    v = gdb.new_validation(
+        command='python -c "import neo4jrestclientx"',
+        success="",
+        failure="ImportError: No module named neo4jrestclientx",
+        )
+
+    v.relationships.create("validator", f1)
+
+    msg = "{} known nodes, {} known relationships."
+    print msg.format(gdb.count_nodes(), gdb.count_relationships())
+
+
