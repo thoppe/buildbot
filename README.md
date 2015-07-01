@@ -51,3 +51,10 @@ Add some validation steps:
 
     v.relationships.create("validator", f1)
 
+
+
+### To dos:
+
++ Refactor out db code
++ Write logging.info hooks for each action
++ Export flow to json
