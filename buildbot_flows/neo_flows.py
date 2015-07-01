@@ -115,6 +115,12 @@ class enhanced_GraphDatabase(GraphDatabase):
         print q
         return self.scalar_query(q)
         
-    
     def export_json(self, idx):
-        print idx
+        q = '''
+        MATCH (node)
+        WHERE ID(node)={}
+        RETURN node
+        '''.format(idx)
+        node = self.scalar_query(q)
+        print node
+
