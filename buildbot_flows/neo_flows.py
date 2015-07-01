@@ -3,6 +3,15 @@ from neo4jrestclient.client import GraphDatabase
 
 from flow_datatypes import *
 
+def wrap_query_type((key, val)):
+
+    if isinstance(val, basestring):
+        wrap = '"'
+    else:
+        wrap = ''
+    return '{key}={wrap}{val}{wrap}'.format(key=key, val=val, wrap=wrap)
+
+
 class enhanced_GraphDatabase(GraphDatabase):
 
     def scalar_query(self, q):
@@ -72,10 +81,15 @@ class enhanced_GraphDatabase(GraphDatabase):
         '''
         return self.query(q)
 
-    def new(self,**node_properties):
-        node = self.node(**node_properties)        
-        return node
+    def get_total_cost(self, id):
+        q = '''
+        MATCH (start:flow)-[:depends *0..]->(link:flow)
+        WHERE ID(start)={}
+        RETURN SUM(link.cost)
+       '''.format(id)
 
+        return self.scalar_query(q)
+    
     def new_flow(self, **kwargs):
         node = self.node(**flow(**kwargs))
         node.labels.add("flow")
@@ -86,12 +100,21 @@ class enhanced_GraphDatabase(GraphDatabase):
         node.labels.add("validation")
         return node
 
-    def get_total_cost(self, id):
+    def select(self, label, **kwargs):
         q = '''
-        MATCH (start:flow)-[:depends *0..]->(link:flow)
-        WHERE ID(start)={}
-        RETURN SUM(link.cost)
-       '''.format(id)
-
+        MATCH (node:{label})
+        WHERE
+        {where}
+        RETURN ID(node)
+        '''
+        key_pairs = ['node.{}'.format(wrap_query_type(x))
+                     for x in kwargs.items()]
+        
+        where_string = ' AND '.join(key_pairs)
+        q = q.format(label=label, where=where_string)
+        print q
         return self.scalar_query(q)
+        
     
+    def export_json(self, idx):
+        print idx

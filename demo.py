@@ -25,7 +25,6 @@ if __name__ == "__main__":
     f3 = gdb.new_flow(description = "sudo apt-get install pip", cost=0.25)
     f4 = gdb.new_flow(description = "pip install neo4jrestclient", cost=0.10)
 
-
     f1.relationships.create("depends", f2)
     f2.relationships.create("depends", f3)
     f1.relationships.create("depends", f4)
@@ -37,7 +36,6 @@ if __name__ == "__main__":
         )
 
     f2.relationships.create("validator", v)
-
 
     v = gdb.new_validation(
         command='python -c "import neo4jrestclientx"',
@@ -56,4 +54,10 @@ if __name__ == "__main__":
     msg = "{} known nodes, {} known relationships."
     print msg.format(gdb.count_nodes(), gdb.count_relationships())
 
+    key = "Install neo4j-rest-client"
+    idx = gdb.select('flow', description=key, author="")
+
+    print gdb.export_json(idx)
+
+    
 
