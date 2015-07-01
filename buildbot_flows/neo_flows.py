@@ -1,7 +1,12 @@
 import neo4jrestclient
 from neo4jrestclient.client import GraphDatabase
 
-from flow_datatypes import *
+from flow_datatypes import flow, validation
+_datatype_mapping = {
+    "flow":flow,
+    "validation":validation
+}
+
 
 def wrap_query_type((key, val)):
 
@@ -122,5 +127,19 @@ class enhanced_GraphDatabase(GraphDatabase):
         RETURN node
         '''.format(idx)
         node = self.scalar_query(q)
-        print node
+
+        # Idenitify the label type
+        labels = set(node["metadata"]["labels"])
+
+        label_id = labels.intersection(_datatype_mapping)
+
+        if len(label_id) > 1:
+            raise KeyError("Multiple labels found for idx={}".format(idx))
+
+        obj =  _datatype_mapping[label_id.pop()](**node["data"])
+
+        return obj.json()
+
+        
+
 

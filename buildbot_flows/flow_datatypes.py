@@ -23,6 +23,9 @@ class generic_node_container(object):
         for x in self.data:
             yield x
 
+    def json(self):
+        return json.dumps(self.data, indent=2)
+
 #######################################################################
 
 class flow(generic_node_container):
