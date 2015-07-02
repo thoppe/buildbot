@@ -1,7 +1,7 @@
 from fabric.api import *
 
 def test():
-    local("nosetests-2.7 -v")
+    local("nosetests-2.7 -s -v ")
 
 def clean():
     local("find . -name '*~' | xargs -I {} rm -vf {}")

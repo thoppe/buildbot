@@ -11,26 +11,20 @@ neo4j_login = {
 
 gdb = enhanced_GraphDatabase(**neo4j_login)
 
+def test_create_flow():
+    gdb.new_flow(description = "TEST FLOW")
 
-def setup_func():
-    # Create a database structure
-    pass
+def test_flow_flow_relationship(): pass
+def test_flow_validation_relationship(): pass
+def test_create_validation(): pass
 
-def teardown_func():
-    #"tear down test fixtures"
-    print "teardown"
-    pass
+def test_flow_count_nodes(): pass
+def test_flow_count_relationships(): pass
 
-@with_setup(setup_func, teardown_func)
-def test1():
-    print "FAIL on purpopse.", gdb
-    #assert False
+def test_flow_select(): pass
+def test_flow_export_json(): pass
 
-@with_setup(setup_func, teardown_func)
-def test2():
-    pass
-
-
+def test_flow_cost_propagation(): pass
 
 
 if __name__ == "__main__":
