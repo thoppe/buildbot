@@ -55,7 +55,7 @@ Add some validation steps:
 
 ### To dos:
 
-+ Export flow, validation to json
 + Unit tests
-
 + Write logging.info hooks for each action
+
++ Load from json

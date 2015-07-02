@@ -5,7 +5,7 @@ http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 In-progress experiment implementing flows as a graph database.
 '''
 
-from buildbot_flows import enhanced_GraphDatabase
+from buildbot_flows.neo_flows import enhanced_GraphDatabase
 
 
 neo4j_login = {

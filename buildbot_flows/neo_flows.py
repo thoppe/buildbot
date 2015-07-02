@@ -8,7 +8,8 @@ _datatype_mapping = {
 }
 
 
-def wrap_query_type((key, val)):
+def wrap_query_type(item):
+    (key, val) = item
 
     if isinstance(val, basestring):
         wrap = '"'
