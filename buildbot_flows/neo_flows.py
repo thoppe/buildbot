@@ -3,8 +3,8 @@ from neo4jrestclient.client import GraphDatabase
 
 from flow_datatypes import flow, validation
 _datatype_mapping = {
-    "flow":flow,
-    "validation":validation
+    "flow"      : flow,
+    "validation": validation
 }
 
 

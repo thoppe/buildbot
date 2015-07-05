@@ -1,13 +1,18 @@
-import json
 
 class generic_node_container(object):
     def __init__(self,*args,**kwargs):
         self.data = dict()
         self.data.update(self._object_defaults)
 
-        # Identify the object types from the defaults
-        self.obj_types = dict([(key,type(value)) for key,value
-                            in self._object_defaults.items()])
+        # Identify the object types from the defaults,
+        # use basestring to handle both str and unicode inputs
+        self.obj_types = {}
+        for key,value in self._object_defaults.items():
+            if isinstance(value, str):
+                vtype = basestring
+            else:
+                vtype = type(value)
+            self.obj_types[key] = vtype
 
         # Map any passed values to the container
         for key in kwargs:
@@ -45,8 +50,8 @@ class generic_node_container(object):
             yield x
 
     def json(self):
+        import json
         return json.dumps(self.data, indent=2)
-
 
 
 #######################################################################
@@ -58,6 +63,7 @@ value if none is given.
 #######################################################################
 
 class flow(generic_node_container):
+    label = "flow"
     _object_defaults = {
         "cost"    : 0.00,
         "version" : 1.0,
@@ -69,6 +75,7 @@ class flow(generic_node_container):
 
 
 class validation(generic_node_container):
+    label = "validation"
     _object_defaults = {
         "command"  : "",
         "success"  : "",
