@@ -26,3 +26,9 @@ class validation(node_container):
         "failure"  : "",
     }
 
+
+defined_nodes = {
+    "flow" : flow,
+    "validation" : validation,
+}
+
