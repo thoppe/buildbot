@@ -1,5 +1,4 @@
-
-class generic_node_container(object):
+class node_container(object):
     def __init__(self,*args,**kwargs):
         self.data = dict()
         self.data.update(self._object_defaults)
@@ -52,33 +51,4 @@ class generic_node_container(object):
     def json(self):
         import json
         return json.dumps(self.data, indent=2)
-
-
-#######################################################################
-'''
-Each node in the graphdb is a contract that the following fields will
-exist, be of the type listed, and will be populated with the default
-value if none is given.
-'''
-#######################################################################
-
-class flow(generic_node_container):
-    label = "flow"
-    _object_defaults = {
-        "cost"    : 0.00,
-        "version" : 1.0,
-        "author"  : "",
-        "owner"   : "",
-        "description" : "",
-        "fulfillment" : "",
-    }
-
-
-class validation(generic_node_container):
-    label = "validation"
-    _object_defaults = {
-        "command"  : "",
-        "success"  : "",
-        "failure"  : "",
-    }
 
