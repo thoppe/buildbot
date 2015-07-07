@@ -2,6 +2,7 @@
 *~
 \#*
 .\#*
+*.bak
 
 # Python temps
 *.pyc

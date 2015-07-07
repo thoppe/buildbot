@@ -1,4 +1,8 @@
+from nose import *
+from unittest import TestCase
+
 from buildbot_flows.neo_flows import enhanced_GraphDatabase
+from buildbot_flows.data_nodes import flow
 
 neo4j_login = {
     "username" : "neo4j",
@@ -6,7 +10,24 @@ neo4j_login = {
     "url" : "http://localhost:7474"
 }
 
-gdb = enhanced_GraphDatabase(**neo4j_login)
+class test_neo4j_graph(TestCase):
+    def setUp(self):
+        self.gdb = enhanced_GraphDatabase(**neo4j_login)
+    
+    def tearDown(self):
+        print "This needs to delete all nodes authored by UNITTEST"
+        pass
+
+    '''        
+    def test_add_flow(self):
+        # Create a flow node, return the idx created.
+        x = flow({"owner":"UNITTEST"})
+        return self.gdb.add(flow)
+
+    def test_remove_node_by_index(self):
+        idx = self.test_add_flow()
+        self.gdb.remove(idx)
+    '''
 
 '''
 

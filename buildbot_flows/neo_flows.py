@@ -120,13 +120,15 @@ class enhanced_GraphDatabase(GraphDatabase):
         q = q.format(label=label, where=where_string)
         print q
         return self.scalar_query(q)
+
+    '''
         
     def export_json(self, idx):
-        q = '''
+        q = ''
         MATCH (node)
         WHERE ID(node)={}
         RETURN node
-        '''.format(idx)
+        ''.format(idx)
         node = self.scalar_query(q)
 
         # Idenitify the label type
@@ -140,7 +142,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         obj =  _datatype_mapping[label_id.pop()](**node["data"])
 
         return obj.json()
-
+    '''
         
 
 

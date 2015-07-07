@@ -57,7 +57,7 @@ if __name__ == "__main__":
     key = "Install neo4j-rest-client"
     idx = gdb.select('flow', description=key, author="")
 
-    print gdb.export_json(idx)
+    #print gdb.export_json(idx)
 
     
 

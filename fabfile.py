@@ -1,7 +1,15 @@
+import os
 from fabric.api import *
 
+test_directory = "buildbot_flows/test"
+test_order = [
+    "test_interface.py",
+    "test_graph.py",
+]
+
 def test():
-    local("nosetests-2.7 -s -v ")
+    test_str = ' '.join([os.path.join(test_directory,x) for x in test_order])
+    local("nosetests-2.7 -s -v {}".format(test_str))
 
 def clean():
     local("find . -name '*~' | xargs -I {} rm -vf {}")
