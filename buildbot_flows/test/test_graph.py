@@ -1,6 +1,3 @@
-import nose
-from nose import with_setup
-
 from buildbot_flows.neo_flows import enhanced_GraphDatabase
 
 neo4j_login = {
@@ -26,6 +23,3 @@ def test_flow_export_json(): pass
 
 def test_flow_cost_propagation(): pass
 
-
-if __name__ == "__main__":
-    result = nose.run()
