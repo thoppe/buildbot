@@ -8,6 +8,8 @@ neo4j_login = {
 
 gdb = enhanced_GraphDatabase(**neo4j_login)
 
+'''
+
 def test_create_flow():
     gdb.new_flow(description = "TEST FLOW")
 
@@ -22,4 +24,4 @@ def test_flow_select(): pass
 def test_flow_export_json(): pass
 
 def test_flow_cost_propagation(): pass
-
+'''

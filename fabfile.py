@@ -8,6 +8,7 @@ def clean():
     local("find . -name '*.pyc' | xargs -I {} rm -vf {}")
 
 def push():
+    local("nosetests-2.7")
     local("git status")
     local("git commit -a")
     local("git push")

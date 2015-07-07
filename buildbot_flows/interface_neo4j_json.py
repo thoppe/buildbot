@@ -32,7 +32,7 @@ def convert_node_container2json(node, indent=2):
     data = node.data.copy()
     data["label"] = node.label
 
-    return json.dumps(data, indent=indent)
+    return json.dumps(data, indent=indent, sort_keys=True)
 
 
 def convert_json2node_container(js):
