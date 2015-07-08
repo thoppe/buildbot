@@ -6,6 +6,38 @@ neo4j_login = {
     "url" : "http://localhost:7474"
 }
 
+grassfile = '''
+node {
+  diameter: 75px;
+  border-color: #9AA1AC;
+  border-width: 2px;
+  text-color-internal: #222222;
+  font-size: 12px;
+}
+
+relationship {
+  font-size: 12px;
+  padding: 4px;
+  caption: '<type>';
+
+  color: #333333;
+  border-color: #BF85D6;
+  text-color-internal: #FFFFFF;
+
+  shaft-width: 3px;
+}
+
+meta_description {
+  color: #A5ABB6;
+  shaft-width: 10px;
+  font-size: 8px;
+  padding: 3px;
+  text-color-external: #000000;
+  text-color-internal: #FFFFFF;
+  caption: '<type>';
+}
+'''
+
 gdb = GraphDatabase(**neo4j_login)
 
 def build_meta_graph():
