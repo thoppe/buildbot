@@ -16,6 +16,7 @@ class flow(node_container):
     label = "flow"
     _object_defaults = {
         "version" : 1.0,
+        "status"  : 0.0,
         "description" : "",
         "validation" : "",
     }
