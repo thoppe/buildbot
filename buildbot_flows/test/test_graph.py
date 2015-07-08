@@ -11,7 +11,7 @@ neo4j_login = {
 }
 
 class test_neo4j_graph(TestCase):
-    test_owner = "UNITTEST"
+    description = "UNITTEST -- delete when complete."
     
     def setUp(self):
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
@@ -19,15 +19,15 @@ class test_neo4j_graph(TestCase):
     def tearDown(self):
         q = '''
         MATCH n
-        WHERE n.owner="{}"
+        WHERE n.description="{}"
         DELETE n;
-        '''.format(self.test_owner)
+        '''.format(self.description)
         result = self.gdb.query(q, data_contents=True)
         print result.stats["nodes_deleted"],
 
     def test_add_flow(self):
         # Create a flow node, return the idx created.
-        node = flow(owner=self.test_owner)
+        node = flow(description=self.description)
         return self.gdb.add(node)
 
     def test_remove_node_by_index(self):

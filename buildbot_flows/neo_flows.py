@@ -1,7 +1,4 @@
-import neo4jrestclient
 from neo4jrestclient.client import GraphDatabase
-
-from data_nodes import flow, validation
 import generic_datatypes
 
 def validate_node(node):

@@ -9,27 +9,15 @@ from generic_datatypes import node_container
 class flow(node_container):
     label = "flow"
     _object_defaults = {
-        "cost"    : 0.00,
         "version" : 1.0,
-        "owner"   : "",
         "description" : "",
-        "fulfillment" : "",
-    }
-
-
-class validation(node_container):
-    label = "validation"
-    _object_defaults = {
-        "command"  : "",
-        "success"  : "",
-        "failure"  : "",
+        "validation" : "",
     }
 
 #############################################################
 
 defined_nodes = {
     "flow" : flow,
-    "validation" : validation,
 }
 
 defined_relationships = {
@@ -37,9 +25,6 @@ defined_relationships = {
         "depends" : "flow",
         "fork"    : "flow",
     },
-    "validation" : {
-        "validates" : "flow",
-    }
 
 }
 
