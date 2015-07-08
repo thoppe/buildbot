@@ -1,6 +1,6 @@
 import json
 from generic_datatypes import node_container
-from data_nodes import defined_nodes
+from data_schema import defined_nodes
 
 def convert_node_container2json(node, indent=2):
     '''
