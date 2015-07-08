@@ -93,35 +93,35 @@ class sprint(node_container):
 #############################################################
 
 defined_relationships = {
-    "flow" : {
-        "depends" : "flow",
-        "fork"    : "flow",
-        "satisfy" : "objective",
-        "requires": "job",
-        "requires": "asset",
-    },
+    "flow" : [
+        ("depends" , "flow"),
+        ("fork"    , "flow"),
+        ("satisfy" , "objective"),
+        ("requires", "job"),
+        ("requires", "asset"),
+    ],
     
-    "person" : {
-        "assigned": "task",
-        "owns"    : "flow",
-        "skilled" : "job",
-    },
+    "person" : [
+        ("assigned", "task"),
+        ("owns"    , "flow"),
+        ("skilled" , "job"),
+    ],
     
-    "task" : {
-        "satisfy" : "flow",
-        "assigned": "sprint",
-    },
+    "task" : [
+        ("satisfy" , "flow"),
+        ("assigned", "sprint"),
+    ],
     
-    "organization": {
-        "has" : "objective",
-        "has" : "person",
-        "has" : "project",
-    },
+    "organization": [
+        ("has" , "objective"),
+        ("has" , "person"),
+        ("has" , "project"),
+    ],
 
-    "project" : {
-        "has" : "flow",
-        "has" : "project",
-    },
+    "project" : [
+        ("has" , "flow"),
+        ("has" , "project"),
+    ],
 
 }
 
