@@ -9,7 +9,7 @@ test_order = [
 
 def test():
     test_str = ' '.join([os.path.join(test_directory,x) for x in test_order])
-    local("nosetests-2.7 -s -v {}".format(test_str))
+    local("nosetests-2.7 -x -s -v {}".format(test_str))
 
 def clean():
     local("find . -name '*~' | xargs -I {} rm -vf {}")

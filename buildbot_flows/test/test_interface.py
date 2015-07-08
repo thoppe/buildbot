@@ -1,28 +1,24 @@
 from buildbot_flows.interface_neo4j_json import (convert_node_container2json,
                                                  convert_json2node_container)
 
-from buildbot_flows.data_nodes import flow
+from buildbot_flows.data_schema import flow
 
 valid_flow = {
-    "cost"    : 3.17,
     "version" : 0.2,
-    "owner"   : "unittest",
     "description" : "unittest",
-    "fulfillment" : "unittest",
+    "validation"  : "unittest",
 }
 
 expected_json_string = '''{
-"cost": 3.17, 
-"description": "unittest", 
-"fulfillment": "unittest", 
-"label": "flow", 
-"owner": "unittest", 
-"version": 0.2
-}'''
+  "description": "unittest", 
+  "label": "flow", 
+  "validation": "unittest", 
+  "version": 0.2
+}'''.strip()
 
 def test_flow_to_json():
     node = flow(**valid_flow)
-    js = convert_node_container2json(node,indent=0)
+    js = convert_node_container2json(node,indent=2)
     assert(js == expected_json_string)
 
 def test_json_to_flow():
