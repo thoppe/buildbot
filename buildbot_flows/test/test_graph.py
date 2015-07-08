@@ -41,6 +41,16 @@ class test_neo4j_graph(TestCase):
         result = self.gdb.remove(idx)
         result = self.gdb.remove(idx)
 
+    def test_count_nodes(self):
+        # Add a node and see if count is >= 1
+        self.test_add_flow()
+        assert(self.gdb.count_nodes() >= 1)
+
+    def test_getitem(self):
+        # Add a node and see if count is >= 1
+        idx = self.test_add_flow()
+        assert( self.gdb[idx]["metadata"]["id"] == idx )
+
 '''
 
 def test_create_flow():

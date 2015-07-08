@@ -10,7 +10,6 @@ def validate_node(node):
     '''
     return generic_datatypes.node_container in type(node).mro()
 
-
 def wrap_query_type(item):
     (key, val) = item
 
@@ -20,26 +19,19 @@ def wrap_query_type(item):
         wrap = ''
     return '{key}={wrap}{val}{wrap}'.format(key=key, val=val, wrap=wrap)
 
+def hard_reset(gdb):
+    q = '''
+    MATCH (n)
+    OPTIONAL MATCH (n)-[r]-()
+    DELETE n,r;
+    '''
+    return gdb.query(q)
+
+
 class enhanced_GraphDatabase(GraphDatabase):
 
     def scalar_query(self, q):
         return iter(self.query(q)).next()[0]
-
-    def count_nodes(self):
-        q = "START n=node(*) return count(n);"
-        return self.scalar_query(q)
-
-    def count_relationships(self):
-        q = "START r=rel(*) return count(r);"
-        return self.scalar_query(q)
-
-    def hard_reset(self):
-        q = '''
-        MATCH (n)
-        OPTIONAL MATCH (n)-[r]-()
-        DELETE n,r;
-        '''
-        return self.query(q)
 
     def __iter__(self):
         ''' Returns an iterator over flow ID's '''
@@ -56,24 +48,39 @@ class enhanced_GraphDatabase(GraphDatabase):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)
         return self.scalar_query(q)
 
-    def scalar_query(self, q):
-        return iter(self.query(q)).next()[0]
-
     def count_nodes(self):
         q = "START n=node(*) return count(n);"
         return self.scalar_query(q)
 
+    def add(self, node):
+        if not validate_node(node):
+            msg = "{} object is not a known node-type"
+            raise TypeError(msg.format(node))
+        
+        data = dict(**node)
+
+        obj = self.node(**node)
+        obj.labels.add(node.label)
+        return obj.id
+
+    def remove(self, idx, stats=True):
+        q = '''
+        START n=node({})
+        OPTIONAL MATCH n-[r]-()
+        DELETE r, n;
+        '''.format(idx)
+
+        result = self.query(q, data_contents=stats)
+        return result.stats
+
+
+    #################################################################
+    # Not covered by tests yet
+    #################################################################
+    
     def count_relationships(self):
         q = "START r=rel(*) return count(r);"
         return self.scalar_query(q)
-
-    def hard_reset(self):
-        q = '''
-        MATCH (n)
-        OPTIONAL MATCH (n)-[r]-()
-        DELETE n,r
-        '''
-        return self.query(q)
 
     def get_total_cost(self, id):
         q = '''
@@ -99,23 +106,3 @@ class enhanced_GraphDatabase(GraphDatabase):
         print q
         return self.scalar_query(q)
         
-    def add(self, node):
-        if not validate_node(node):
-            msg = "{} object is not a known node-type"
-            raise TypeError(msg.format(node))
-        
-        data = dict(**node)
-
-        obj = self.node(**node)
-        obj.labels.add(node.label)
-        return obj.id
-
-    def remove(self, idx, stats=True):
-        q = '''
-        START n=node({})
-        OPTIONAL MATCH n-[r]-()
-        DELETE r, n;
-        '''.format(idx)
-
-        result = self.query(q, data_contents=stats)
-        return result.stats
