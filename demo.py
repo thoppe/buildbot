@@ -6,7 +6,7 @@ In-progress experiment implementing flows as a graph database.
 '''
 
 from buildbot_flows.neo_flows import enhanced_GraphDatabase
-
+from buildbot_flows.data_nodes import flow, validation
 
 neo4j_login = {
     "username" : "neo4j",
@@ -19,6 +19,13 @@ if __name__ == "__main__":
 
     gdb = enhanced_GraphDatabase(**neo4j_login)
     gdb.hard_reset()
+
+    x = flow()
+    print x.data
+    
+
+
+    exit()
 
     f1 = gdb.new_flow(description = "Install neo4j-rest-client")
     f2 = gdb.new_flow(description = "Install pip")

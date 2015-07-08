@@ -2,10 +2,13 @@ import neo4jrestclient
 from neo4jrestclient.client import GraphDatabase
 
 from data_nodes import flow, validation
-_datatype_mapping = {
-    "flow"      : flow,
-    "validation": validation
-}
+import generic_datatypes
+
+def validate_node(node):
+    '''
+    Returns True only is the input object is derived from a node_container.
+    '''
+    return generic_datatypes.node_container in type(node).mro()
 
 
 def wrap_query_type(item):
@@ -16,7 +19,6 @@ def wrap_query_type(item):
     else:
         wrap = ''
     return '{key}={wrap}{val}{wrap}'.format(key=key, val=val, wrap=wrap)
-
 
 class enhanced_GraphDatabase(GraphDatabase):
 
@@ -38,20 +40,6 @@ class enhanced_GraphDatabase(GraphDatabase):
         DELETE n,r;
         '''
         return self.query(q)
-
-    def new(self,**node_properties):
-        node = self.node(**node_properties)        
-        return node
-
-    def new_flow(self, **kwargs):
-        node = self.node(**flow(**kwargs))
-        node.labels.add("flow")
-        return node
-
-    def new_validation(self, **kwargs):
-        node = self.node(**validation(**kwargs))
-        node.labels.add("validation")
-        return node
 
     def __iter__(self):
         ''' Returns an iterator over flow ID's '''
@@ -95,16 +83,6 @@ class enhanced_GraphDatabase(GraphDatabase):
        '''.format(id)
 
         return self.scalar_query(q)
-    
-    def new_flow(self, **kwargs):
-        node = self.node(**flow(**kwargs))
-        node.labels.add("flow")
-        return node
-
-    def new_validation(self, **kwargs):
-        node = self.node(**validation(**kwargs))
-        node.labels.add("validation")
-        return node
 
     def select(self, label, **kwargs):
         q = '''
@@ -120,29 +98,24 @@ class enhanced_GraphDatabase(GraphDatabase):
         q = q.format(label=label, where=where_string)
         print q
         return self.scalar_query(q)
-
-    '''
         
-    def export_json(self, idx):
-        q = ''
-        MATCH (node)
-        WHERE ID(node)={}
-        RETURN node
-        ''.format(idx)
-        node = self.scalar_query(q)
-
-        # Idenitify the label type
-        labels = set(node["metadata"]["labels"])
-
-        label_id = labels.intersection(_datatype_mapping)
-
-        if len(label_id) > 1:
-            raise KeyError("Multiple labels found for idx={}".format(idx))
-
-        obj =  _datatype_mapping[label_id.pop()](**node["data"])
-
-        return obj.json()
-    '''
+    def add(self, node):
+        if not validate_node(node):
+            msg = "{} object is not a known node-type"
+            raise TypeError(msg.format(node))
         
+        data = dict(**node)
 
+        obj = self.node(**node)
+        obj.labels.add(node.label)
+        return obj.id
 
+    def remove(self, idx, stats=True):
+        q = '''
+        START n=node({})
+        OPTIONAL MATCH n-[r]-()
+        DELETE r, n;
+        '''.format(idx)
+
+        result = self.query(q, data_contents=stats)
+        return result.stats

@@ -1,5 +1,6 @@
 class node_container(object):
     def __init__(self,*args,**kwargs):
+        
         self.data = dict()
         self.data.update(self._object_defaults)
 

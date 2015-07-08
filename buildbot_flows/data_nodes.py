@@ -11,7 +11,6 @@ class flow(node_container):
     _object_defaults = {
         "cost"    : 0.00,
         "version" : 1.0,
-        "author"  : "",
         "owner"   : "",
         "description" : "",
         "fulfillment" : "",

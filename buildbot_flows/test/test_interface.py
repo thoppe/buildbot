@@ -6,14 +6,12 @@ from buildbot_flows.data_nodes import flow
 valid_flow = {
     "cost"    : 3.17,
     "version" : 0.2,
-    "author"  : "unittest",
     "owner"   : "unittest",
     "description" : "unittest",
     "fulfillment" : "unittest",
 }
 
 expected_json_string = '''{
-"author": "unittest", 
 "cost": 3.17, 
 "description": "unittest", 
 "fulfillment": "unittest", 
