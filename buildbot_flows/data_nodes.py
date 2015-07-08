@@ -25,9 +25,21 @@ class validation(node_container):
         "failure"  : "",
     }
 
+#############################################################
 
 defined_nodes = {
     "flow" : flow,
     "validation" : validation,
+}
+
+defined_relationships = {
+    "flow" : {
+        "depends" : "flow",
+        "fork"    : "flow",
+    },
+    "validation" : {
+        "validates" : "flow",
+    }
+
 }
 

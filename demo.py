@@ -18,7 +18,7 @@ neo4j_login = {
 if __name__ == "__main__":
 
     gdb = enhanced_GraphDatabase(**neo4j_login)
-    gdb.hard_reset()
+    #gdb.hard_reset()
 
     x = flow()
     print x.data

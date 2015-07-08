@@ -47,7 +47,6 @@ class test_neo4j_graph(TestCase):
         assert(self.gdb.count_nodes() >= 1)
 
     def test_getitem(self):
-        # Add a node and see if count is >= 1
         idx = self.test_add_flow()
         assert( self.gdb[idx]["metadata"]["id"] == idx )
 
