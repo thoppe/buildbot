@@ -118,10 +118,18 @@ class flow_requires_job(edge_container):
     label = "requires"
     end   = "job"
 
+    _object_defaults = {
+        "time" : 0.0
+    }
+
 class flow_requires_asset(edge_container):
     start = "flow"
     label = "requires"
     end   = "asset"
+
+    _object_defaults = {
+        "cost" : 0.0
+    }
 
 class person_assigned_task(edge_container):
     start = "person"
