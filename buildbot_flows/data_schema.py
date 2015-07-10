@@ -131,19 +131,15 @@ defined_relationships = {
 # Node label mappings for imports
 #############################################################
 
-defined_nodes = {
-    "flow"  : flow,
-    "job"   : job,
-    "asset" : asset,
+import sys
+import inspect
 
-    "organization" : organization,
-    "objective" : objective,
-    "person" : person,
-    "project"      : project,
-    
-    "task" : task,
-    "sprint" : sprint,
-}
-
+class_introspection = inspect.getmembers(sys.modules[__name__],
+                                         inspect.isclass)
+# Programmatically construct the defined nodes from above
+defined_nodes = {}
+for name,cls in class_introspection:
+    if node_container in cls.mro():
+        defined_nodes[name] = cls
 
 
