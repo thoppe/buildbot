@@ -1,4 +1,6 @@
-class node_container(object):
+class neo4j_container(object):
+    _object_defaults = {}
+    
     def __init__(self,*args,**kwargs):        
         self.data = dict()
         self.data.update(self._object_defaults)
@@ -39,10 +41,6 @@ class node_container(object):
     def __repr__(self):
         return str(self.data)
 
-    def __eq__(self, other):
-        return ((self.label==other.label) and
-                (self.data ==other.data))
-
     def keys(self):
         return self.data.keys()
 
@@ -52,3 +50,25 @@ class node_container(object):
     def __iter__(self):
         for x in self.data:
             yield x
+
+class node_container(neo4j_container):
+    
+    label = None
+
+    def __eq__(self, other):
+        return ((self.label==other.label) and
+                (self.data ==other.data))
+
+class edge_container(neo4j_container):
+    
+    label = None
+    start = None
+    end   = None
+
+    def __eq__(self, other):
+        return ((self.label==other.label) and
+                (self.start==other.start) and
+                (self.end  ==other.end)   and
+                (self.data ==other.data))
+
+

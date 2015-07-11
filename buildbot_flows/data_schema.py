@@ -5,6 +5,7 @@ value if none is given.
 '''
 
 from generic_datatypes import node_container
+from generic_datatypes import edge_container
 import time
 
 
@@ -16,6 +17,7 @@ class flow(node_container):
     label = "flow"
     _object_defaults = {
         "version" : 1.0,
+        "status"  : 0.0,
         "description" : "",
         "validation" : "",
     }
@@ -56,6 +58,7 @@ class person(node_container):
     _object_defaults = {
         "name" : "",
         "username" : "",
+        "userid" : 0,
     }
 
 # Projects have a start and end time which defaults to now and approximately one day from now
@@ -88,61 +91,118 @@ class sprint(node_container):
     }
 
 
+'''
 #############################################################
-# Allowed relationships, read as (A)->[is]->(B)
+Allowed relationships, read as (A)->[is]->(B). Defined in this way 
+so everything is explict and properities can be added later.
 #############################################################
+'''
 
-defined_relationships = {
-    "flow" : [
-        ("depends" , "flow"),
-        ("fork"    , "flow"),
-        ("satisfy" , "objective"),
-        ("requires", "job"),
-        ("requires", "asset"),
-    ],
+class flow_depends_flow(edge_container):
+    start = "flow"
+    label = "depends"
+    end   = "flow"
+
+class flow_fork_flow(edge_container):
+    start = "flow"
+    label = "fork"
+    end   = "flow"
     
-    "person" : [
-        ("assigned", "task"),
-        ("owns"    , "flow"),
-        ("skilled" , "job"),
-    ],
+class flow_satisfy_objective(edge_container):
+    start = "flow"
+    label = "satisfy"
+    end   = "objective"
+
+class flow_requires_job(edge_container):
+    start = "flow"
+    label = "requires"
+    end   = "job"
+
+    _object_defaults = {
+        "time" : 0.0
+    }
+
+class flow_requires_asset(edge_container):
+    start = "flow"
+    label = "requires"
+    end   = "asset"
+
+    _object_defaults = {
+        "cost" : 0.0
+    }
+
+class person_assigned_task(edge_container):
+    start = "person"
+    label = "assigned"
+    end   = "task"
+
+class person_owns_flow(edge_container):
+    start = "person"
+    label = "owns"
+    end   = "flow"
+
+class person_skilled_job(edge_container):
+    start = "person"
+    label = "skilled"
+    end   = "job"
+
+class task_satisfy_flow(edge_container):
+    start = "task"
+    label = "satisfy"
+    end   = "flow"
+
+class task_assigned_flow(edge_container):
+    start = "task"
+    label = "assigned"
+    end   = "flow"
+
+class organization_has_objective(edge_container):
+    start = "organization"
+    label = "has"
+    end   = "objective"
+
+class organization_has_person(edge_container):
+    start = "organization"
+    label = "has"
+    end   = "person"
     
-    "task" : [
-        ("satisfy" , "flow"),
-        ("assigned", "sprint"),
-    ],
+class organization_has_project(edge_container):
+    start = "organization"
+    label = "has"
+    end   = "project"
+
+class project_has_flow(edge_container):
+    start = "project"
+    label = "has"
+    end   = "flow"
     
-    "organization": [
-        ("has" , "objective"),
-        ("has" , "person"),
-        ("has" , "project"),
-    ],
-
-    "project" : [
-        ("has" , "flow"),
-        ("has" , "project"),
-    ],
-
-}
-
+class project_has_project(edge_container):
+    start = "project"
+    label = "has"
+    end   = "project"
 
 #############################################################
 # Node label mappings for imports
 #############################################################
 
-defined_nodes = {
-    "flow"  : flow,
-    "job"   : job,
-    "asset" : asset,
+import sys
+import inspect
+import collections
 
-    "organization" : organization,
-    "objective" : objective,
-    "person" : person,
-    "project"      : project,
-    
-    "task" : task,
-    "sprint" : sprint,
-}
+class_introspection = inspect.getmembers(sys.modules[__name__],
+                                         inspect.isclass)
 
+# Programmatically construct the defined nodes from above
+defined_nodes = {}
+for name,cls in class_introspection:
+    if node_container in cls.mro():
+        defined_nodes[name] = cls
+
+# Programmatically construct the relationships
+defined_relationships = collections.defaultdict(dict)
+for name,cls in class_introspection:
+    if edge_container in cls.mro():
+        defined_relationships[cls.start] = (cls.label, cls.end)
+defined_relationships = dict(defined_relationships)
 
 
