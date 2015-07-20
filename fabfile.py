@@ -1,7 +1,7 @@
 import os
 from fabric.api import *
 
-test_directory = "buildbot_flows/test"
+test_directory = "buildbot/test"
 test_order = [
     "test_interface.py",
     "test_graph.py",
@@ -20,3 +20,5 @@ def push():
     local("git status")
     local("git commit -a")
     local("git push")
+
+def commit(): push() # Alias
