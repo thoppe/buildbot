@@ -1,7 +1,6 @@
-from buildbot_flows.interface_neo4j_json import (convert_node_container2json,
-                                                 convert_json2node_container)
-
-from buildbot_flows.data_schema import flow
+from buildbot.interface_neo4j_json import (convert_node_container2json,
+                                           convert_json2node_container)
+from buildbot.data_schema import flow
 
 valid_flow = {
     "version"     : 0.2,

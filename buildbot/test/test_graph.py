@@ -1,9 +1,9 @@
 from nose.tools import *
 from unittest import TestCase
 
-from buildbot_flows.neo_flows import enhanced_GraphDatabase
-from buildbot_flows.data_schema import flow, job
-from buildbot_flows.data_schema import flow_requires_job
+from buildbot.neo_flows import enhanced_GraphDatabase
+from buildbot.data_schema import flow, job
+from buildbot.data_schema import flow_requires_job
 
 neo4j_login = {
     "username" : "neo4j",

@@ -1,7 +1,7 @@
 import os
 from fabric.api import *
 
-test_directory = "buildbot_flows/test"
+test_directory = "buildbot/test"
 test_order = [
     "test_interface.py",
     "test_graph.py",
