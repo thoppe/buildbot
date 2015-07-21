@@ -122,21 +122,15 @@ class enhanced_GraphDatabase(GraphDatabase):
     #################################################################
     
     def count_relationships(self):
-        q = "START r=rel(*) return count(r);"
+        q = "START r=rel(*) RETURN COUNT(r);"
         return self.scalar_query(q)
     
     def get_total_cost(self, id):
         q = '''
-        MATCH (start:flow)-[r:requires|depends]->(:job) 
+        MATCH p=(start:flow)-[:depends*0..]->(:flow)-[r:requires*0..]->(:job)
         WHERE ID(start)={}
-        RETURN r
+        RETURN SUM( REDUCE(total=0, x in r|total + x.time) )
        '''.format(id)
-
-        for item in self.query(q):
-            print item
-
-        print q
-        exit()
 
         return self.scalar_query(q)
 
