@@ -84,10 +84,10 @@ class enhanced_GraphDatabase(GraphDatabase):
         start_node = self._select_direct_node_from_idx(rel.start_id)
         end_node   = self._select_direct_node_from_idx(rel.end_id)
         
-        edge = start_node.relationships.create(rel.label, end_node)
-        rel.id = edge.id
+        obj = start_node.relationships.create(rel.label, end_node, **data)
+        rel.id = obj.id
 
-        return rel
+        return obj
 
     def remove_node(self, idx, stats=True):
         q = '''

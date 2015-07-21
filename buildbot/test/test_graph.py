@@ -76,7 +76,7 @@ class test_neo4j_graph(TestCase):
         assert(rel.id is not None)
 
         # Make sure data has been copied (check assigned status)
-        assert(obj.data['time'] == time_cost)
+        assert(obj.properties['time'] == time_cost)
 
         return obj
     

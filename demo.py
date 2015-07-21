@@ -30,15 +30,15 @@ if __name__ == "__main__":
 
     developer = gdb.add_node(job(description = "Developer"))
 
-    f1 = gdb.add_node(flow(description = "Install neo4j-rest-client"))
-    f2 = gdb.add_node(flow(description = "pip install neo4jrestclient"))
-    f3 = gdb.add_node(flow(description = "Install pip"))
+    #f1 = gdb.add_node(flow(description = "Install neo4j-rest-client"))
+    #f2 = gdb.add_node(flow(description = "pip install neo4jrestclient"))
+    #f3 = gdb.add_node(flow(description = "Install pip"))
     f4 = gdb.add_node(flow(description = "sudo apt-get install pip"))
 
-    depends = defined_relationships[("flow","depends","flow")]
-    gdb.add_relationship(depends(f1,f2))
-    gdb.add_relationship(depends(f2,f3))
-    gdb.add_relationship(depends(f3,f4))
+    #depends = defined_relationships[("flow","depends","flow")]
+    #gdb.add_relationship(depends(f1,f2))
+    #gdb.add_relationship(depends(f2,f3))
+    #gdb.add_relationship(depends(f3,f4))
 
     job_required = defined_relationships[("flow","requires","job")]
     #gdb.add_relationship(job_required(f2,developer,time=0.5))
