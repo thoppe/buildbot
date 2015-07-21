@@ -39,30 +39,44 @@ class test_neo4j_graph(TestCase):
         assert( self.gdb[idx]["metadata"]["id"] == idx )
     
     def test_add_flow(self):
+        status_level = 0.7
+        
         # Create a flow node, return the idx created.
         flow = defined_nodes["flow"]
-        node = flow(description=self.description)
+        node = flow(description=self.description,status=status_level)
 
         # Add to the graph
         obj = self.gdb.add_node(node)
 
         # Make sure an ID has been assigned
         assert(node.id is not None)
+
+        # Make sure data has been copied (check assigned status)
+        assert(obj.data['status'] == status_level)
         
         return obj
     
-    def test_add_flow_depends_relationship(self):
-        edge_func = defined_relationships[("flow","depends","flow")]
+    def test_add_flow_requires_job_relationship(self):
+        time_cost = 7.8
+        
+        # Create the nodes
+        v1 = defined_nodes["flow"](description=self.description)
+        v2 = defined_nodes["job"](description=self.description)
 
-        v1 = self.test_add_flow()
-        v2 = self.test_add_flow()
-        rel = edge_func(v1,v2)
+        self.gdb.add_node(v1)
+        self.gdb.add_node(v2)
+        
+        edge_func = defined_relationships[("flow","requires","job")]
+        rel = edge_func(v1,v2,time=time_cost)
 
         # Add to the graph
         obj = self.gdb.add_relationship(rel)
         
         # Make sure an ID has been assigned
         assert(rel.id is not None)
+
+        # Make sure data has been copied (check assigned status)
+        assert(obj.data['time'] == time_cost)
 
         return obj
     
@@ -72,7 +86,7 @@ class test_neo4j_graph(TestCase):
         assert(stats["nodes_deleted"] == 1)
 
     def test_remove_relationship_by_idx(self):
-        rel = self.test_add_flow_depends_relationship()
+        rel = self.test_add_flow_requires_job_relationship()
         stats = self.gdb.remove_relationship(rel.id)
         assert(stats["relationship_deleted"] == 1)
 
@@ -84,7 +98,7 @@ class test_neo4j_graph(TestCase):
 
     @raises(KeyError)
     def test_remove_missing_edge(self):
-        idx = self.test_add_flow_depends_relationship().id
+        idx = self.test_add_flow_requires_job_relationship().id
         self.gdb.remove_relationship(idx)
         self.gdb.remove_relationship(idx)
 

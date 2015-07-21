@@ -5,7 +5,7 @@ http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 In-progress experiment implementing flows as a graph database.
 '''
 
-from buildbot.neo_flows import enhanced_GraphDatabase
+from buildbot.neo_flows import enhanced_GraphDatabase, hard_reset
 from buildbot.data_schema import flow
 
 from buildbot.data_schema import defined_relationships
@@ -22,39 +22,29 @@ neo4j_login = {
 if __name__ == "__main__":
 
     gdb = enhanced_GraphDatabase(**neo4j_login)
-    
-    description = "UNITTEST -- delete when complete."
 
-    a = defined_nodes["flow"](description=description)
-    b = defined_nodes["flow"](description=description)
-    gdb.add_node(a)
-    gdb.add_node(b)
+    flow = defined_nodes["flow"]
+    job  = defined_nodes["job"]
 
-    x = defined_relationships[("flow","depends","flow")](a,b)
-    gdb.add_relationship(x)
-    print x
-    print a
-    exit()
-    #x = create_relationship_object(a,"depends",b)
-    print vars(a)
-    exit()
-    gdb.add_relationship(x)
-    print x
-    #ab = defined_
-    #print a
-    #gdb.connect(a,b)
-    #print a,b
-    exit()
+    hard_reset(gdb)
 
-    f1 = gdb.new_flow(description = "Install neo4j-rest-client")
-    f2 = gdb.new_flow(description = "Install pip")
-    f3 = gdb.new_flow(description = "sudo apt-get install pip", cost=0.25)
-    f4 = gdb.new_flow(description = "pip install neo4jrestclient", cost=0.10)
+    developer = gdb.add_node(job(description = "Developer"))
 
-    f1.relationships.create("depends", f2)
-    f2.relationships.create("depends", f3)
-    f1.relationships.create("depends", f4)
+    f1 = gdb.add_node(flow(description = "Install neo4j-rest-client"))
+    f2 = gdb.add_node(flow(description = "pip install neo4jrestclient"))
+    f3 = gdb.add_node(flow(description = "Install pip"))
+    f4 = gdb.add_node(flow(description = "sudo apt-get install pip"))
 
+    depends = defined_relationships[("flow","depends","flow")]
+    gdb.add_relationship(depends(f1,f2))
+    gdb.add_relationship(depends(f2,f3))
+    gdb.add_relationship(depends(f3,f4))
+
+    job_required = defined_relationships[("flow","requires","job")]
+    #gdb.add_relationship(job_required(f2,developer,time=0.5))
+    gdb.add_relationship(job_required(f4,developer,time=0.1))
+
+    '''
     v = gdb.new_validation(
         command="pip --version",
         success="pip 7.0.3 ...",
@@ -70,12 +60,17 @@ if __name__ == "__main__":
         )
 
     v.relationships.create("validator", f1)
+    '''
+
+    gdb.get_total_cost(f4.id)
+    exit()
 
     for node in gdb.iter_over("flow"):
         idx  = node["metadata"]["id"]
         desc = node["data"]["description"]
         cost = gdb.get_total_cost(idx)
         print "Cost {:0.3f} hrs, Action {}".format(cost, desc)
+    exit()
 
     msg = "{} known nodes, {} known relationships."
     print msg.format(gdb.count_nodes(), gdb.count_relationships())
