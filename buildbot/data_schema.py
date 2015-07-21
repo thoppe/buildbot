@@ -202,7 +202,16 @@ for name,cls in class_introspection:
 defined_relationships = collections.defaultdict(dict)
 for name,cls in class_introspection:
     if edge_container in cls.mro():
-        defined_relationships[cls.start] = (cls.label, cls.end)
+        key = (cls.start, cls.label, cls.end)
+        defined_relationships[key] = cls
 defined_relationships = dict(defined_relationships)
 
 
+# Helper function to create an edge from defined nodes
+def create_relationship_object(node1, relationship, node2,
+                               *args, **kwargs):
+    key = (node1.label, relationship, node2.label)
+    if key not in defined_relationships:
+        msg = "{} -[{}]> {} is an invalid relationship"
+        raise KeyError(msg.format(*key))
+    return defined_relationships[key](*args, **kwargs)

@@ -5,8 +5,12 @@ http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 In-progress experiment implementing flows as a graph database.
 '''
 
-from buildbot_flows.neo_flows import enhanced_GraphDatabase
-from buildbot_flows.data_nodes import flow, validation
+from buildbot.neo_flows import enhanced_GraphDatabase
+from buildbot.data_schema import flow
+
+from buildbot.data_schema import defined_relationships
+from buildbot.data_schema import defined_nodes
+from buildbot.data_schema import create_relationship_object
 
 neo4j_login = {
     "username" : "neo4j",
@@ -18,13 +22,28 @@ neo4j_login = {
 if __name__ == "__main__":
 
     gdb = enhanced_GraphDatabase(**neo4j_login)
-    #gdb.hard_reset()
-
-    x = flow()
-    print x.data
     
+    description = "UNITTEST -- delete when complete."
 
+    a = defined_nodes["flow"](description=description)
+    b = defined_nodes["flow"](description=description)
+    gdb.add_node(a)
+    gdb.add_node(b)
 
+    x = defined_relationships[("flow","depends","flow")](a,b)
+    gdb.add_relationship(x)
+    print x
+    print a
+    exit()
+    #x = create_relationship_object(a,"depends",b)
+    print vars(a)
+    exit()
+    gdb.add_relationship(x)
+    print x
+    #ab = defined_
+    #print a
+    #gdb.connect(a,b)
+    #print a,b
     exit()
 
     f1 = gdb.new_flow(description = "Install neo4j-rest-client")

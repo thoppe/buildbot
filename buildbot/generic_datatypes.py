@@ -25,7 +25,7 @@ class neo4j_container(object):
     def __setitem__(self, key, value):
         # Don't allow new fields to be set
         if key not in self:
-            msg = "{} not a key in {} node, will not create new fields."
+            msg = "{} not a field in {}, will not create new fields."
             raise KeyError(msg.format(key,type(self)))
         
         # Check the type of the new value
@@ -54,7 +54,12 @@ class neo4j_container(object):
 class node_container(neo4j_container):
     
     label = None
-
+    id    = None
+    
+    def __init__(self, id=None, *args, **kwargs):
+        self.id = id
+        super(node_container, self).__init__(*args, **kwargs)
+        
     def __eq__(self, other):
         return ((self.label==other.label) and
                 (self.data ==other.data))
@@ -65,10 +70,29 @@ class edge_container(neo4j_container):
     start = None
     end   = None
 
+    start_id = None
+    end_id   = None
+    id       = None
+
+    def __init__(self, n1, n2, id=None, *args, **kwargs):
+        super(edge_container, self).__init__(*args, **kwargs)
+
+        self.id = id
+
+        if n1.id is None or n2.id is None:
+            msg = "Nodes must have an ID before an edge can be created"
+            raise ValueError(msg)
+
+        self.start_id = n1.id
+        self.end_id   = n2.id
+
+    def __repr__(self):
+        s = "{} -[{}]> {} ".format(self.start, self.label, self.end)
+        return s + super(edge_container, self).__repr__()
+    
     def __eq__(self, other):
         return ((self.label==other.label) and
                 (self.start==other.start) and
                 (self.end  ==other.end)   and
                 (self.data ==other.data))
-
 
