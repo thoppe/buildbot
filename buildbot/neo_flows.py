@@ -85,21 +85,37 @@ class enhanced_GraphDatabase(GraphDatabase):
         end_node   = self._select_direct_node_from_idx(rel.end_id)
         
         edge = start_node.relationships.create(rel.label, end_node)
-        self.id = edge.id
+        rel.id = edge.id
 
         return rel
 
     def remove_node(self, idx, stats=True):
         q = '''
-        START n=node({})
-        OPTIONAL MATCH n-[r]-()
-        DELETE r, n;
+        MATCH (n) WHERE
+        ID(n)={}
+        DELETE n;
         '''.format(idx)
 
-        result = self.query(q, data_contents=stats)
-        return result.stats
+        stats = self.query(q, data_contents=stats).stats
+        if not stats["nodes_deleted"]:
+            msg = "Nothing matching when node ID {} was deleted."
+            raise KeyError(msg.format(idx))
 
+        return stats
 
+    def remove_relationship(self, idx, stats=True):
+        q = '''
+        MATCH ()-[r]-() WHERE 
+        ID(r)={} 
+        DELETE r;
+        '''.format(idx)
+
+        stats = self.query(q, data_contents=stats).stats
+        if not stats["relationship_deleted"]:
+            msg = "Nothing matching when relationship ID {} was deleted."
+            raise KeyError(msg.format(idx))
+
+        return stats
 
     #################################################################
     # Not covered by tests yet
