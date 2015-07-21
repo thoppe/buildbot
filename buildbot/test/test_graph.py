@@ -102,6 +102,22 @@ class test_neo4j_graph(TestCase):
         self.gdb.remove_relationship(idx)
         self.gdb.remove_relationship(idx)
 
+    def test_update_node(self):
+        status_level = 0.67
+        flow = defined_nodes["flow"]
+        node = flow(description=self.description,status=status_level)
+        obj  = self.gdb.add_node(node)
+
+        # Modify the status and push result
+        node["status"] *= 2
+        self.gdb.update_node(node)
+
+        obj2 = self.gdb[node.id]
+        assert(obj2['data']['status'] == status_level*2)
+
+        
+        
+
 '''
 def test_flow_cost_propagation(): pass
 '''

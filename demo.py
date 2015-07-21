@@ -55,29 +55,19 @@ if __name__ == "__main__":
     msg = "{} known nodes, {} known relationships."
     print msg.format(gdb.count_nodes(), gdb.count_relationships())
 
-
+    # Add some validation into the nodes
+    f3["validation"] = '''
+    Run: `pip --version`
+    Success: output should be > 7.0.3.
+    Failure: command not found.
     '''
-    v = gdb.new_validation(
-        command="pip --version",
-        success="pip 7.0.3 ...",
-        failure="command not found",
-        )
 
-    f2.relationships.create("validator", v)
-
-    v = gdb.new_validation(
-        command='python -c "import neo4jrestclientx"',
-        success="",
-        failure="ImportError: No module named neo4jrestclientx",
-        )
-
-    v.relationships.create("validator", f1)
+    f1["validation"] = '''
+    Run: `python -c "import neo4jrestclientx"`
+    Success: Nothing
+    Failure: ImportError: No module named neo4jrestclientx
     '''
-    #gdb.get_total_cost(f3.id)
 
-    #key = "Install neo4j-rest-client"
-    #idx = gdb.select('flow', description=key, author="")
-    #print gdb.export_json(idx)
-
+    gdb.update_node(f1)
+    gdb.update_node(f3)
     
-

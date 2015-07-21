@@ -5,14 +5,17 @@ def validate_node(node):
     '''
     Returns True only is the input object is derived from a node_container.
     '''
-    return generic_datatypes.node_container in type(node).mro()
+    if generic_datatypes.node_container not in type(node).mro():
+        msg = "{} object is not a known node-type"
+        raise TypeError(msg.format(node))
 
 def validate_relationship(rel):
     '''
     Returns True only is the input object is derived from a edge_container.
     '''
-    return generic_datatypes.edge_container in type(rel).mro()
-
+    if generic_datatypes.edge_container not in type(rel).mro():
+        msg = "{} object is not a known relationship"
+        raise TypeError(msg.format(node))
 
 def wrap_query_type(item):
     (key, val) = item
@@ -61,11 +64,25 @@ class enhanced_GraphDatabase(GraphDatabase):
         q = "START n=node(*) return count(n);"
         return self.scalar_query(q)
 
-    def add_node(self, node):
-        if not validate_node(node):
-            msg = "{} object is not a known node-type"
-            raise TypeError(msg.format(node))
+    def update_node(self, node):
+        validate_node(node)
         
+        # Make sure node has ID
+        if node.id is None:
+            msg = "Node must have id before update"
+            raise ValueError(msg)
+
+        obj = self.node[node.id]
+        
+        for key in node:
+            val = node[key]
+            if obj.get(key) != node[key]:
+                obj.set(key, node[key])
+
+        return node
+
+    def add_node(self, node):
+        validate_node(node)
         data = dict(**node)
 
         obj = self.node(**node)
@@ -76,9 +93,8 @@ class enhanced_GraphDatabase(GraphDatabase):
         return node
 
     def add_relationship(self, rel):
-        if not validate_relationship(rel):
-            msg = "{} object is not a known relationship"
-            raise TypeError(msg.format(node))
+        validate_relationship(rel)
+
         data = dict(**rel)
 
         start_node = self._select_direct_node_from_idx(rel.start_id)
