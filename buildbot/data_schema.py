@@ -151,10 +151,10 @@ class task_satisfy_flow(edge_container):
     label = "satisfy"
     end   = "flow"
 
-class task_assigned_flow(edge_container):
+class task_assigned_sprint(edge_container):
     start = "task"
     label = "assigned"
-    end   = "flow"
+    end   = "sprint"
 
 class organization_has_objective(edge_container):
     start = "organization"
@@ -195,13 +195,13 @@ class_introspection = inspect.getmembers(sys.modules[__name__],
 # Programmatically construct the defined nodes from above
 defined_nodes = {}
 for name,cls in class_introspection:
-    if node_container in cls.mro():
+    if node_container in cls.mro() and cls is not node_container:
         defined_nodes[name] = cls
 
 # Programmatically construct the relationships
 defined_relationships = collections.defaultdict(dict)
 for name,cls in class_introspection:
-    if edge_container in cls.mro():
+    if edge_container in cls.mro() and cls is not edge_container:
         key = (cls.start, cls.label, cls.end)
         defined_relationships[key] = cls
 defined_relationships = dict(defined_relationships)

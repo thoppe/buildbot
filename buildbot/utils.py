@@ -52,15 +52,16 @@ def build_meta_graph():
     
     NODES = {}
     for name in defined_nodes:
+        print "Adding node", name
         node = gdb.node(name=name)
         NODES[name] = node
         meta.add(node)
      
-    for start_key in defined_relationships:
-        for rel, end_key in defined_relationships[start_key]:
-            v0 = NODES[start_key]
-            v1 = NODES[end_key]
-            gdb.relationships.create(v0,rel,v1)
+    for start_key, rel, end_key in defined_relationships:
+        print "Adding relationship", start_key,rel,end_key
+        v0 = NODES[start_key]
+        v1 = NODES[end_key]
+        gdb.relationships.create(v0,rel,v1)
 
 def clean_meta_graph():
 
@@ -80,7 +81,7 @@ def clean_meta_graph():
 if __name__ == "__main__":
     clean_meta_graph()
     build_meta_graph()
-    raw_input()
+    raw_input("Visit http://localhost:7474/browser/ to see the schema; Enter to Exit")
     clean_meta_graph()
     
     
