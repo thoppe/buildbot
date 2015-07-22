@@ -1,6 +1,14 @@
 import json
-from generic_datatypes import node_container
+
 from data_schema import defined_nodes
+from data_schema import defined_relationships
+
+from generic_datatypes import node_container
+from generic_datatypes import edge_container
+
+_required_edge_members = ["start", "label", "end",
+                          "start_id", "end_id", "id"]
+_required_node_members = ["label", "id"]
 
 def convert_node_container2json(node, indent=2):
     '''
@@ -30,7 +38,9 @@ def convert_node_container2json(node, indent=2):
 
     # Create a copy of the data since we are going to add the label
     data = node.data.copy()
-    data["label"] = node.label
+
+    for name in _required_node_members:
+        data[name] = getattr(node, name)
 
     return json.dumps(data, indent=indent, sort_keys=True)
 
@@ -50,14 +60,104 @@ def convert_json2node_container(js):
         msg = "convert_node_container2json received malformed json {}"
         raise ValueError(msg.format(Ex))
 
-    try:
-        label = data.pop("label")
-    except KeyError:
-        msg = "convert_node_container2json received json with no label."
-        raise KeyError(msg)
+    member_data = {}
+    for name in _required_node_members:
+        try:
+            member_data[name] = data.pop(name)
+        except KeyError:
+            msg = "convert_node_container2json received json with no {}."
+            raise KeyError(msg.format(name))
+
+    label = member_data["label"]
 
     if label not in defined_nodes:
         msg = "{} is not a known node type."
         raise KeyError(msg.format(label))
 
-    return defined_nodes[label](**data)
+
+    node = defined_nodes[label](**data)
+
+    for name,value in member_data.items():
+        setattr(node, name, value)
+
+    return node
+
+
+############################################################################
+
+def convert_edge_container2json(edge, indent=2):
+    '''
+    Converts a generic node_container into a json object. Will validate:
+    + It is a node_containter baseclass
+    + The keys in .data and .obj_types are the same
+    + Each type in .obj_types matches the that of .data
+
+    If it passes, it turns the .data into a json object and adds the label
+    as a new key.
+    '''
+    
+    if edge_container not in type(edge).mro():
+        msg = "convert_edge_container2json expected an edge_container"
+        raise TypeError(msg)
+
+    if not set(edge.obj_types.keys()) == set(edge.data.keys()):
+        msg = ("convert_edge_container2json received a malformed edge. "
+               ".data and .obj_keys did not match")
+        raise TypeError(msg)
+
+    for key in edge:        
+        if not edge.validate_type(key, edge[key]):
+            msg = ("convert_edge_container2json received a malformed edge. "
+                   "Key '{}' was not {}".format(key, edge.obj_types[key]))
+            raise TypeError(msg)
+
+    # Create a copy of the data since we are going to add start,label,end
+    data = edge.data.copy()
+
+    for key in _required_edge_members:
+        data[key] = getattr(edge,key)
+
+    return json.dumps(data, indent=indent, sort_keys=True)
+
+def convert_json2edge_container(js):
+    '''
+    Converts a json string to a edge_container json object. Will validate:
+    + That js is a valid json string
+    + That start_id,rel,end_id exists as a key in js
+    + That the start_id,rel,end_id is a defined_edge in generic_datatypes.py
+
+    If it passes, it will return the proper subclassed edge_container.
+    '''
+    try:
+        data = json.loads(js)
+    except ValueError as Ex:
+        msg = "convert_edge_container2json received malformed json {}"
+        raise ValueError(msg.format(Ex))
+
+    member_data = {}
+
+    for name in _required_edge_members:
+        try:
+            member_data[name] = data.pop(name)
+        except KeyError:
+            msg = "convert_edge_container2json received json with no {}."
+            raise KeyError(msg.format(name))
+
+    key = (member_data["start"],
+           member_data["label"],
+           member_data["end"])    
+
+    if key not in defined_relationships:
+        msg = "{} is not a known relationship type."
+        raise KeyError(msg.format(key))
+
+
+    edge = defined_relationships[key](member_data["start_id"],
+                                      member_data["end_id"],**data)
+
+    for name,value in member_data.items():
+        setattr(edge, name, value)
+
+    return edge
+                                      
+

@@ -79,12 +79,18 @@ class edge_container(neo4j_container):
 
         self.id = id
 
-        if n1.id is None or n2.id is None:
+        if type(n1) is int and type(n2) is int:
+            idx1 = n1
+            idx2 = n2
+        elif n1.id is None or n2.id is None:
             msg = "Nodes must have an ID before an edge can be created"
             raise ValueError(msg)
+        else:
+            idx1 = n1.id
+            idx2 = n2.id
 
-        self.start_id = n1.id
-        self.end_id   = n2.id
+        self.start_id = idx1
+        self.end_id   = idx2
 
     def __repr__(self):
         s = "{} -[{}]> {} ".format(self.start, self.label, self.end)
