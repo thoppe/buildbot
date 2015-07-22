@@ -9,7 +9,6 @@ from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
 
 from buildbot.data_schema import defined_relationships
 from buildbot.data_schema import defined_nodes
-from buildbot.data_schema import create_relationship_object
 
 neo4j_login = {
     "username" : "neo4j",
