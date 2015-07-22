@@ -165,6 +165,11 @@ class organization_has_person(edge_container):
     start = "organization"
     label = "has"
     end   = "person"
+
+class organization_has_asset(edge_container):
+    start = "organization"
+    label = "has"
+    end   = "asset"
     
 class organization_has_project(edge_container):
     start = "organization"
