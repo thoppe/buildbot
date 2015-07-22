@@ -1,31 +1,21 @@
 from buildbot.interface_neo4j_json import (convert_node_container2json,
                                            convert_json2node_container)
-from buildbot.data_schema import flow
+from buildbot.data_schema import defined_relationships
+from buildbot.data_schema import defined_nodes
 
-valid_flow = {
+test_flow_data = {
     "version"     : 0.2,
     "description" : "unittest",
     "validation"  : "unittest",
     "status"      : 0.75,
 }
 
-expected_json_string = '''{
-  "description": "unittest", 
-  "label": "flow", 
-  "status": 0.75, 
-  "validation": "unittest", 
-  "version": 0.2
-}'''
+flow = defined_nodes["flow"]
 
-def test_flow_to_json():
-    node = flow(**valid_flow)
-    js = convert_node_container2json(node,indent=2)
-    assert(js == expected_json_string)
-
-def test_json_to_flow():
-    node1 = flow(**valid_flow)
-    node2 = convert_json2node_container(expected_json_string)
-    assert(node1 == node2)
-
+def test_flow_to_json_to_flow():
+    node1     = flow(**test_flow_data)
+    json_text = convert_node_container2json(node1,indent=2)
+    node2     = convert_json2node_container(json_text)
+    assert( node1 == node2 )
 
 
