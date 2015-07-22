@@ -2,11 +2,10 @@
 Neo4j flows workbench.
 http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 
-In-progress experiment implementing flows as a graph database.
+Implementing flows as a graph database.
 '''
 
-from buildbot.neo_flows import enhanced_GraphDatabase, hard_reset
-from buildbot.data_schema import flow
+from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
 
 from buildbot.data_schema import defined_relationships
 from buildbot.data_schema import defined_nodes

@@ -1,7 +1,7 @@
 from nose.tools import *
 from unittest import TestCase
 
-from buildbot.neo_flows import enhanced_GraphDatabase
+from buildbot.graphDB import enhanced_GraphDatabase
 from buildbot.data_schema import defined_relationships
 from buildbot.data_schema import defined_nodes
 
