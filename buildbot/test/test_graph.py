@@ -11,8 +11,10 @@ neo4j_login = {
     "url" : "http://localhost:7474"
 }
 
-class test_neo4j_graph(TestCase):
-    description = "UNITTEST -- delete when complete."
+# Test basic graph operations
+
+class buildbot_test_suite(TestCase):
+    test_desc = "UNITTEST -- delete when complete."
     
     def setUp(self):
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
@@ -23,10 +25,12 @@ class test_neo4j_graph(TestCase):
         WHERE n.description="{}"
         OPTIONAL MATCH (n)-[r]-()
         DELETE n,r
-        '''.format(self.description)
+        '''.format(self.test_desc)
         
         result = self.gdb.query(q, data_contents=True)
         print result.stats["nodes_deleted"],
+
+class test_basic_graph_operations(buildbot_test_suite):
     
     def test_count_nodes(self):
         # Add a node and see if count is >= 1
@@ -43,7 +47,7 @@ class test_neo4j_graph(TestCase):
         
         # Create a flow node, return the idx created.
         flow = defined_nodes["flow"]
-        node = flow(description=self.description,status=status_level)
+        node = flow(description=self.test_desc,status=status_level)
 
         # Add to the graph
         obj = self.gdb.add_node(node)
@@ -60,8 +64,8 @@ class test_neo4j_graph(TestCase):
         time_cost = 7.8
         
         # Create the nodes
-        v1 = defined_nodes["flow"](description=self.description)
-        v2 = defined_nodes["job"](description=self.description)
+        v1 = defined_nodes["flow"](description=self.test_desc)
+        v2 = defined_nodes["job"](description=self.test_desc)
 
         self.gdb.add_node(v1)
         self.gdb.add_node(v2)
@@ -105,7 +109,7 @@ class test_neo4j_graph(TestCase):
     def test_update_node(self):
         status_level = 0.67
         flow = defined_nodes["flow"]
-        node = flow(description=self.description,status=status_level)
+        node = flow(description=self.test_desc,status=status_level)
         obj  = self.gdb.add_node(node)
 
         # Modify the status and push result
@@ -116,8 +120,33 @@ class test_neo4j_graph(TestCase):
         assert(obj2['data']['status'] == status_level*2)
 
         
-        
+class test_utility_functions(buildbot_test_suite):
+    
+    def test_time_calculation_proprogation(self):
+        # Test if the time calculation proprogates upward to parent flows
 
-'''
-def test_flow_cost_propagation(): pass
-'''
+        flow = defined_nodes["flow"]
+        job  = defined_nodes["job"]
+        depends = defined_relationships[("flow","depends","flow")]
+        
+        f1 = self.gdb.add_node(flow(description=self.test_desc))
+        f2 = self.gdb.add_node(flow(description=self.test_desc))
+        f3 = self.gdb.add_node(flow(description=self.test_desc))
+        f4 = self.gdb.add_node(flow(description=self.test_desc))
+
+        self.gdb.add_relationship(depends(f1,f2))
+        self.gdb.add_relationship(depends(f2,f3))
+        self.gdb.add_relationship(depends(f3,f4))
+
+        job_required = defined_relationships[("flow","requires","job")]
+        developer = self.gdb.add_node(job(description=self.test_desc))
+        system_admin = self.gdb.add_node(job(description=self.test_desc))
+        
+        self.gdb.add_relationship(job_required(f3,developer,time=0.5))
+        self.gdb.add_relationship(job_required(f2,developer,time=0.1))
+        self.gdb.add_relationship(job_required(f4,system_admin,time=0.25))
+
+        assert( self.gdb.get_flow_total_time(f4.id) == 0.25 )
+        assert( self.gdb.get_flow_total_time(f3.id) == 0.25+0.5 )
+        assert( self.gdb.get_flow_total_time(f2.id) == 0.25+0.5+0.1)
+        assert( self.gdb.get_flow_total_time(f1.id) == 0.25+0.5+0.1)

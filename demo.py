@@ -48,7 +48,7 @@ if __name__ == "__main__":
     for node in gdb.iter_over("flow"):
         idx  = node["metadata"]["id"]
         desc = node["data"]["description"]
-        cost = gdb.get_total_cost(idx)
+        cost = gdb.get_flow_total_time(idx)
         print "Cost {:0.3f} hrs, Action {}".format(cost, desc)
 
     msg = "{} known nodes, {} known relationships."

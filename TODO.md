@@ -1,4 +1,3 @@
-+ Write a unittest for get_total_cost
 + Fix util view
 
 + Get time estimate to work with multiple jobs

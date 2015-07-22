@@ -141,7 +141,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         q = "START r=rel(*) RETURN COUNT(r);"
         return self.scalar_query(q)
     
-    def get_total_cost(self, id):
+    def get_flow_total_time(self, id):
         q = '''
         MATCH p=(start:flow)-[:depends*0..]->(:flow)-[r:requires*0..]->(:job)
         WHERE ID(start)={}
