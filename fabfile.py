@@ -22,3 +22,10 @@ def push():
     local("git push")
 
 def commit(): push() # Alias
+
+def docker():
+    # sudo apt-get install docker
+    # [restart]
+    # docker build .
+    # sudo gpasswd -a travis docker
+    pass
