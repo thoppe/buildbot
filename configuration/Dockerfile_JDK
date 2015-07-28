@@ -1,0 +1,6 @@
+# docker build -t minimal_openjdk7 -f Dockerfile_JDK .
+FROM gliderlabs/alpine
+RUN  apk-install openjdk7-jre-base
+
+ENTRYPOINT [ "java" ]
+CMD [ "-version" ]
