@@ -6,3 +6,6 @@
 
 # Python temps
 *.pyc
+
+# Database directory
+database/*

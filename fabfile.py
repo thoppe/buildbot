@@ -7,6 +7,13 @@ test_order = [
     "test_graph.py",
 ]
 
+docker_args = {
+    "local_database_directory" : os.path.join(os.getcwd(), "database/"),
+    "neo4j_port": 7475,
+    "username": "neo4j",
+    "password": "tulsa",
+}
+
 def test():
     test_str = ' '.join([os.path.join(test_directory,x) for x in test_order])
     local("nosetests-2.7 -x -s -v {}".format(test_str))
@@ -24,8 +31,8 @@ def push():
 def commit(): push() # Alias
 
 def docker():
-    # sudo apt-get install docker
-    # [restart]
-    # docker build .
-    # sudo gpasswd -a travis docker
-    pass
+    local("docker pull tpires/neo4j")
+    cmd = ("docker run  -v {local_database_directory}:/var/lib/neo4j/data -i -t -d -e "
+           "NEO4J_AUTH={username}:{password} --name buildbot_neo4j --cap-add=SYS_RESOURCE "
+           "-p {neo4j_port}:7474 tpires/neo4j")
+    local(cmd.format(**docker_args))
