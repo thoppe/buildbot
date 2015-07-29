@@ -32,7 +32,19 @@ def commit(): push() # Alias
 
 def docker():
     local("docker pull tpires/neo4j")
-    cmd = ("docker run  -v {local_database_directory}:/var/lib/neo4j/data -i -t -d -e "
-           "NEO4J_AUTH={username}:{password} --name buildbot_neo4j --cap-add=SYS_RESOURCE "
+    cmd = ("docker run  -v {local_database_directory}:/var/lib/neo4j/data "
+           "-i -t -d  "
+           "-e NEO4J_AUTH={username}:{password} --name buildbot_neo4j "
+           "--cap-add=SYS_RESOURCE "
            "-p {neo4j_port}:7474 tpires/neo4j")
+        
     local(cmd.format(**docker_args))
+
+def docker_teardown():
+    local("docker stop buildbot_neo4j")
+    local("docker rm buildbot_neo4j")
+    
+    
+    
+
+
