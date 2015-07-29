@@ -1,15 +1,13 @@
 from nose.tools import *
 from unittest import TestCase
 
+import os
 from buildbot.graphDB import enhanced_GraphDatabase
 from buildbot.data_schema import defined_relationships
 from buildbot.data_schema import defined_nodes
+from buildbot.utils import neo4j_credentials_from_env
 
-neo4j_login = {
-    "username" : "neo4j",
-    "password" : "tulsa",
-    "url" : "http://localhost:7474"
-}
+neo4j_login = neo4j_credentials_from_env()
 
 # Test basic graph operations
 
@@ -150,3 +148,4 @@ class test_utility_functions(buildbot_test_suite):
         assert( self.gdb.get_flow_total_time(f3.id) == 0.25+0.5 )
         assert( self.gdb.get_flow_total_time(f2.id) == 0.25+0.5+0.1)
         assert( self.gdb.get_flow_total_time(f1.id) == 0.25+0.5+0.1)
+

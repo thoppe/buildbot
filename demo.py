@@ -5,19 +5,15 @@ http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 Implementing flows as a graph database.
 '''
 
+import os
 from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
-
 from buildbot.data_schema import defined_relationships
 from buildbot.data_schema import defined_nodes
-
-neo4j_login = {
-    "username" : "neo4j",
-    "password" : "tulsa",
-    "url" : "http://localhost:7474"
-}
-
+from buildbot.utils import neo4j_credentials_from_env
 
 if __name__ == "__main__":
+    
+    neo4j_login = neo4j_credentials_from_env()
 
     gdb = enhanced_GraphDatabase(**neo4j_login)
 

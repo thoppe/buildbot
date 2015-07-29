@@ -1,10 +1,19 @@
+import os
 from neo4jrestclient.client import GraphDatabase
 
-neo4j_login = {
-    "username" : "neo4j",
-    "password" : "tulsa",
-    "url" : "http://localhost:7474"
-}
+def get_env_variable(key):
+    val = os.environ.get(key,None)
+    if val is None:
+        msg = "Environment variable {} not set!".format(key)
+        raise KeyError(msg)
+    return val
+
+def neo4j_credentials_from_env():
+    return {
+        "username" : get_env_variable("NEO4J_USERNAME"),
+        "password" : get_env_variable("NEO4J_PASSWORD"),
+        "url" : "http://localhost:{}".format(get_env_variable("NEO4J_PORT")),
+    }
 
 grassfile = '''
 node {
@@ -38,7 +47,6 @@ meta_description {
 }
 '''
 
-gdb = GraphDatabase(**neo4j_login)
 
 def build_meta_graph():
     '''
@@ -48,6 +56,7 @@ def build_meta_graph():
     from data_schema import defined_nodes
     from data_schema import defined_relationships
 
+    gdb = GraphDatabase(**neo4j_login)
     meta = gdb.labels.create("meta_description")
     
     NODES = {}

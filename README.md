@@ -12,12 +12,16 @@ The results of `demo.py` should look something like:
 
 ![](example_images/example_flow.png)
 
+Startup a docker instance of neo4j
+
+    fab docker
+
 Assign some login parameters, these are local to your neo4j server.
 
     neo4j_login = {
-        "username" : "neo4j",
+        "username" : "buildbot",
         "password" : "tulsa",
-        "url" : "http://localhost:7474"
+        "url" : "http://localhost:7475"
     }
 
 Create a new graph connection
