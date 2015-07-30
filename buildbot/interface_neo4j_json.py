@@ -145,7 +145,7 @@ def convert_edge_container2json(edge, indent=2):
 
     return json.dumps(data, indent=indent, sort_keys=True)
 
-def convert_json2edge_container(js):
+def convert_json2edge_container(js, ignore_id_check=False):
     '''
     Converts a json string to a edge_container json object. Will validate:
     + That js is a valid json string
@@ -157,16 +157,18 @@ def convert_json2edge_container(js):
     try:
         data = json.loads(js)
     except ValueError as Ex:
-        msg = "convert_edge_container2json received malformed json {}"
+        msg = "convert_json2edge_container received malformed json {}"
         raise ValueError(msg.format(Ex))
 
     member_data = {}
 
     for name in _required_edge_members:
+        if ignore_id_check and name=="id":
+            continue
         try:
             member_data[name] = data.pop(name)
         except KeyError:
-            msg = "convert_edge_container2json received json with no {}."
+            msg = "convert_json2edge_container received json with no {}."
             raise KeyError(msg.format(name))
 
     key = (member_data["start"],

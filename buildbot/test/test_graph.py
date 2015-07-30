@@ -48,15 +48,15 @@ class test_basic_graph_operations(buildbot_test_suite):
         node = flow(description=self.test_desc,status=status_level)
 
         # Add to the graph
-        obj = self.gdb.add_node(node)
+        node = self.gdb.add_node(node)
 
         # Make sure an ID has been assigned
         assert(node.id is not None)
 
         # Make sure data has been copied (check assigned status)
-        assert(obj.data['status'] == status_level)
+        assert(node.data['status'] == status_level)
         
-        return obj
+        return node
     
     def test_add_flow_requires_job_relationship(self):
         time_cost = 7.8
@@ -72,15 +72,15 @@ class test_basic_graph_operations(buildbot_test_suite):
         rel = edge_func(v1,v2,time=time_cost)
 
         # Add to the graph
-        obj = self.gdb.add_relationship(rel)
+        rel = self.gdb.add_relationship(rel)
         
         # Make sure an ID has been assigned
         assert(rel.id is not None)
 
         # Make sure data has been copied (check assigned status)
-        assert(obj.properties['time'] == time_cost)
+        assert(rel['time'] == time_cost)
 
-        return obj
+        return rel
     
     def test_remove_node_by_index(self):
         node = self.test_add_flow()

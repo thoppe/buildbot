@@ -113,7 +113,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         obj = start_node.relationships.create(rel.label, end_node, **data)
         rel.id = obj.id
 
-        return obj
+        return rel
 
     def remove_node(self, idx, stats=True):
         q = '''
