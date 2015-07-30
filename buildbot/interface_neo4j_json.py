@@ -10,6 +10,30 @@ _required_edge_members = ["start", "label", "end",
                           "start_id", "end_id", "id"]
 _required_node_members = ["label", "id"]
 
+def convert_neo4j2node(obj):
+    '''
+    Converts a neo4j result node into a buildbot node.
+    Will validate:
+    + That there is a exactly one label that overlaps with defined nodes.
+
+    '''
+    node_id = obj['metadata']['id']
+    labelset = set(obj["metadata"]["labels"])
+
+    if len(labelset.intersection(defined_nodes)) == 0:
+        msg = "graphdb node {} requested is not a defined node"
+        raise KeyError(msg.format(node_id))
+
+    if len(labelset.intersection(defined_nodes)) > 1:
+        msg = "graphdb node {} has ambiguous labeling"
+        raise KeyError(msg.format(node_id))
+
+
+    data = obj["data"]
+    node = defined_nodes[labelset.pop()](**data)
+    node.id = node_id
+    return node
+
 def convert_node_container2json(node, indent=2):
     '''
     Converts a generic node_container into a json object. Will validate:
@@ -45,7 +69,7 @@ def convert_node_container2json(node, indent=2):
     return json.dumps(data, indent=indent, sort_keys=True)
 
 
-def convert_json2node_container(js):
+def convert_json2node_container(js, ignore_id_check=False):
     '''
     Converts a json string to a node_container json object. Will validate:
     + That js is a valid json string
@@ -57,15 +81,17 @@ def convert_json2node_container(js):
     try:
         data = json.loads(js)
     except ValueError as Ex:
-        msg = "convert_node_container2json received malformed json {}"
+        msg = "convert_json2node_container received malformed json {}"
         raise ValueError(msg.format(Ex))
 
     member_data = {}
     for name in _required_node_members:
+        if ignore_id_check and name=="id":
+            continue
         try:
             member_data[name] = data.pop(name)
         except KeyError:
-            msg = "convert_node_container2json received json with no {}."
+            msg = "convert_json2node_container received json with no {}."
             raise KeyError(msg.format(name))
 
     label = member_data["label"]

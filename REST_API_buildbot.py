@@ -21,28 +21,20 @@ gdb = enhanced_GraphDatabase(**neo4j_login)
 
 ## TEST CODE HERE
 
-# Create a flow node, get the idx created.
-flow = defined_nodes["flow"]
-node = flow(description="Test flow!",status=0.2)
-obj  = gdb.add_node(node)
-
-node_id  = obj.id
-print node_id
-
 #!flask/bin/python
 from flask import Flask, request, abort
 app = Flask(__name__)
+tapp = app.test_client()
 
 # Test with
 #curl -i http://localhost:5000/buildbot/api/v1.0/node/30
 
 @app.route('/buildbot/api/v1.0/node/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    # TODO, add 404 error
     obj = gdb[node_id]
     node = interface.convert_neo4j2node(obj)
     js = interface.convert_node_container2json(node)
-    return js
+    return js, 200
 
 @app.route('/buildbot/api/v1.0/node', methods=['POST'])
 def create_node():
@@ -50,7 +42,7 @@ def create_node():
     
     if 'label' not in js:
        abort(400)
-       
+
     json_text = json.dumps(js)
     node = interface.convert_json2node_container(json_text,
                                                  ignore_id_check=True)
@@ -61,15 +53,47 @@ def create_node():
     return js, 201
 
 
-test_create_node = '''curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node'''
+def test_get_node(node_id):
+    print "Get Node"
+    url = '/buildbot/api/v1.0/node/{}'.format(node_id)
+    response = tapp.get(url)
+    return response.data
 
-test_request_node = "curl -i http://localhost:5000/buildbot/api/v1.0/node/30"
+def test_create_node(test_data):
+    print "Creating node"
+    json_string = json.dumps(test_data)
+    response = tapp.post('/buildbot/api/v1.0/node',
+                        data=json_string,
+                        content_type='application/json')
+    return response.data
 
-import logging, sys
-app.logger.addHandler(logging.StreamHandler(sys.stdout))
-app.logger.setLevel(logging.DEBUG)
 
-if __name__ == '__main__':
+ #test_create_node = '''curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node'''
+#test_request_node = "curl -i http://localhost:5000/buildbot/api/v1.0/node/30"
 
-    app.run(debug=True, use_reloader=False)
+# Create a flow node, get the idx created.
+#flow = defined_nodes["flow"]
+#node = flow(description="Test flow!",status=0.2)
+#obj  = gdb.add_node(node)
+#node_id  = obj.id
+#print node_id
+
+test_data = {"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}
+
+js_node = test_create_node(test_data)
+node = interface.convert_json2node_container(js_node)
+js_node2 = test_get_node(node.id)
+
+assert( js_node == js_node2 )
+
+
+
+
+
+
+#import logging, sys
+#app.logger.addHandler(logging.StreamHandler(sys.stdout))
+#app.logger.setLevel(logging.DEBUG)
+#if __name__ == '__main__':
+#    app.run(debug=True, use_reloader=False)
 
