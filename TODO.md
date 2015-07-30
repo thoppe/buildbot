@@ -1,2 +1,10 @@
+# High priority
++ Buildbot API
++ Buildbot API test cases
+
+# Medium priority
++ Rethink the schema structure
+
+# Low priority
 + Get time estimate to work with multiple jobs.
-+ Don't hard-code in login information for testing (make env vars).
+

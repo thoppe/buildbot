@@ -50,6 +50,14 @@ def docker():
 def docker_teardown():
     local("docker stop buildbot_neo4j")
     local("docker rm buildbot_neo4j")
+
+def api():
+    import time
+    local("pkill -9 python")
+    local("python REST_API_buildbot.py &")
+    time.sleep(1)
+    local('''curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node''')
+    
     
 def demo():
     local("python demo.py")    

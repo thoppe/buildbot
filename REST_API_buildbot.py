@@ -44,8 +44,6 @@ def get_node(node_id):
     js = interface.convert_node_container2json(node)
     return js
 
-# curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node
-
 @app.route('/buildbot/api/v1.0/node', methods=['POST'])
 def create_node():
     js = request.get_json()
@@ -63,5 +61,15 @@ def create_node():
     return js, 201
 
 
+test_create_node = '''curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node'''
+
+test_request_node = "curl -i http://localhost:5000/buildbot/api/v1.0/node/30"
+
+import logging, sys
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.DEBUG)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    app.run(debug=True, use_reloader=False)
+
