@@ -39,7 +39,13 @@ class enhanced_GraphDatabase(GraphDatabase):
 
     def scalar_query(self, q,returns=[]):
         qval = self.query(q,returns=returns)
-        return iter(qval).next()[0]
+        results = qval.elements
+        if len(results) != 1:
+            msg = "Query {} return {} results, expecting 1"
+            raise KeyError(msg.format(q,len(results)))
+        
+        return qval.elements[0][0]
+
 
     def __iter__(self):
         ''' Returns an iterator over flow ID's '''
@@ -58,7 +64,12 @@ class enhanced_GraphDatabase(GraphDatabase):
 
     def __getitem__(self, idx):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)
-        return self.scalar_query(q)
+        try:
+            return self.scalar_query(q)
+        except KeyError:
+            msg = "Node {} not found".format(idx)
+            raise KeyError(msg)
+        
 
     def count_nodes(self):
         q = "START n=node(*) return count(n);"
@@ -71,7 +82,6 @@ class enhanced_GraphDatabase(GraphDatabase):
         if node.id is None:
             msg = "Node must have id before update"
             raise ValueError(msg)
-
         obj = self.node[node.id]
         
         for key in node:
