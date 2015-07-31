@@ -1,6 +1,5 @@
 # High priority
-+ Buildbot API (update rel)
-+ Buildbot API test cases
++ Dockerize buildbot API
 
 # Medium priority
 + Interface should handle dict inputs
