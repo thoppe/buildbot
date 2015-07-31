@@ -112,12 +112,6 @@ def test_update_node(test_data):
                         content_type='application/json')
     return response.data
 
-def test_remove_relationship(rel_id):
-    print "Remove relationship", rel_id
-    url = '/buildbot/api/v1.0/relationship/remove/{}'.format(rel_id)
-    response = tapp.post(url)
-    return response.data
-
 
 test_flow_data1 = {"description": "unittest", "label": "flow",
              "status": 0.75, "validation": "unittest", "version": 0.2}
@@ -135,16 +129,6 @@ print test_update_node(test_flow_data1)
 # Add a second flow node
 js_node2 = test_create_node(test_flow_data2)
 node2 = interface.convert_json2node_container(js_node2)
-
-test_flow_link_data = {"label":"depends",
-                       "start_id":node1.id,
-                       "end_id"  :node2.id}
-
-js_rel1 = test_create_relationship(test_flow_link_data)
-rel = interface.convert_json2edge_container(js_rel1)
-
-test_remove_relationship(rel.id)
-exit()
 
 
 # Remove the nodes (this fails now when there is a relationship joining them!

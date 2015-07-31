@@ -15,15 +15,17 @@ API.config["DEBUG"] = True
 
 # Test basic graph operations
 class buildbotAPI_test_suite(TestCase):
-    test_desc = "UNITTEST -- delete when complete."
+    test_desc = "unittest"
 
-    flow_data1 = {"description": "unittest", "label": "flow",
-                  "status": 0.75, "validation": "unittest", "version": 0.2}
-    
     def setUp(self):
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
         self.API = API.test_client()
-    
+        self.flow_data1 = {"description": self.test_desc,
+                           "label": "flow",
+                           "status": 0.75,
+                           "validation": "unittest",
+                           "version": 0.2}
+        
     def tearDown(self):
         q = '''
         MATCH (n)
@@ -65,6 +67,15 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         response = self.post(url)
         stats = json.loads(response.data)
         assert(stats["nodes_deleted"]==1)
+
+    def test_remove_relationship(self):
+        json_rel_string = self.test_create_relationship()
+        rel = interface.convert_json2edge_container(json_rel_string)
+        url = '/buildbot/api/v1.0/relationship/remove/{}'.format(rel.id)
+        response = self.post(url)
+        stats = json.loads(response.data)
+        assert(stats["relationship_deleted"]==1)
+        return response.data
 
     def test_create_relationship(self):
         js_node1 = self.test_create_flow_node()
