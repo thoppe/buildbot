@@ -25,6 +25,7 @@ gdb = enhanced_GraphDatabase(**neo4j_login)
 #!flask/bin/python
 from flask import Flask, request, abort
 app = Flask(__name__)
+app.config["DEBUG"] = True
 tapp = app.test_client()
 
 
@@ -49,23 +50,24 @@ def create_relationship():
 
     return js_out, 201
 
+@app.route('/buildbot/api/v1.0/relationship/remove/<int:rel_id>',
+           methods=['POST'])
+def remove_relationship(rel_id):
+    result = gdb.remove_relationship(rel_id)
+    return json.dumps(result), 200
 
 ###########################################################################
 
 @app.route('/buildbot/api/v1.0/node/<int:node_id>', methods=['GET'])
 def get_node(node_id):
-    obj = gdb[node_id]    
+    obj  = gdb[node_id]    
     node = interface.convert_neo4j2node(obj)
-    js = interface.convert_node_container2json(node)
+    js   = interface.convert_node_container2json(node)
     return js, 200
 
-@app.route('/buildbot/api/v1.0/node/delete/<int:node_id>', methods=['POST'])
-def delete_node(node_id):
-    print "Deleting node", node_id
-    try:
-        result = gdb.remove_node(node_id)
-    except Exception as Ex:
-        print Ex
+@app.route('/buildbot/api/v1.0/node/remove/<int:node_id>', methods=['POST'])
+def remove_node(node_id):
+    result = gdb.remove_node(node_id)
     return json.dumps(result), 200
 
 @app.route('/buildbot/api/v1.0/node/create', methods=['POST'])
@@ -111,9 +113,9 @@ def test_get_node(node_id):
     response = tapp.get(url)
     return response.data
 
-def test_delete_node(node_id):
-    print "Delete Node"
-    url = '/buildbot/api/v1.0/node/delete/{}'.format(node_id)
+def test_remove_node(node_id):
+    print "Remove Node"
+    url = '/buildbot/api/v1.0/node/remove/{}'.format(node_id)
     response = tapp.post(url)
     return response.data
 
@@ -139,6 +141,12 @@ def test_update_node(test_data):
     response = tapp.post('/buildbot/api/v1.0/node/update',
                         data=json_string,
                         content_type='application/json')
+    return response.data
+
+def test_remove_relationship(rel_id):
+    print "Remove relationship", rel_id
+    url = '/buildbot/api/v1.0/relationship/remove/{}'.format(rel_id)
+    response = tapp.post(url)
     return response.data
 
 
@@ -172,11 +180,16 @@ test_flow_link_data = {"label":"depends",
                        "start_id":node1.id,
                        "end_id"  :node2.id}
 
-print test_create_relationship(test_flow_link_data)
+js_rel1 = test_create_relationship(test_flow_link_data)
+rel = interface.convert_json2edge_container(js_rel1)
 
-# Delete the nodes (this fails now when there is a relationship joining them!
-print test_delete_node(node1.id)
-print test_delete_node(node2.id)
+test_remove_relationship(rel.id)
+exit()
+
+
+# Remove the nodes (this fails now when there is a relationship joining them!
+print test_remove_node(node1.id)
+print test_remove_node(node2.id)
 
 
 '''
