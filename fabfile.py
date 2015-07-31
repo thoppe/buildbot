@@ -14,6 +14,7 @@ for key,val in DOCKER_ENV.items():
 
 test_directory = "buildbot/test"
 test_order = [
+    "test_buildbotAPI.py", # DEBUG MOVE THIS TO THE BACK!
     "test_interface.py",
     "test_docker.py",
     "test_graph.py",

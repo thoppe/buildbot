@@ -19,17 +19,13 @@ for key,val in DOCKER_ENV.items():
 neo4j_login = neo4j_credentials_from_env()
 gdb = enhanced_GraphDatabase(**neo4j_login)
 
-#hard_reset(gdb)
-## TEST CODE HERE
-
 #!flask/bin/python
 from flask import Flask, request, abort
-app = Flask(__name__)
-app.config["DEBUG"] = True
-tapp = app.test_client()
+API = Flask(__name__)
 
+#tapp = app.test_client()
 
-@app.route('/buildbot/api/v1.0/relationship/create', methods=['POST'])
+@API.route('/buildbot/api/v1.0/relationship/create', methods=['POST'])
 def create_relationship():
     js = request.get_json()
 
@@ -50,7 +46,7 @@ def create_relationship():
 
     return js_out, 201
 
-@app.route('/buildbot/api/v1.0/relationship/remove/<int:rel_id>',
+@API.route('/buildbot/api/v1.0/relationship/remove/<int:rel_id>',
            methods=['POST'])
 def remove_relationship(rel_id):
     result = gdb.remove_relationship(rel_id)
@@ -58,19 +54,19 @@ def remove_relationship(rel_id):
 
 ###########################################################################
 
-@app.route('/buildbot/api/v1.0/node/<int:node_id>', methods=['GET'])
+@API.route('/buildbot/api/v1.0/node/<int:node_id>', methods=['GET'])
 def get_node(node_id):
     obj  = gdb[node_id]    
     node = interface.convert_neo4j2node(obj)
     js   = interface.convert_node_container2json(node)
     return js, 200
 
-@app.route('/buildbot/api/v1.0/node/remove/<int:node_id>', methods=['POST'])
+@API.route('/buildbot/api/v1.0/node/remove/<int:node_id>', methods=['POST'])
 def remove_node(node_id):
     result = gdb.remove_node(node_id)
     return json.dumps(result), 200
 
-@app.route('/buildbot/api/v1.0/node/create', methods=['POST'])
+@API.route('/buildbot/api/v1.0/node/create', methods=['POST'])
 def create_node():
     js = request.get_json()
     
@@ -86,7 +82,7 @@ def create_node():
     js = interface.convert_node_container2json(node)
     return js, 201
 
-@app.route('/buildbot/api/v1.0/node/update', methods=['POST'])
+@API.route('/buildbot/api/v1.0/node/update', methods=['POST'])
 def update_node():
     js = request.get_json()
     
@@ -107,25 +103,7 @@ def update_node():
 
 ###########################################################################
 
-def test_get_node(node_id):
-    print "Get Node", node_id
-    url = '/buildbot/api/v1.0/node/{}'.format(node_id)
-    response = tapp.get(url)
-    return response.data
-
-def test_remove_node(node_id):
-    print "Remove Node"
-    url = '/buildbot/api/v1.0/node/remove/{}'.format(node_id)
-    response = tapp.post(url)
-    return response.data
-
-def test_create_node(test_data):
-    print "Creating node"
-    json_string = json.dumps(test_data)
-    response = tapp.post('/buildbot/api/v1.0/node/create',
-                        data=json_string,
-                        content_type='application/json')
-    return response.data
+'''
 
 def test_create_relationship(test_data):
     print "Creating relationship"
@@ -156,16 +134,7 @@ test_flow_data1 = {"description": "unittest", "label": "flow",
 test_flow_data2 = {"description": "unittest", "label": "flow",
                     "status": 0.99, "validation": "unittest", "version": 0.3}
 
-
-js_node1 = test_create_node(test_flow_data1)
-print js_node1
-
-node1 = interface.convert_json2node_container(js_node1)
-js_node1_match = test_get_node(node1.id)
-print js_node1_match
-
-# Check that they match
-assert( js_node1 == js_node1_match )
+##############################################################################
 
 # Change the status
 test_flow_data1["status"] = .20
@@ -190,7 +159,7 @@ exit()
 # Remove the nodes (this fails now when there is a relationship joining them!
 print test_remove_node(node1.id)
 print test_remove_node(node2.id)
-
+'''
 
 '''
 #import logging, sys
