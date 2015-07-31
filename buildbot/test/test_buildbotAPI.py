@@ -92,3 +92,17 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         response = self.post('/buildbot/api/v1.0/relationship/create',
                              data=json_rel_string,)
         return response.data
+
+    def test_update_node(self):
+        js_node1 = self.test_create_flow_node()
+        node1 = interface.convert_json2node_container(js_node1)
+        
+        # Change the status
+        node1["status"] *= 2
+        json_string2 = interface.convert_node_container2json(node1)
+        response = self.post('/buildbot/api/v1.0/node/update',
+                             data=json_string2)
+        node2 = interface.convert_json2node_container(response.data)
+
+        # Check that the returned node is updated
+        assert(node1 == node2)
