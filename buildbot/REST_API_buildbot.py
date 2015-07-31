@@ -104,15 +104,6 @@ def update_node():
 ###########################################################################
 
 '''
-
-def test_create_relationship(test_data):
-    print "Creating relationship"
-    json_string = json.dumps(test_data)
-    response = tapp.post('/buildbot/api/v1.0/relationship/create',
-                        data=json_string,
-                        content_type='application/json')
-    return response.data
-
 def test_update_node(test_data):
     print "Update node"
     json_string = json.dumps(test_data)

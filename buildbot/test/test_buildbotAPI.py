@@ -22,7 +22,7 @@ class buildbotAPI_test_suite(TestCase):
     
     def setUp(self):
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
-        self.app = API.test_client()
+        self.API = API.test_client()
     
     def tearDown(self):
         q = '''
@@ -35,20 +35,24 @@ class buildbotAPI_test_suite(TestCase):
         result = self.gdb.query(q, data_contents=True)
         print result.stats["nodes_deleted"],
 
+    def post(self, url, data={}):
+        return self.API.post(url, data=data, content_type='application/json')
+
+    def get(self, url):
+        return self.API.get(url)
+
 class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_create_flow_node(self):
         json_string = json.dumps(self.flow_data1)
-        response = self.app.post('/buildbot/api/v1.0/node/create',
-                                 data=json_string,
-                                 content_type='application/json')
+        response = self.post('/buildbot/api/v1.0/node/create',json_string)
         return response.data
 
     def test_get_node(self):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1)
         url = '/buildbot/api/v1.0/node/{}'.format(node1.id)
-        response = self.app.get(url)
+        response = self.get(url)
         node2 = interface.convert_json2node_container(response.data)
         
         # Check that they match
@@ -58,4 +62,22 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1)
         url = '/buildbot/api/v1.0/node/remove/{}'.format(node1.id)
-        response = self.app.post(url)
+        response = self.post(url)
+        stats = json.loads(response.data)
+        assert(stats["nodes_deleted"]==1)
+
+    def test_create_relationship(self):
+        js_node1 = self.test_create_flow_node()
+        node1 = interface.convert_json2node_container(js_node1)
+
+        js_node1 = self.test_create_flow_node()
+        node2 = interface.convert_json2node_container(js_node1)
+
+        rel_data = {"label":"depends",
+                    "start_id":node1.id,
+                    "end_id"  :node2.id}
+
+        json_rel_string = json.dumps(rel_data)
+        response = self.post('/buildbot/api/v1.0/relationship/create',
+                             data=json_rel_string,)
+        return response.data
