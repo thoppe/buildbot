@@ -62,7 +62,10 @@ def get_node(node_id):
 @app.route('/buildbot/api/v1.0/node/delete/<int:node_id>', methods=['POST'])
 def delete_node(node_id):
     print "Deleting node", node_id
-    result = gdb.remove_node(node_id)
+    try:
+        result = gdb.remove_node(node_id)
+    except Exception as Ex:
+        print Ex
     return json.dumps(result), 200
 
 @app.route('/buildbot/api/v1.0/node/create', methods=['POST'])
@@ -97,7 +100,6 @@ def update_node():
         print "Update node {} failed with:".format(node.id), Ex
         abort(404)
 
-    node = gdb.add_node(node)
     js = interface.convert_node_container2json(node)
     return js, 201
 

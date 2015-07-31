@@ -42,10 +42,8 @@ class enhanced_GraphDatabase(GraphDatabase):
         results = qval.elements
         if len(results) != 1:
             msg = "Query {} return {} results, expecting 1"
-            raise KeyError(msg.format(q,len(results)))
-        
+            raise KeyError(msg.format(q,len(results)))        
         return qval.elements[0][0]
-
 
     def __iter__(self):
         ''' Returns an iterator over flow ID's '''
@@ -117,16 +115,19 @@ class enhanced_GraphDatabase(GraphDatabase):
 
     def remove_node(self, idx, stats=True):
         q = '''
-        MATCH (n) WHERE
-        ID(n)={}
-        DELETE n;
+        START n=NODE({})
+        OPTIONAL MATCH n-[r]-()
+        DELETE r, n;
         '''.format(idx)
 
-        stats = self.query(q, data_contents=stats).stats
-        if not stats["nodes_deleted"]:
-            msg = "Nothing matching when node ID {} was deleted."
+        try:
+            stats = self.query(q, data_contents=stats).stats
+        except Exception:
+            msg = "Error removing node ID {}."
             raise KeyError(msg.format(idx))
 
+        #if not stats["nodes_deleted"]:
+            
         return stats
 
     def remove_relationship(self, idx, stats=True):
