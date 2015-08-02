@@ -54,16 +54,14 @@ meta_description {
 '''
 
 
-def build_meta_graph():
+def build_meta_graph(gdb):
     '''
     Exports a JSON graph that explains all known relationship types and nodes.
     '''
-
-    from data_schema import defined_nodes
-    from data_schema import defined_relationships
-
-    gdb = GraphDatabase(**neo4j_login)
     meta = gdb.labels.create("meta_description")
+
+    defined_nodes = gdb.package.nodes
+    defined_relationships = gdb.package.relationships
     
     NODES = {}
     for name in defined_nodes:
@@ -78,7 +76,7 @@ def build_meta_graph():
         v1 = NODES[end_key]
         gdb.relationships.create(v0,rel,v1)
 
-def clean_meta_graph():
+def clean_meta_graph(gdb):
 
     # Remove all the meta_descriptions
     q = '''
@@ -94,9 +92,15 @@ def clean_meta_graph():
 
 
 if __name__ == "__main__":
-    clean_meta_graph()
-    build_meta_graph()
-    raw_input("Visit http://localhost:7474/browser/ to see the schema; Enter to Exit")
-    clean_meta_graph()
+    from graphDB import enhanced_GraphDatabase
     
+    neo4j_login = neo4j_credentials_from_env()
+    gdb = enhanced_GraphDatabase(**neo4j_login)
+    
+    clean_meta_graph(gdb)
+    build_meta_graph(gdb)
+    msg = ("Visit http://localhost:7474/browser/ to see the schema;"
+           "\n Enter to Exit")
+    raw_input(msg)
+    clean_meta_graph(gdb)
     

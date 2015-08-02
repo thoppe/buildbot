@@ -48,6 +48,9 @@ def commit(): push() # Alias
 def package():
     local("python buildbot/package_manager.py")
 
+def metadraw():
+    local("python buildbot/utils.py")
+
 
 #########################################################################
 
