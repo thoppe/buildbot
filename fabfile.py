@@ -42,6 +42,15 @@ def push():
 
 def commit(): push() # Alias
 
+#########################################################################
+
+def package():
+    local("python buildbot/package_manager.py")
+
+
+#########################################################################
+
+
 def docker_build_test_env():
     docker_neo4j()
     docker_api()
