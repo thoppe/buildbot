@@ -1,10 +1,10 @@
 {
     "nodes" : {
         "flow" : {
-            "version"     : "1.0",
-            "status"      : "0.0",
-            "description" : "''",
-            "validation"  : "''"
+            "version"     : 1.0,
+            "status"      : 0.0,
+            "description" : "",
+            "validation"  : ""
         }
     },
     

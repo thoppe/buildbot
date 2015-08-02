@@ -1,0 +1,59 @@
+{
+    "requires" : ["packages/flows.json"],
+    
+    "nodes" : {
+        "job" : {
+            "description" : "",
+            "title"  : ""
+        },
+        "asset" : {
+            "description" : "",
+            "title"  : ""
+        },
+        "organization" : {
+            "description" : "",
+            "title"  : ""
+        },
+        "objective" : {
+            "description" : ""
+        },
+        "person" : {
+            "name" : "",
+            "username" : "",
+            "userid" : 0
+        },
+        "project" : {
+            "name" : "",
+            "description" : "",
+            "startime" : 0.0,
+            "endtime"  : 0.0
+        },
+        "task" : {
+            "description" : "",
+            "name"  : ""
+        },        
+        "sprint" : {
+            "description" : "",
+            "name"  : ""
+        }
+    },
+    
+    "relationships" : [
+        ["flow", "fork", "flow"],
+        ["flow", "satisfy", "objective"],
+        ["flow", "requires", "job", {"time":0.0}],
+        ["flow", "requires", "asset", {"cost":0.0}],
+        ["person", "assigned", "task"],
+        ["person", "owns", "flow"],
+        ["person", "skilled", "job"],
+        ["task", "satisfy", "flow"],
+        ["task", "assigned", "sprint"],
+        ["organization", "has", "objective"],
+        ["organization", "has", "person"],
+        ["organization", "has", "asset"],
+        ["organization", "has", "project"],
+        ["project", "has", "flow"],
+        ["project", "has", "project"]
+    ]
+}
+
