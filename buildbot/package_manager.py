@@ -12,6 +12,11 @@ class buildbot_package(object):
     def __init__(self, string_input):
         self.load_package(string_input)
 
+    def __repr__(self):
+        data = {"nodes":self.nodes.keys(),
+                "relationships":self.relationships.keys()}
+        return json.dumps(data,indent=2)
+
     def update(self, other_package):
         self.nodes.update(other_package.nodes)
         self.relationships.update(other_package.relationships)
@@ -34,8 +39,8 @@ class buildbot_package(object):
 
         for item in js["relationships"]:
             self.add_relationship(item)
-    
-    def add_node(self, key, data):        
+
+    def add_node(self, key, data):
         class _node_factory(node_container):
             label = key
             _object_defaults = data
@@ -74,16 +79,15 @@ class buildbot_package(object):
         self.relationships[key] = _rel_factory
 
 
+if __name__ == "__main__":
+    #f_flows = "packages/flows.json"
+    f_flows = "packages/project_management.json"
 
-#f_flows = "packages/flows.json"
-f_flows = "packages/project_management.json"
+    with open(f_flows) as FIN:
+        raw = FIN.read()
 
-with open(f_flows) as FIN:
-    raw = FIN.read()
+    P = buildbot_package(raw)
 
-P = buildbot_package(raw)
-
-print P
 
 #############################################################
 # Flow nodes

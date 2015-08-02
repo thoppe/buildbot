@@ -1,19 +1,20 @@
 import os
 from fabric.api import *
 
-DOCKER_ENV = {
+ENV_VARS = {
     "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/"),
     "NEO4J_PORT_7474_TCP_ADDR" : "localhost",
     "NEO4J_PORT_7474_TCP_PORT" : "7474",
     "NEO4J_ENV_NEO4J_AUTH"     : "buildbot:tulsa",
+    "buildbot_package"         : "packages/project_management.json"
 }
 
 # Split the ENV login keys if this is a local build
-a,b = DOCKER_ENV["NEO4J_ENV_NEO4J_AUTH"].split(":")
-DOCKER_ENV["NEO4J_USERNAME"], DOCKER_ENV["NEO4J_PASSWORD"] = a,b
+a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")
+ENV_VARS["NEO4J_USERNAME"], ENV_VARS["NEO4J_PASSWORD"] = a,b
 
 # Export the DOCKER enviorment variables (IF NOT SET)
-for key,val in DOCKER_ENV.items():
+for key,val in ENV_VARS.items():
     if key not in os.environ:
         os.environ[key] = str(val)
 

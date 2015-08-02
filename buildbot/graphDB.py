@@ -1,21 +1,6 @@
+import os
 from neo4jrestclient.client import GraphDatabase, Node
-import generic_datatypes
-
-def validate_node(node):
-    '''
-    Returns True only is the input object is derived from a node_container.
-    '''
-    if generic_datatypes.node_container not in type(node).mro():
-        msg = "{} object is not a known node-type"
-        raise TypeError(msg.format(node))
-
-def validate_relationship(rel):
-    '''
-    Returns True only is the input object is derived from a edge_container.
-    '''
-    if generic_datatypes.edge_container not in type(rel).mro():
-        msg = "{} object is not a known relationship"
-        raise TypeError(msg.format(node))
+from package_manager import buildbot_package
 
 def wrap_query_type(item):
     (key, val) = item
@@ -36,6 +21,32 @@ def hard_reset(gdb):
 
 
 class enhanced_GraphDatabase(GraphDatabase):
+
+    def __init__(self, *args, **kwargs):
+        
+        # Load the package/schema
+        f_package_name = kwargs.pop("buildbot_package")
+        with open(f_package_name) as FIN:
+            raw = FIN.read()
+            self.package = buildbot_package(raw)
+        super(enhanced_GraphDatabase,self).__init__(*args,**kwargs)
+
+    def validate_node(self,node):
+        '''
+        Returns True only is the input object defined in the package.
+        '''
+        if node.label not in self.package.nodes:
+            msg = "{} object is not a known node-type"
+            raise TypeError(msg.format(node))
+    
+    def validate_relationship(self, rel):
+        '''
+        Returns True only is the input object is defined in the package.
+        '''
+        key = (rel.start, rel.label, rel.end)
+        if key not in self.package.relationships:
+            msg = "{} object is not a known relationship"
+            raise TypeError(msg.format(rel))
 
     def scalar_query(self, q,returns=[]):
         qval = self.query(q,returns=returns)
@@ -74,7 +85,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         return self.scalar_query(q)
 
     def update_node(self, node):
-        validate_node(node)
+        self.validate_node(node)
         
         # Make sure node has ID
         if node.id is None:
@@ -90,7 +101,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         return node
 
     def add_node(self, node):
-        validate_node(node)
+        self.validate_node(node)
         data = dict(**node)
 
         obj = self.node(**node)
@@ -101,7 +112,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         return node
 
     def add_relationship(self, rel):
-        validate_relationship(rel)
+        self.validate_relationship(rel)
 
         data = dict(**rel)
 

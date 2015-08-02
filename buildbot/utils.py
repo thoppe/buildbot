@@ -17,7 +17,8 @@ def neo4j_credentials_from_env():
     return {
         "username" : username,
         "password" : password,
-        "url" : "http://{}:{}".format(tcp_addr, tcp_port)
+        "url" : "http://{}:{}".format(tcp_addr, tcp_port),
+        "buildbot_package" : get_env_variable("buildbot_package"),
     }
 
 grassfile = '''
