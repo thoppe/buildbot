@@ -1,8 +1,8 @@
 import json
 
-from buildbot.utils import neo4j_credentials_from_env
-from buildbot.graphDB import enhanced_GraphDatabase
-import buildbot.interface_neo4j_json as interface
+from utils import neo4j_credentials_from_env
+from graphDB import enhanced_GraphDatabase
+import interface_neo4j_json as interface
 
 # Startup the database connection
 neo4j_login = neo4j_credentials_from_env()
@@ -11,6 +11,11 @@ gdb = enhanced_GraphDatabase(**neo4j_login)
 #!flask/bin/python
 from flask import Flask, request, abort
 API = Flask(__name__)
+
+@API.route('/')
+def landing_page():
+    text = "Buildbot API v1.0"
+    return text
 
 @API.route('/buildbot/api/v1.0/relationship/create', methods=['POST'])
 def create_relationship():
@@ -95,4 +100,8 @@ if __name__ == "__main__":
     #app.logger.addHandler(logging.StreamHandler(sys.stdout))
     #app.logger.setLevel(logging.DEBUG)
     if __name__ == '__main__':
-        app.run()
+        # For this to be dockerized, it needs to be seen from
+        # the outside world, otherwise we get
+        # (56) Recv failure: Connection reset by peer
+
+        API.run(host='0.0.0.0')

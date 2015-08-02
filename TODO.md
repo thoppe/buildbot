@@ -1,5 +1,5 @@
 # High priority
-+ Dockerize buildbot API
++ Document and unittesst Dockerize buildbot API
 
 # Medium priority
 + Interface should handle dict inputs

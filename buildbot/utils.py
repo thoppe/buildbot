@@ -9,10 +9,15 @@ def get_env_variable(key):
     return val
 
 def neo4j_credentials_from_env():
+    user_pass = get_env_variable("NEO4J_ENV_NEO4J_AUTH")
+    username, password = user_pass.split(':')
+    tcp_addr = get_env_variable("NEO4J_PORT_7474_TCP_ADDR")
+    tcp_port = get_env_variable("NEO4J_PORT_7474_TCP_PORT")
+    
     return {
-        "username" : get_env_variable("NEO4J_USERNAME"),
-        "password" : get_env_variable("NEO4J_PASSWORD"),
-        "url" : "http://localhost:{}".format(get_env_variable("NEO4J_PORT")),
+        "username" : username,
+        "password" : password,
+        "url" : "http://{}:{}".format(tcp_addr, tcp_port)
     }
 
 grassfile = '''

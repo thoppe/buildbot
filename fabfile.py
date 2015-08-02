@@ -2,15 +2,20 @@ import os
 from fabric.api import *
 
 DOCKER_ENV = {
-    "NEO4J_DATABASE_DIR" : os.path.join(os.getcwd(), "database/"),
-    "NEO4J_PORT"     : 7475,
-    "NEO4J_USERNAME" : "buildbot",
-    "NEO4J_PASSWORD" : "tulsa",
+    "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/"),
+    "NEO4J_PORT_7474_TCP_ADDR" : "localhost",
+    "NEO4J_PORT_7474_TCP_PORT" : "7474",
+    "NEO4J_ENV_NEO4J_AUTH"     : "buildbot:tulsa",
 }
 
-# Export the DOCKER enviorment variables
+# Split the ENV login keys if this is a local build
+a,b = DOCKER_ENV["NEO4J_ENV_NEO4J_AUTH"].split(":")
+DOCKER_ENV["NEO4J_USERNAME"], DOCKER_ENV["NEO4J_PASSWORD"] = a,b
+
+# Export the DOCKER enviorment variables (IF NOT SET)
 for key,val in DOCKER_ENV.items():
-    os.environ[key] = str(val)
+    if key not in os.environ:
+        os.environ[key] = str(val)
 
 test_directory = "buildbot/test"
 test_order = [
@@ -21,7 +26,8 @@ test_order = [
 ]
 
 def test():
-    test_str = ' '.join([os.path.join(test_directory,x) for x in test_order])
+    test_str = ' '.join([os.path.join(test_directory,x)
+                         for x in test_order])
     local("nosetests-2.7 -x -s -v {}".format(test_str))
 
 def clean():
@@ -36,32 +42,59 @@ def push():
 
 def commit(): push() # Alias
 
-def docker():
+def docker_build_test_env():
+    docker_neo4j()
+    docker_api()
+
+def docker_neo4j():
     local("docker pull tpires/neo4j")
+    
     cmd = ("docker run "
            "-v {NEO4J_DATABASE_DIR}:/var/lib/neo4j/data "
            "-i -t -d "
            "-e NEO4J_AUTH={NEO4J_USERNAME}:{NEO4J_PASSWORD} "
            "--name buildbot_neo4j "
            "--cap-add=SYS_RESOURCE "
-           "-p {NEO4J_PORT}:7474 tpires/neo4j")
+           "-p {NEO4J_PORT_7474_TCP_PORT}:7474 "
+           "tpires/neo4j")
         
     local(cmd.format(**os.environ))
 
-def docker_teardown():
-    local("docker stop buildbot_neo4j")
-    local("docker rm buildbot_neo4j")
-
-def api():
-    import time
-    local("pkill -9 python")
-    local("python REST_API_buildbot.py &")
-    time.sleep(1)
-    local('''curl -i -H "Content-Type: application/json" -X POST -d '{"description": "unittest", "label": "flow", "status": 0.75, "validation": "unittest", "version": 0.2}' http://localhost:5000/buildbot/api/v1.0/node''')
+def docker_api():
+    local("docker build -t buildbot_api_baseimage .")
     
+    cmd = ("docker run "
+           "--link buildbot_neo4j:NEO4J "
+           "-i -t -d "
+           "-p 5000:5000 "
+           "--name buildbot_api "
+           "buildbot_api_baseimage "
+           )
+    
+    local(cmd.format(**os.environ))
+    
+def docker_teardown_all():
+    docker_teardown_neo4j()
+    docker_teardown_api()
+    
+def docker_teardown_neo4j():
+    try:
+        local("docker stop buildbot_neo4j")
+        local("docker rm buildbot_neo4j")
+    except: pass
+        
+def docker_teardown_api():
+    try:
+        local("docker stop buildbot_api")
+        local("docker rm buildbot_api")
+    except: pass
+    
+def api():
+    local("python buildbot/REST_API_buildbot.py")
     
 def demo():
     local("python demo.py")    
     
-
-
+def docker_clean():
+    #local("docker rm $(docker ps -a -q)")
+    local('docker rmi $(docker images | grep "^<none>" | awk "{print $3}")')

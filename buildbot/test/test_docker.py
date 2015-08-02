@@ -10,7 +10,7 @@ def test_neo4j_credentials_exist():
 
 def test_neo4j_docker_connection():
     neo4j_login = neo4j_credentials_from_env()
-    
+    print neo4j_login
     try:
         gdb = enhanced_GraphDatabase(**neo4j_login)
     except:
