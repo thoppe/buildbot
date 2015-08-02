@@ -5,10 +5,7 @@ http://neo4j-rest-client.readthedocs.org/en/latest/info.html
 Implementing flows as a graph database.
 '''
 
-import os
 from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
-from buildbot.data_schema import defined_relationships
-from buildbot.data_schema import defined_nodes
 from buildbot.utils import neo4j_credentials_from_env
 
 if __name__ == "__main__":
