@@ -3,8 +3,6 @@ from unittest import TestCase
 
 import os, json
 from buildbot.graphDB import enhanced_GraphDatabase
-from buildbot.data_schema import defined_relationships
-from buildbot.data_schema import defined_nodes
 import buildbot.interface_neo4j_json as interface
 
 from buildbot.utils import neo4j_credentials_from_env

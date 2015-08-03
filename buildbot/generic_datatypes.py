@@ -1,3 +1,5 @@
+import json
+
 class neo4j_container(object):
     _object_defaults = {}
     
@@ -64,6 +66,12 @@ class node_container(neo4j_container):
         return ((self.label==other.label) and
                 (self.data ==other.data))
 
+    def json(self, indent=2):
+        data = self.data.copy()
+        data["id"]    = self.id
+        data["label"] = self.label
+        return json.dumps(data,indent=indent)
+
 class edge_container(neo4j_container):
     
     label = None
@@ -101,4 +109,15 @@ class edge_container(neo4j_container):
                 (self.start==other.start) and
                 (self.end  ==other.end)   and
                 (self.data ==other.data))
+
+    def json(self,indent=2):
+        data = self.data.copy()
+        data["id"]    = self.id
+        data["start_id"] = self.end_id
+        data["end_id"]= self.start_id
+        data["label"] = self.label
+        data["start"] = self.start
+        data["end"]   = self.end
+        return json.dumps(data,indent=indent)
+
 

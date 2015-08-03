@@ -1,9 +1,10 @@
 # High priority
-+ Document and unittesst Dockerize buildbot API
++ Build a package manager
 
 # Medium priority
++ Unicode/str problem
 + Interface should handle dict inputs
-+ Rethink the schema structure
++ Document and unittesst Dockerize buildbot API
 + Move to py2neo?
 
 # Low priority
