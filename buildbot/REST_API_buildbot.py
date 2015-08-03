@@ -2,11 +2,17 @@ import json
 
 from utils import neo4j_credentials_from_env
 from graphDB import enhanced_GraphDatabase
-import interface_neo4j_json as interface
 
 # Startup the database connection
 neo4j_login = neo4j_credentials_from_env()
 gdb = enhanced_GraphDatabase(**neo4j_login)
+
+# Helper functions
+import interface_neo4j_json as inter
+neo2node  = lambda x:inter.convert_neo4j2node_container(x,gdb.package)
+neo2edge  = lambda x:inter.convert_neo4j2edge_container(x,gdb.package)
+json2node = lambda x,**a:inter.convert_json2node_container(x,gdb.package,**a)
+json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
 
 #!flask/bin/python
 from flask import Flask, request, abort
@@ -25,16 +31,16 @@ def create_relationship():
         if key not in data: abort(400)
 
     # Query the nodes
-    node1 = interface.convert_neo4j2node(gdb[data["start_id"]])
-    node2 = interface.convert_neo4j2node(gdb[data["end_id"]])
+    node1 = neo2node(gdb[data["start_id"]])
+    node2 = neo2node(gdb[data["end_id"]])
 
     # Build a relationship object
     data["start"] = node1.label
     data["end"]   = node2.label
-    rel = interface.convert_json2edge_container(json.dumps(data),True)
+    rel = json2edge(json.dumps(data),ignore_id_check=True)
 
     rel = gdb.add_relationship(rel)
-    js_out = interface.convert_edge_container2json(rel)
+    js_out = rel.json()
 
     return js_out, 201
 
@@ -49,8 +55,8 @@ def remove_relationship(rel_id):
 @API.route('/buildbot/api/v1.0/node/<int:node_id>', methods=['GET'])
 def get_node(node_id):
     obj     = gdb[node_id]    
-    node    = interface.convert_neo4j2node(obj)
-    js_out  = interface.convert_node_container2json(node)
+    node    = neo2node(obj)
+    js_out  = node.json()
     return js_out, 200
 
 @API.route('/buildbot/api/v1.0/node/remove/<int:node_id>', methods=['POST'])
@@ -66,12 +72,11 @@ def create_node():
        abort(400)
 
     json_text = json.dumps(data)
-    node = interface.convert_json2node_container(json_text,
-                                                 ignore_id_check=True)
+    node = json2node(json_text,ignore_id_check=True)
     
     # Add the node and set the ID
     node = gdb.add_node(node)
-    js_out = interface.convert_node_container2json(node)
+    js_out = node.json()
     return js_out, 201
 
 @API.route('/buildbot/api/v1.0/node/update', methods=['POST'])
@@ -82,7 +87,7 @@ def update_node():
        abort(400)
     
     json_text = json.dumps(data)
-    node = interface.convert_json2node_container(json_text)
+    node = json2node(json_text)
     
     try:
         node = gdb.update_node(node)
@@ -90,7 +95,7 @@ def update_node():
         print "Update node {} failed with:".format(node.id), Ex
         abort(404)
 
-    js_out = interface.convert_node_container2json(node)
+    js_out = node.json()
     return js_out, 201
 
 ###########################################################################

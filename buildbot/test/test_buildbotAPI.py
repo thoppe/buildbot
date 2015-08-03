@@ -3,6 +3,8 @@ from unittest import TestCase
 
 import os, json
 from buildbot.graphDB import enhanced_GraphDatabase
+
+# Helper functions
 import buildbot.interface_neo4j_json as interface
 
 from buildbot.utils import neo4j_credentials_from_env
@@ -17,6 +19,7 @@ class buildbotAPI_test_suite(TestCase):
 
     def setUp(self):
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
+        self.P   = self.gdb.package
         self.API = API.test_client()
         self.flow_data1 = {"description": self.test_desc,
                            "label": "flow",
@@ -50,17 +53,17 @@ class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_get_node(self):
         js_node1 = self.test_create_flow_node()
-        node1 = interface.convert_json2node_container(js_node1)
+        node1 = interface.convert_json2node_container(js_node1,self.P)
         url = '/buildbot/api/v1.0/node/{}'.format(node1.id)
         response = self.get(url)
-        node2 = interface.convert_json2node_container(response.data)
+        node2 = interface.convert_json2node_container(response.data,self.P)
         
         # Check that they match
         assert( node1 == node2 )
 
     def test_remove_node(self):
         js_node1 = self.test_create_flow_node()
-        node1 = interface.convert_json2node_container(js_node1)
+        node1 = interface.convert_json2node_container(js_node1,self.P)
         url = '/buildbot/api/v1.0/node/remove/{}'.format(node1.id)
         response = self.post(url)
         stats = json.loads(response.data)
@@ -68,7 +71,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_remove_relationship(self):
         json_rel_string = self.test_create_relationship()
-        rel = interface.convert_json2edge_container(json_rel_string)
+        rel = interface.convert_json2edge_container(json_rel_string,self.P)
         url = '/buildbot/api/v1.0/relationship/remove/{}'.format(rel.id)
         response = self.post(url)
         stats = json.loads(response.data)
@@ -77,10 +80,10 @@ class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_create_relationship(self):
         js_node1 = self.test_create_flow_node()
-        node1 = interface.convert_json2node_container(js_node1)
+        node1 = interface.convert_json2node_container(js_node1,self.P)
 
         js_node1 = self.test_create_flow_node()
-        node2 = interface.convert_json2node_container(js_node1)
+        node2 = interface.convert_json2node_container(js_node1,self.P)
 
         rel_data = {"label":"depends",
                     "start_id":node1.id,
@@ -93,14 +96,14 @@ class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_update_node(self):
         js_node1 = self.test_create_flow_node()
-        node1 = interface.convert_json2node_container(js_node1)
+        node1 = interface.convert_json2node_container(js_node1,self.P)
         
         # Change the status
         node1["status"] *= 2
-        json_string2 = interface.convert_node_container2json(node1)
+        json_string2 = node1.json()
         response = self.post('/buildbot/api/v1.0/node/update',
                              data=json_string2)
-        node2 = interface.convert_json2node_container(response.data)
+        node2 = interface.convert_json2node_container(response.data,self.P)
 
         # Check that the returned node is updated
         assert(node1 == node2)

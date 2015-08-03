@@ -1,8 +1,5 @@
 import json
 
-from data_schema import defined_nodes
-from data_schema import defined_relationships
-
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
 
@@ -10,27 +7,27 @@ _required_edge_members = ["start", "label", "end",
                           "start_id", "end_id", "id"]
 _required_node_members = ["label", "id"]
 
-def convert_neo4j2node(obj):
+def convert_neo4j2node_container(obj,package):
     '''
     Converts a neo4j result node into a buildbot node.
     Will validate:
-    + That there is a exactly one label that overlaps with defined nodes.
+    + That there is a exactly one label that overlaps with packages nodes.
 
     '''
     node_id = obj['metadata']['id']
     labelset = set(obj["metadata"]["labels"])
 
-    if len(labelset.intersection(defined_nodes)) == 0:
-        msg = "graphdb node {} requested is not a defined node"
+    if len(labelset.intersection(package.nodes)) == 0:
+        msg = "graphdb node {} requested is not defined in the package"
         raise KeyError(msg.format(node_id))
 
-    if len(labelset.intersection(defined_nodes)) > 1:
+    if len(labelset.intersection(package.nodes)) > 1:
         msg = "graphdb node {} has ambiguous labeling"
         raise KeyError(msg.format(node_id))
 
 
     data = obj["data"]
-    node = defined_nodes[labelset.pop()](**data)
+    node = package.nodes[labelset.pop()](**data)
     node.id = node_id
     return node
 
@@ -120,3 +117,7 @@ def convert_json2edge_container(js, package, ignore_id_check=False):
     return edge
                                       
 
+############################################################################
+# To do at some point (class-ify this whole package manager mess)
+# class neo4j2containers(object):
+    
