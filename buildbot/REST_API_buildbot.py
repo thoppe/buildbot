@@ -15,13 +15,14 @@ json2node = lambda x,**a:inter.convert_json2node_container(x,gdb.package,**a)
 json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
 
 #!flask/bin/python
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 API = Flask(__name__)
 
 @API.route('/')
 def landing_page():
-    text = "Buildbot API v1.0"
-    return text
+    import os
+    logging.error(os.getcwd())
+    return render_template("apidocs.html")
 
 @API.route('/buildbot/api/v1.0/relationship/create', methods=['POST'])
 def create_relationship():
@@ -102,11 +103,11 @@ def update_node():
 
 if __name__ == "__main__":
     import logging, sys
-    #app.logger.addHandler(logging.StreamHandler(sys.stdout))
-    #app.logger.setLevel(logging.DEBUG)
+    API.logger.addHandler(logging.StreamHandler(sys.stdout))
+    API.logger.setLevel(logging.DEBUG)
     if __name__ == '__main__':
         # For this to be dockerized, it needs to be seen from
         # the outside world, otherwise we get
         # (56) Recv failure: Connection reset by peer
 
-        API.run(host='0.0.0.0')
+        API.run(host='0.0.0.0',debug=True)
