@@ -14,15 +14,37 @@ neo2edge  = lambda x:inter.convert_neo4j2edge_container(x,gdb.package)
 json2node = lambda x,**a:inter.convert_json2node_container(x,gdb.package,**a)
 json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
 
+# API_DOCS
+
+API_DOCS = {}
+API_DOCS["create_node"] = {
+    "method" : "POST",
+    "description" : "Create new nodes",
+    "url" : '/buildbot/api/v1.0/node/create',
+    "labels" : gdb.package.nodes.keys()
+    }
+
+API_DOCS["create_rel"] = {
+    "method" : "POST",
+    "description" : "Create relationship",
+    "url" : '/buildbot/api/v1.0/relationship/create',
+    "labels" : ["{}-[{}]->{}".format(*x) for x in gdb.package.relationships]
+}
+
+
+
 #!flask/bin/python
 from flask import Flask, request, abort, render_template
 API = Flask(__name__)
 
 @API.route('/')
 def landing_page():
-    import os
-    logging.error(os.getcwd())
-    return render_template("apidocs.html")
+    data = {}
+    data["package_name"]  = gdb.package.meta["package_name"]
+    data["package_owner"] = gdb.package.meta["package_owner"]
+
+    data["API_DOCS"] = API_DOCS
+    return render_template("apidocs.html",**data)
 
 @API.route('/buildbot/api/v1.0/relationship/create', methods=['POST'])
 def create_relationship():

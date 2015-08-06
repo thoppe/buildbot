@@ -33,6 +33,9 @@ class buildbot_package(object):
                     raw = FIN.read()
                     px = buildbot_package(raw)
                     self.update(px)
+                    
+        if "meta" in js:
+            self.meta = js["meta"]
 
         for key,val in js["nodes"].items():
             self.add_node(key, val)
