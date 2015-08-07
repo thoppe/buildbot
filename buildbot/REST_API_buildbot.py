@@ -80,8 +80,31 @@ def documentation_page():
 
 @API.route('/help/<string:label>')
 def label_documentation_page(label):
-    s = ''' HERE BOY {} '''.format(label)
-    return s
+    data = {}
+    data["package_name"]  = gdb.package.meta["package_name"]
+    data["package_owner"] = gdb.package.meta["package_owner"]
+    data["label"] = label
+
+    if "]->" in label:
+        obj_type = gdb.package.relationships
+        obj_key = (label.split('-[')[0],
+                   label.split('-[')[1].split(']->')[0],
+                   label.split(']->')[1])
+        data["label_type"] = "relationship"
+        
+    else:
+        obj_type = gdb.package.nodes
+        obj_key = label
+        data["label_type"] = "node"
+
+    obj = obj_type[obj_key](1,1)
+    item = {}
+    
+    for key in obj:
+        item[key] = unicode(type(obj[key]).__name__)
+    data["label_desc"] = json.dumps(item,indent=2)
+    
+    return render_template("API_label_doc.html",**data)
 
 ###########################################################################
 
