@@ -56,10 +56,14 @@ API_DOCS["get_node"] = {
 }
 
 #!flask/bin/python
-from flask import Flask, request, abort, render_template
+from flask import Flask, request, abort, render_template, redirect
 API = Flask(__name__)
 
 @API.route('/')
+def root_page():
+    return redirect("/help")
+
+@API.route('/help')
 def landing_page():
     data = {}
     data["package_name"]  = gdb.package.meta["package_name"]

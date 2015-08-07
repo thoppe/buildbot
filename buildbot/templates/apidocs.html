@@ -1,72 +1,31 @@
-<head>
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+{% extends "base.html" %}
+{% block body %}
 
-  <!-- Custom styles for this template -->
-  <style>
-    body {
-    padding-top: 50px;
-    }
-    .simple-template {
-    padding: 40px 0px;
-    }
-    .endpoint {
-    font-size : 125%;
-    padding: 0px 0px 10px 0px;
-    }
-  </style>
+<div class="container">
 
-  <!-- Bootstrap -->
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-  <title>Buildbot API 1.0</title>
-</head>
+  <div class="simple-template">
+    <h3>Auto-generated documentation for {{package_name}}</h3>
+    <hr>
 
-<body>
-
-
-  <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="#">Buildbot API</a>
-      </div>
-      <div id="navbar" class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="#">
-              {{package_owner}}/{{package_name}}</a></li>
-        </ul>
-      </div><!--/.nav-collapse -->
-    </div>
-
-  </nav>
-  <div class="container">
-
-    <div class="simple-template">
-      <h3>Auto-generated documentation for {{package_name}}</h3>
-      <hr>
-
-      {% for item in API_DOCS %}
-      <div class="well">
-        <code>[{{item.methods}}]</code> {{item.description}}
-        <div class="endpoint">
+    {% for item in API_DOCS %}
+    <div class="well">
+      <code>[{{item.methods}}]</code> {{item.description}}
+      <div class="endpoint">
         <code>{{item.url}}</code>
-        </div>
-        <div>
-          {% for label in item.labels %}
-          <kbd>{{label}}</kbd> 
-          {% endfor %} 
-        </div>
       </div>
-      {% endfor %} 
-
-
+      <div>
+        {% for label in item.labels %}
+        <kbd>{{label}}</kbd> 
+        {% endfor %} 
+      </div>
     </div>
+    {% endfor %} 
   </div>
+</div>
+
+{% endblock %}
 
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <script src="../../dist/js/bootstrap.min.js"></script>
-
-</body>
 
 
 
