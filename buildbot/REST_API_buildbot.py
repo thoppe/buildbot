@@ -64,7 +64,7 @@ def root_page():
     return redirect("/help")
 
 @API.route('/help')
-def landing_page():
+def documentation_page():
     data = {}
     data["package_name"]  = gdb.package.meta["package_name"]
     data["package_owner"] = gdb.package.meta["package_owner"]
@@ -76,7 +76,14 @@ def landing_page():
                  "update_node"
                  ]
     data["API_DOCS"] = [API_DOCS[key] for key in key_order]
-    return render_template("apidocs.html",**data)
+    return render_template("API_documentation.html",**data)
+
+@API.route('/help/<string:label>')
+def label_documentation_page(label):
+    s = ''' HERE BOY {} '''.format(label)
+    return s
+
+###########################################################################
 
 doc_key = "create_relationship"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
