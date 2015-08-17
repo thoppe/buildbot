@@ -17,11 +17,6 @@ if __name__ == "__main__":
     flow = gdb.package.nodes["flow"]
     job  = gdb.package.nodes["job"]
 
-    bob = person(name="foobar")
-
-    print vars(person)
-    exit()
-    
     hard_reset(gdb)
 
     f1 = gdb.add_node(flow(description = u"Install neo4j-rest-client"))

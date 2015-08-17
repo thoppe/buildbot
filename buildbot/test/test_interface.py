@@ -57,3 +57,14 @@ class test_package_interface(interface_test_suite):
 
         assert( edge1 == edge2 )
         assert( edge1.id == edge2.id )
+        
+    def test_schema_org(self):
+        node = self.package.nodes["person"]()
+
+        # This is only defined in schema.org and should fail if not read properly
+        node["url"] = u"localhost"
+
+    @raises(KeyError)
+    def test_missing_key(self):
+        node = self.package.nodes["person"](not_a_real_field="blank")
+        

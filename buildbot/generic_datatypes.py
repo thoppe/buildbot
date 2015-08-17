@@ -1,4 +1,20 @@
 import json
+from schemas.schema_org_manager import schema_org
+
+
+def load_context(context):
+    if not context:
+        return {}
+
+    if context["@context"] == u'http://schema.org':
+        field_keys = schema_org[context["@type"]]
+    else:
+        msg = "Context {} unknown".format(context["@context"])
+        raise KeyError(msg)
+
+    # Assume field_keys are defaulted to strings
+    defaults = [u""]*len(field_keys)
+    return dict(zip(field_keys,defaults))
 
 class neo4j_container(object):
     _object_defaults = {}
@@ -8,16 +24,23 @@ class neo4j_container(object):
         self.data = dict()
 
         # Download any context if needed
-        if self._context:
-            print "Load the schema information here!", self._context
-            exit()
+        self._context_defaults = load_context(self._context)
+        self.data.update(self._context_defaults)
 
-        
+        # Update the types from the known object defaults        
         self.data.update(self._object_defaults)
 
         # Identify the object types from the defaults,
         # use basestring to handle both str and unicode inputs
         self.obj_types = {}
+        
+        for key,value in self._context_defaults.items():
+            if isinstance(value, str):
+                vtype = basestring
+            else:
+                vtype = type(value)
+            self.obj_types[key] = vtype
+
         for key,value in self._object_defaults.items():
             if isinstance(value, str):
                 vtype = basestring
