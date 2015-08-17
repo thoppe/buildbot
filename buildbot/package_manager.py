@@ -44,9 +44,17 @@ class buildbot_package(object):
             self.add_relationship(item)
 
     def add_node(self, key, data):
+
+        # Extract any json-LD context information (marked by @ keys)        
+        context = {}
+        for data_key in data.keys():
+            if data_key and data_key[0]=="@":
+                context[data_key] = data.pop(data_key)
+        
         class _node_factory(node_container):
             label = key
             _object_defaults = data
+            _context = context
 
         self.nodes[key] = _node_factory
 

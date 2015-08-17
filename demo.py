@@ -12,9 +12,15 @@ if __name__ == "__main__":
     
     neo4j_login = neo4j_credentials_from_env()
     gdb = enhanced_GraphDatabase(**neo4j_login)
-    
+
+    person = gdb.package.nodes["person"]
     flow = gdb.package.nodes["flow"]
     job  = gdb.package.nodes["job"]
+
+    bob = person(name="foobar")
+
+    print vars(person)
+    exit()
     
     hard_reset(gdb)
 

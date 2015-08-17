@@ -22,6 +22,8 @@
             "description" : ""
         },
         "person" : {
+            "@context": "http://schema.org",
+            "@type": "Person",
             "name" : "",
             "username" : "",
             "userid" : 0

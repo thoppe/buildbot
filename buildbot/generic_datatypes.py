@@ -2,9 +2,17 @@ import json
 
 class neo4j_container(object):
     _object_defaults = {}
+    _context = {}
     
     def __init__(self,*args,**kwargs):        
         self.data = dict()
+
+        # Download any context if needed
+        if self._context:
+            print "Load the schema information here!", self._context
+            exit()
+
+        
         self.data.update(self._object_defaults)
 
         # Identify the object types from the defaults,
