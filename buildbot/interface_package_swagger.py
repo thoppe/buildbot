@@ -1,3 +1,4 @@
+import json
 from REST_API_buildbot import API_DOCS, gdb, neo4j_login
 
 
@@ -13,7 +14,5 @@ S["host"] = "http://0.0.0.0:5000/"
 S["produces"] = ["application/json",]
 S["paths"] = {}
 
+print json.dumps(S,indent=2)
 
-
-print neo4j_login
-print S

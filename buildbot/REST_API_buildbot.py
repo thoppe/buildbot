@@ -20,7 +20,7 @@ API_DOCS = {}
 API_DOCS["create_node"] = {
     "methods" : "POST",
     "description" : "Create a new node.",
-    "url" : '/buildbot/api/v1.0/node/create',
+    "url" : '/buildbot/api/v1.0/node/<string:label>/create',
     "labels" : gdb.package.nodes.keys()
     }
 
@@ -67,7 +67,7 @@ def root_page():
 def documentation_page():
     data = {}
     data["package_name"]  = gdb.package.meta["package_name"]
-    data["package_owner"] = gdb.package.meta["package_owner"]
+    data["package_author"] = gdb.package.meta["package_author"]
 
     # Set the order to display here!
     key_order = ["create_node", "create_relationship",
@@ -82,7 +82,7 @@ def documentation_page():
 def label_documentation_page(label):
     data = {}
     data["package_name"]  = gdb.package.meta["package_name"]
-    data["package_owner"] = gdb.package.meta["package_owner"]
+    data["package_author"] = gdb.package.meta["package_author"]
     data["label"] = label
 
     if "]->" in label:
@@ -112,7 +112,7 @@ doc_key = "create_relationship"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
 def create_relationship():
     data = request.get_json()
-
+    
     for key in ["label", "start_id", "end_id"]:
         if key not in data: abort(400)
 
@@ -154,11 +154,14 @@ def remove_node(node_id):
 
 doc_key = "create_node"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def create_node():
+def create_node(label):
     data = request.get_json()
-    
-    if 'label' not in data:
-       abort(400)
+
+    if 'label' in data and label != data['label']:
+       abort(500, "Label mismatch") 
+
+    # Set the label if not in the data
+    data["label"] = label
 
     json_text = json.dumps(data)
     node = json2node(json_text,ignore_id_check=True)
@@ -195,9 +198,25 @@ if __name__ == "__main__":
     import logging, sys
     API.logger.addHandler(logging.StreamHandler(sys.stdout))
     API.logger.setLevel(logging.DEBUG)
-    if __name__ == '__main__':
-        # For this to be dockerized, it needs to be seen from
-        # the outside world, otherwise we get
-        # (56) Recv failure: Connection reset by peer
+    
+    # For this to be dockerized, it needs to be seen from
+    # the outside world, otherwise we get
+    # (56) Recv failure: Connection reset by peer
+    #API.run(host='0.0.0.0',debug=True)
+    
+    data = {"description": "test flow",
+            "label": "flow",
+            "status": 0.75,
+            "validation": "unittest",
+            "version": 0.2}
+    
+    x = API.test_client()
+    url = '/buildbot/api/v1.0/node/{label}/create'.format(**data)
 
-        API.run(host='0.0.0.0',debug=True)
+    def post(url,data):
+        urlx = url.format(**data)
+        js = json.dumps(data)
+        return x.post(url,data=js,content_type='application/json')
+        
+    print post(url,data)
+

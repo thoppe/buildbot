@@ -39,7 +39,10 @@ class buildbotAPI_test_suite(TestCase):
         print result.stats["nodes_deleted"],
 
     def post(self, url, data={}):
-        return self.API.post(url, data=data, content_type='application/json')
+        url = url.format(**data)
+        json_string = json.dumps(data)
+        return self.API.post(url, data=json_string,
+                             content_type='application/json')
 
     def get(self, url):
         return self.API.get(url)
@@ -47,8 +50,9 @@ class buildbotAPI_test_suite(TestCase):
 class test_basic_API_operations(buildbotAPI_test_suite):
 
     def test_create_flow_node(self):
-        json_string = json.dumps(self.flow_data1)
-        response = self.post('/buildbot/api/v1.0/node/create',json_string)
+       
+        response = self.post('/buildbot/api/v1.0/node/{label}/create',
+                             self.flow_data1)
         return response.data
 
     def test_get_node(self):
@@ -89,9 +93,8 @@ class test_basic_API_operations(buildbotAPI_test_suite):
                     "start_id":node1.id,
                     "end_id"  :node2.id}
 
-        json_rel_string = json.dumps(rel_data)
         response = self.post('/buildbot/api/v1.0/relationship/create',
-                             data=json_rel_string,)
+                             rel_data)
         return response.data
 
     def test_update_node(self):
@@ -101,8 +104,10 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         # Change the status
         node1["status"] *= 2
         json_string2 = node1.json()
+        data = json.loads(node1.json())
+        
         response = self.post('/buildbot/api/v1.0/node/update',
-                             data=json_string2)
+                             data)
         node2 = interface.convert_json2node_container(response.data,self.P)
 
         # Check that the returned node is updated
