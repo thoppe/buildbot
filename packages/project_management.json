@@ -1,7 +1,7 @@
 {
     "meta" : {
         "package_owner" : "thoppe",
-        "package_name" : "project_management"
+        "package_name"  : "project_management"
     },
     "requires" : ["packages/flows.json"],
     

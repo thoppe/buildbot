@@ -106,7 +106,9 @@ def api():
     local("python buildbot/REST_API_buildbot.py")
     
 def demo():
-    local("python demo.py")    
+    #local("python demo.py")
+    local("python buildbot/interface_package_swagger.py")
+
     
 def docker_clean():
     #local("docker rm $(docker ps -a -q)")
