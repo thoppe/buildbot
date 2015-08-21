@@ -15,6 +15,7 @@ json2node = lambda x,**a:inter.convert_json2node_container(x,gdb.package,**a)
 json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
 
 # API_DOCS
+rel_API = "<string:start_label>/<string:rel_label>/<string:end_label>"
 
 API_DOCS = {}
 API_DOCS["create_node"] = {
@@ -24,35 +25,35 @@ API_DOCS["create_node"] = {
     "labels" : gdb.package.nodes.keys()
     }
 
-API_DOCS["create_relationship"] = {
-    "methods" : "POST",
-    "description" : "Create a new relationship.",
-    "url" : '/buildbot/api/v1.0/relationship/create',
-    "labels" : ["{}-[{}]->{}".format(*x) for x in gdb.package.relationships]
-}
-
 API_DOCS["update_node"] = {
     "methods" : "POST",
     "description" : "Update a node.",
-    "url" : '/buildbot/api/v1.0/node/update',
+    "url" : '/buildbot/api/v1.0/node/<string:label>/update',
 }
 
 API_DOCS["remove_node"] = {
     "methods" : "POST",
     "description" : "Remove a node.",
-    "url" : '/buildbot/api/v1.0/node/remove/<int:node_id>'
-}
-
-API_DOCS["remove_relationship"] = {
-    "methods" : "POST",
-    "description" : "Remove a relationship.",
-    "url" : '/buildbot/api/v1.0/relationship/remove/<int:rel_id>'
+    "url" : '/buildbot/api/v1.0/node/<string:label>/remove'
 }
 
 API_DOCS["get_node"] = {
     "methods" : "GET",
     "description" : "Retrieves a node by index.",
-    "url" : '/buildbot/api/v1.0/node/<int:node_id>'
+    "url" : '/buildbot/api/v1.0/node/<string:label>/<int:node_id>'
+}
+
+API_DOCS["create_relationship"] = {
+    "methods" : "POST",
+    "description" : "Create a new relationship.",
+    "url" : '/buildbot/api/v1.0/relationship/{}/create'.format(rel_API),
+    "labels" : ["{}-[{}]->{}".format(*x) for x in gdb.package.relationships]
+}
+
+API_DOCS["remove_relationship"] = {
+    "methods" : "POST",
+    "description" : "Remove a relationship.",
+    "url" : '/buildbot/api/v1.0/relationship/{}/remove'.format(rel_API),
 }
 
 #!flask/bin/python
@@ -110,19 +111,25 @@ def label_documentation_page(label):
 
 doc_key = "create_relationship"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def create_relationship():
+def create_relationship(start_label, rel_label, end_label):
     data = request.get_json()
-    
-    for key in ["label", "start_id", "end_id"]:
+
+    for key in ["start_id", "end_id"]:
         if key not in data: abort(400)
 
     # Query the nodes
     node1 = neo2node(gdb[data["start_id"]])
     node2 = neo2node(gdb[data["end_id"]])
 
+    # Sanity checks!
+    assert(node1.label == start_label)
+    assert(node2.label == end_label)
+
     # Build a relationship object
     data["start"] = node1.label
     data["end"]   = node2.label
+    data["label"] = rel_label
+    
     rel = json2edge(json.dumps(data),ignore_id_check=True)
 
     rel = gdb.add_relationship(rel)
@@ -132,15 +139,18 @@ def create_relationship():
 
 doc_key = "remove_relationship"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def remove_relationship(rel_id):
-    result = gdb.remove_relationship(rel_id)
+def remove_relationship(start_label, rel_label, end_label):
+    data = request.get_json()
+    assert("id" in data)
+    
+    result = gdb.remove_relationship(data["id"])
     return json.dumps(result), 200
 
 ###########################################################################
 
 doc_key = "get_node"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def get_node(node_id):
+def get_node(label, node_id):
     obj     = gdb[node_id]    
     node    = neo2node(obj)
     js_out  = node.json()
@@ -148,8 +158,12 @@ def get_node(node_id):
 
 doc_key = "remove_node"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def remove_node(node_id):
-    result = gdb.remove_node(node_id)
+def remove_node(label):
+    data = request.get_json()
+    assert("id" in data)
+    
+    # TO DO: Add check if label matches node id!
+    result = gdb.remove_node(data["id"])
     return json.dumps(result), 200
 
 doc_key = "create_node"
@@ -174,12 +188,12 @@ def create_node(label):
 
 doc_key = "update_node"
 @API.route(API_DOCS[doc_key]["url"], methods=[API_DOCS[doc_key]["methods"]])
-def update_node():
+def update_node(label):
     data = request.get_json()
-    
-    if 'label' not in data and 'id' not in data:
-       abort(400)
-    
+
+    if 'label' in data and label != data['label']:
+       abort(500, "Label mismatch") 
+        
     json_text = json.dumps(data)
     node = json2node(json_text)
     
@@ -211,12 +225,31 @@ if __name__ == "__main__":
             "version": 0.2}
     
     x = API.test_client()
-    url = '/buildbot/api/v1.0/node/{label}/create'.format(**data)
+    url = '/buildbot/api/v1.0/node/{label}/create'
 
     def post(url,data):
         urlx = url.format(**data)
         js = json.dumps(data)
-        return x.post(url,data=js,content_type='application/json')
+        return x.post(urlx,data=js,content_type='application/json')
         
-    print post(url,data)
+    response_n1 = post(url,data)
+    idx1 = json.loads(response_n1.data)["id"]
+
+    response_n2 = post(url,data)
+    idx2 = json.loads(response_n2.data)["id"]
+
+    url = '/buildbot/api/v1.0/node/{label}/update'
+    print post(url, json.loads(response_n1.data))
+
+    data = {"start_id":idx1, "end_id":idx2}
+    url  = '/buildbot/api/v1.0/relationship/flow/depends/flow/create'
+    response = post(url, data)
+
+    url  = '/buildbot/api/v1.0/relationship/flow/depends/flow/remove'
+    print post(url, json.loads(response.data))
+    
+    url = '/buildbot/api/v1.0/node/{label}/remove'
+    print post(url, json.loads(response_n1.data))
+    print post(url, json.loads(response_n2.data))
+
 

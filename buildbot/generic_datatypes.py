@@ -103,6 +103,9 @@ class node_container(neo4j_container):
         data["label"] = self.label
         return json.dumps(data,indent=indent)
 
+    def as_dict(self):
+        return json.loads(self.json())
+
 class edge_container(neo4j_container):
     
     label = None
@@ -150,5 +153,8 @@ class edge_container(neo4j_container):
         data["start"] = self.start
         data["end"]   = self.end
         return json.dumps(data,indent=indent)
+
+    def as_dict(self):
+        return json.loads(self.json())
 
 

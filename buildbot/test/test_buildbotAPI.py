@@ -44,7 +44,8 @@ class buildbotAPI_test_suite(TestCase):
         return self.API.post(url, data=json_string,
                              content_type='application/json')
 
-    def get(self, url):
+    def get(self, url, data={}):
+        url = url.format(**data)
         return self.API.get(url)
 
 class test_basic_API_operations(buildbotAPI_test_suite):
@@ -58,8 +59,8 @@ class test_basic_API_operations(buildbotAPI_test_suite):
     def test_get_node(self):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
-        url = '/buildbot/api/v1.0/node/{}'.format(node1.id)
-        response = self.get(url)
+        url = '/buildbot/api/v1.0/node/{label}/{id}'
+        response = self.get(url, node1.as_dict())
         node2 = interface.convert_json2node_container(response.data,self.P)
         
         # Check that they match
@@ -68,16 +69,24 @@ class test_basic_API_operations(buildbotAPI_test_suite):
     def test_remove_node(self):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
-        url = '/buildbot/api/v1.0/node/remove/{}'.format(node1.id)
-        response = self.post(url)
+        url = '/buildbot/api/v1.0/node/{label}/remove'
+        response = self.post(url,node1.as_dict())
         stats = json.loads(response.data)
         assert(stats["nodes_deleted"]==1)
 
     def test_remove_relationship(self):
         json_rel_string = self.test_create_relationship()
         rel = interface.convert_json2edge_container(json_rel_string,self.P)
-        url = '/buildbot/api/v1.0/relationship/remove/{}'.format(rel.id)
-        response = self.post(url)
+        
+        rel_data = {
+            "id":rel.id,
+            "start":rel.start,
+            "end":rel.end,
+            "label":rel.label,
+        }
+        url = '/buildbot/api/v1.0/relationship/{start}/{label}/{end}/remove'
+        response = self.post(url,rel_data)
+
         stats = json.loads(response.data)
         assert(stats["relationship_deleted"]==1)
         return response.data
@@ -89,12 +98,16 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         js_node1 = self.test_create_flow_node()
         node2 = interface.convert_json2node_container(js_node1,self.P)
 
-        rel_data = {"label":"depends",
-                    "start_id":node1.id,
-                    "end_id"  :node2.id}
-
-        response = self.post('/buildbot/api/v1.0/relationship/create',
-                             rel_data)
+        rel_data = {
+            "start_id":node1.id,
+            "end_id"  :node2.id,
+            "label":"depends",
+            "start":node1.label,
+            "end":node2.label,
+        }
+        url = '/buildbot/api/v1.0/relationship/{start}/{label}/{end}/create'
+        
+        response = self.post(url,data=rel_data)
         return response.data
 
     def test_update_node(self):
@@ -104,10 +117,9 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         # Change the status
         node1["status"] *= 2
         json_string2 = node1.json()
-        data = json.loads(node1.json())
         
-        response = self.post('/buildbot/api/v1.0/node/update',
-                             data)
+        response = self.post('/buildbot/api/v1.0/node/{label}/update',
+                             node1.as_dict())
         node2 = interface.convert_json2node_container(response.data,self.P)
 
         # Check that the returned node is updated
