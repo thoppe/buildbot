@@ -278,5 +278,3 @@ if __name__ == "__main__":
     url = '/buildbot/api/v1.0/node/{label}/remove'
     print post(url, json.loads(response_n1.data))
     print post(url, json.loads(response_n2.data))
-
-
