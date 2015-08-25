@@ -184,6 +184,6 @@ class enhanced_GraphDatabase(GraphDatabase):
         
         where_string = ' AND '.join(key_pairs)
         q = q.format(label=label, where=where_string)
-        print q
-        return self.scalar_query(q)
-        
+        qval = self.query(q)
+        results = [x[0] for x in qval.elements]
+        return results

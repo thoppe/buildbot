@@ -18,4 +18,3 @@ def test_neo4j_docker_connection():
                         shell=True, stderr=subprocess.PIPE)
         msg = "{} or docker container not found."
         raise IOError(msg.format(Ex))
-            
