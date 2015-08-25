@@ -1,0 +1,21 @@
+{
+    "meta" : {
+        "package_author"      : "thoppe",
+        "package_name"        : "ip_api",
+        "package_description" : "Toy package to test contracts"
+    },
+    "requires" : ["packages/flows.json"],
+    
+    "nodes" : {
+        "ping" : {
+            "IP_address" : "",
+            "timestep"   : ""
+        }
+    },
+    
+    "relationships" : [ ],
+
+    "contracts" : [ ]
+
+}
+

@@ -5,6 +5,7 @@ from buildbot.graphDB import enhanced_GraphDatabase
 from buildbot.utils import neo4j_credentials_from_env
 
 neo4j_login = neo4j_credentials_from_env()
+neo4j_login["buildbot_package"] = 'packages/project_management.json'
 
 # Test basic graph operations
 

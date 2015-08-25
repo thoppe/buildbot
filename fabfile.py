@@ -9,6 +9,8 @@ ENV_VARS = {
     "buildbot_package"         : "packages/project_management.json"
 }
 
+ENV_VARS["buildbot_package"] = "packages/IP_demo.json"
+
 # Split the ENV login keys if this is a local build
 a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")
 ENV_VARS["NEO4J_USERNAME"], ENV_VARS["NEO4J_PASSWORD"] = a,b
@@ -51,15 +53,13 @@ def package():
 def metadraw():
     local("python buildbot/utils.py")
 
-
 #########################################################################
 
+#def docker_build_test_env():
+#    docker_neo4j()
+#    docker_api()
 
-def docker_build_test_env():
-    docker_neo4j()
-    docker_api()
-
-def docker_neo4j():
+def neo4j():
     local("docker pull tpires/neo4j")
     
     cmd = ("docker run "
@@ -73,34 +73,34 @@ def docker_neo4j():
         
     local(cmd.format(**os.environ))
 
-def docker_api():
-    local("docker build -t buildbot_api_baseimage .")
+#def docker_api():
+#    local("docker build -t buildbot_api_baseimage .")
+#    
+#    cmd = ("docker run "
+#           "--link buildbot_neo4j:NEO4J "
+#           "-i -t -d "
+#           "-p 5000:5000 "
+#           "--name buildbot_api "
+#           "buildbot_api_baseimage "
+#           )
+#    
+#    local(cmd.format(**os.environ))
     
-    cmd = ("docker run "
-           "--link buildbot_neo4j:NEO4J "
-           "-i -t -d "
-           "-p 5000:5000 "
-           "--name buildbot_api "
-           "buildbot_api_baseimage "
-           )
+#def docker_teardown_all():
+#    docker_teardown_neo4j()
+#    docker_teardown_api()
     
-    local(cmd.format(**os.environ))
-    
-def docker_teardown_all():
-    docker_teardown_neo4j()
-    docker_teardown_api()
-    
-def docker_teardown_neo4j():
+def neo4j_teardown():
     try:
         local("docker stop buildbot_neo4j")
         local("docker rm buildbot_neo4j")
     except: pass
         
-def docker_teardown_api():
-    try:
-        local("docker stop buildbot_api")
-        local("docker rm buildbot_api")
-    except: pass
+#def docker_teardown_api():
+#    try:
+#        local("docker stop buildbot_api")
+#        local("docker rm buildbot_api")
+#    except: pass
     
 def api():
     local("python buildbot/REST_API_buildbot.py")
@@ -110,7 +110,3 @@ def demo():
     #local("python buildbot/interface_package_swagger.py")
     local("python buildbot/REST_API_buildbot.py")
 
-    
-def docker_clean():
-    #local("docker rm $(docker ps -a -q)")
-    local('docker rmi $(docker images | grep "^<none>" | awk "{print $3}")')
