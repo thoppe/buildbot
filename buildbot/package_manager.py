@@ -14,7 +14,8 @@ class buildbot_package(object):
 
     def __repr__(self):
         data = {"nodes":self.nodes.keys(),
-                "relationships":self.relationships.keys()}
+                "relationships":self.relationships.keys(),
+                "contracts":self.contracts}
         return json.dumps(data,indent=2)
 
     def update(self, other_package):
@@ -26,6 +27,7 @@ class buildbot_package(object):
         
         self.nodes = {}
         self.relationships = {}
+        self.contacts = []
 
         if "requires" in js:
             for filename in js["requires"]:
@@ -42,6 +44,9 @@ class buildbot_package(object):
 
         for item in js["relationships"]:
             self.add_relationship(item)
+
+        for item in js["contracts"]:
+            print item
 
     def add_node(self, key, data):
 
