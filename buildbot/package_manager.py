@@ -45,8 +45,10 @@ class buildbot_package(object):
         for item in js["relationships"]:
             self.add_relationship(item)
 
-        for item in js["contracts"]:
-            print item
+        # Load the contracts if they exist
+        if "contracts" in js:
+            for item in js["contracts"]:
+                print item
 
     def add_node(self, key, data):
 
