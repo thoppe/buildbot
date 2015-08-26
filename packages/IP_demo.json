@@ -9,13 +9,24 @@
     "nodes" : {
         "ping" : {
             "IP_address" : "",
-            "timestep"   : ""
+            "timestamp"  : ""
         }
     },
     
     "relationships" : [ ],
 
-    "contracts" : [ ]
+    "contracts" : [
+        "contracts/ipify.swagger" 
+    ],
+
+    "actions" : {
+        "pingme" : {
+            "pre" : "https://api.ipify.org/",
+            "post": "/node/ping/create",
+            "input"  : [],
+            "output" : ["IP_address", "timestamp"]           
+        }
+    }
 
 }
 

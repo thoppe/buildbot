@@ -6,6 +6,7 @@ import json
 
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
+from contract_manager  import buildbot_contract
 
 class buildbot_package(object):
 
@@ -15,7 +16,7 @@ class buildbot_package(object):
     def __repr__(self):
         data = {"nodes":self.nodes.keys(),
                 "relationships":self.relationships.keys(),
-                "contracts":self.contracts}
+                }
         return json.dumps(data,indent=2)
 
     def update(self, other_package):
@@ -27,7 +28,8 @@ class buildbot_package(object):
         
         self.nodes = {}
         self.relationships = {}
-        self.contacts = []
+        self.contracts = {}
+        self.actions = {}
 
         if "requires" in js:
             for filename in js["requires"]:
@@ -47,8 +49,15 @@ class buildbot_package(object):
 
         # Load the contracts if they exist
         if "contracts" in js:
-            for item in js["contracts"]:
-                print item
+            for name in js["contracts"]:
+                contract = buildbot_contract(name)
+                self.contracts[name] = contract
+
+        # Load the actions if they exist
+        if "actions" in js:
+            
+            pass
+
 
     def add_node(self, key, data):
 
