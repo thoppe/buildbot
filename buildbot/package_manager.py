@@ -34,6 +34,11 @@ class buildbot_package(object):
         self.contracts = {}
         self.actions = {}
 
+        if "code_entry" in js:
+            self.code_entry = js["code_entry"]
+        else:
+            self.code_entry = ""
+
         if "requires" in js:
             for filename in js["requires"]:
                 with open(filename,'r') as FIN:
@@ -58,7 +63,7 @@ class buildbot_package(object):
         # Load the actions if they exist
         if "actions" in js:
             for name,data in js["actions"].items():
-                self.actions[name] = buildbot_action(name,data,self.contracts)
+                self.actions[name] = buildbot_action(name,data,self)
 
     def add_node(self, key, data):
 

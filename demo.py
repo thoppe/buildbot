@@ -9,13 +9,13 @@ from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
 from buildbot.utils import neo4j_credentials_from_env
 
 if __name__ == "__main__":
-    
+        
     neo4j_login = neo4j_credentials_from_env()
-    gdb = enhanced_GraphDatabase(**neo4j_login)
-
-    print neo4j_login
-    print gdb.package
+    neo4j_login["buildbot_package"]= "packages/checkin/checkin.json"
     
+    gdb = enhanced_GraphDatabase(**neo4j_login)
+    func = gdb.package.actions["pingme"]
+    print func()
     ###################################################################
     exit()
     hard_reset(gdb)

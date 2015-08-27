@@ -8,7 +8,7 @@ ENV_VARS = {
     "NEO4J_ENV_NEO4J_AUTH"     : "buildbot:tulsa",
     "buildbot_package"         : "packages/project_management.json"
 }
-#ENV_VARS["buildbot_package"] = "packages/checkin/IP_demo.json"
+#ENV_VARS["buildbot_package"] = "packages/checkin/checkin.json"
 
 # Split the ENV login keys if this is a local build
 a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")

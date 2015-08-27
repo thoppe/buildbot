@@ -1,8 +1,8 @@
 {
     "meta" : {
         "package_author"      : "thoppe",
-        "package_name"        : "ip_api",
-        "package_description" : "Toy package to test contracts"
+        "package_name"        : "Checkin",
+        "package_description" : "Logs your IP address and a timestamp."
     },
     "requires" : [],
     "code_entry" : "logic.js",
@@ -22,7 +22,7 @@
 
     "actions" : {
         "pingme" : {
-            "pre" : "https://api.ipify.org/",
+            "pre" : "https://api.ipify.org?format=json",
             "post": "/node/ping/create",
             "input"  : [],
             "output" : ["IP_address", "timestamp"],
