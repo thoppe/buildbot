@@ -13,7 +13,6 @@ if __name__ == "__main__":
     neo4j_login = neo4j_credentials_from_env()
     gdb = enhanced_GraphDatabase(**neo4j_login)
 
-    flow = gdb.package.nodes["flow"]
     print neo4j_login
     print gdb.package
     

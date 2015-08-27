@@ -4,7 +4,8 @@
         "package_name"        : "ip_api",
         "package_description" : "Toy package to test contracts"
     },
-    "requires" : ["packages/flows.json"],
+    "requires" : [],
+    "code_entry" : "logic.js",
     
     "nodes" : {
         "ping" : {
@@ -24,7 +25,8 @@
             "pre" : "https://api.ipify.org/",
             "post": "/node/ping/create",
             "input"  : [],
-            "output" : ["IP_address", "timestamp"]           
+            "output" : ["IP_address", "timestamp"],
+            "description" : "Records an IP address and time."
         }
     }
 

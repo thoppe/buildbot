@@ -6,7 +6,7 @@ import json
 
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
-from contract_manager  import buildbot_contract
+from contract_manager  import buildbot_contract, buildbot_action
 
 class buildbot_package(object):
 
@@ -14,10 +14,13 @@ class buildbot_package(object):
         self.load_package(string_input)
 
     def __repr__(self):
-        data = {"nodes":self.nodes.keys(),
-                "relationships":self.relationships.keys(),
-                }
-        return json.dumps(data,indent=2)
+        data = {
+            "nodes":self.nodes.keys(),
+            "relationships":self.relationships.keys(),
+            "contracts":self.contracts.keys(),
+            "actions":self.actions.keys(),
+        }
+        return json.dumps(data,indent=1)
 
     def update(self, other_package):
         self.nodes.update(other_package.nodes)
@@ -50,14 +53,12 @@ class buildbot_package(object):
         # Load the contracts if they exist
         if "contracts" in js:
             for name in js["contracts"]:
-                contract = buildbot_contract(name)
-                self.contracts[name] = contract
+                self.contracts[name] = buildbot_contract(name)
 
         # Load the actions if they exist
         if "actions" in js:
-            
-            pass
-
+            for name,data in js["actions"].items():
+                self.actions[name] = buildbot_action(name,data,self.contracts)
 
     def add_node(self, key, data):
 

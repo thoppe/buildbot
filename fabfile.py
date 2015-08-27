@@ -8,8 +8,7 @@ ENV_VARS = {
     "NEO4J_ENV_NEO4J_AUTH"     : "buildbot:tulsa",
     "buildbot_package"         : "packages/project_management.json"
 }
-
-ENV_VARS["buildbot_package"] = "packages/IP_demo.json"
+#ENV_VARS["buildbot_package"] = "packages/checkin/IP_demo.json"
 
 # Split the ENV login keys if this is a local build
 a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")
@@ -29,6 +28,7 @@ test_order = [
 ]
 
 def test():
+    ENV_VARS["buildbot_package"] = "packages/project_management.json"    
     test_str = ' '.join([os.path.join(test_directory,x)
                          for x in test_order])
     local("nosetests-2.7 -x -s -v {}".format(test_str))

@@ -26,4 +26,31 @@ class buildbot_contract(object):
 
     def keys(self):
         return self.paths.keys()
+    
+class buildbot_action(object):
+
+    def __init__(self,name,data,contracts):
+        self.name = name
+        self.data = data
+
+        # Identify the [pre] contract
+        self.pre_contract = None
+        for contract in contracts.values():
+            if contract.data["host"] in data["pre"]:
+                self.pre_contract = contract
+
+        assert(self.pre_contract is not None)
+        
+        # Assume for now that the [post] contract is internal
+        # (this doesn't have to be true in the future)
+
+        # + Identify the code_entry point
+
+    def activate(self):
+        # Run the action and validate against the contract
+        print "ACTIVATE!"
+        exit()
+
+
+    
 
