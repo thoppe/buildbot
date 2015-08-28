@@ -9,8 +9,9 @@
     
     "nodes" : {
         "ping" : {
+            "name"       : "",
             "IP_address" : "",
-            "timestamp"  : ""
+            "timestamp"  : 0
         }
     },
     
@@ -24,8 +25,8 @@
         "pingme" : {
             "pre" : "https://api.ipify.org?format=json",
             "post": "/node/ping/create",
-            "input"  : [],
-            "output" : ["IP_address", "timestamp"],
+            "input"  : ["name"],
+            "output" : ["IP_address", "timestamp","name"],
             "description" : "Records an IP address and time."
         }
     }

@@ -1,7 +1,11 @@
-import json
+#!flask/bin/python
+from flask import Flask, request, abort, render_template, redirect
 
+import json
 from utils import neo4j_credentials_from_env
 from graphDB import enhanced_GraphDatabase
+
+API = Flask(__name__)
 
 # Startup the database connection
 neo4j_login = neo4j_credentials_from_env()
@@ -64,9 +68,7 @@ API_DOCS["remove_relationship"] = {
     "url" : '/buildbot/api/v1.0/relationship/{}/remove'.format(rel_API),
 }
 
-#!flask/bin/python
-from flask import Flask, request, abort, render_template, redirect
-API = Flask(__name__)
+
 
 @API.route('/')
 def root_page():

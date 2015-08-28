@@ -27,14 +27,16 @@ class buildbot_contract(object):
     def keys(self):
         return self.paths.keys()
 
-
-    
     
 class buildbot_action(object):
 
     def __init__(self,name,data,pack):
         self.name = name
-        self.data = data
+        self.pre  = data["pre"]
+        self.post = data["post"]
+        self.input  = data["input"]
+        self.output = data["output"]
+
         contracts = pack.contracts
 
         # Identify the [pre] contract
@@ -47,7 +49,7 @@ class buildbot_action(object):
         
         # Assume for now that the [post] contract is internal
         # (this doesn't have to be true in the future)
-        self.post_contract = data["post"]
+
 
         # Identify the code_entry point
         self.code_entry = os.path.abspath(pack.code_entry)
@@ -58,26 +60,34 @@ class buildbot_action(object):
         print "Running the action", self.name
 
         # Check that input data matches contract
-        print "CONTRACT CHECK function input GOES HERE..."
+        print "CONTRACT CHECK function input GOES HERE... (unittest needed)"
+        if set(kwargs.keys()) != set(self.input):
+            msg = "INPUT CONTRACT {} violated! {} vs {}"
+            raise ValueError(msg.format(self.name, kwargs.keys(), self.input))
 
         # Format url with "input" information?
-        url = self.data["pre"]
+        url = self.pre
         r = requests.get(url)
 
-        # Assume data is JSON serlizable
-        input_data = json.loads(r.content)
+        # Assume data is JSON serializable
+        url_data = json.loads(r.content)
+        url_data.update(kwargs)
 
         # Check that input data from API matches contract
         print "CONTRACT CHECK API INPUT GOES HERE..."
+        output_data = self.nodejs_oneoff(url_data)
 
         # Run the nodejs code
-        print "Action {} input {}".format(self.name, input_data)
-
-        output_data = self.nodejs_oneoff(input_data)
-        print "CONTRACT CHECK OUTPUT GOES HERE..."
-
+        print "Action {} input {}".format(self.name, url_data)
         print "Action {} output {}".format(self.name, output_data)
 
+        print "CONTRACT CHECK OUTPUT GOES HERE... (unittest needed)"
+        if set(output_data.keys()) != set(self.output):
+            msg = "OUTPUT CONTRACT {} violated! {} vs {}"
+            raise ValueError(msg.format(self.name, output_data.keys(), self.output))
+
+        
+        print "EXECUTE NODE ACTION HERE"
         
 
 
@@ -116,6 +126,8 @@ class buildbot_action(object):
                 msg = "Problem with nodejs code\n{}".format(err)
                 raise SyntaxError(msg)
 
+        print "THIS!", nodejs_code
+        print output
 
         output_data = json.loads(output)
         return output_data
