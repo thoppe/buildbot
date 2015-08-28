@@ -1,7 +1,7 @@
 '''
 The buildbot_contract manager loads and validates a swagger file.
 '''
-import os, json, requests, subprocess
+import os, json, requests, subprocess, tempfile
 from swagger_spec_validator.validator20 import validate_spec
 
 class buildbot_contract(object):
@@ -47,29 +47,38 @@ class buildbot_action(object):
         
         # Assume for now that the [post] contract is internal
         # (this doesn't have to be true in the future)
+        self.post_contract = data["post"]
 
         # Identify the code_entry point
         self.code_entry = os.path.abspath(pack.code_entry)
 
 
-    def __call__(self):
+    def __call__(self,**kwargs):
         # Run the action and validate against the contract
         print "Running the action", self.name
+
+        # Check that input data matches contract
+        print "CONTRACT CHECK function input GOES HERE..."
 
         # Format url with "input" information?
         url = self.data["pre"]
         r = requests.get(url)
 
         # Assume data is JSON serlizable
-        data = json.loads(r.content)
+        input_data = json.loads(r.content)
 
-        # Check that input data matches contract
-        print "CONTRACT CHECK GOES HERE..."
+        # Check that input data from API matches contract
+        print "CONTRACT CHECK API INPUT GOES HERE..."
 
         # Run the nodejs code
-        print data, self.name
+        print "Action {} input {}".format(self.name, input_data)
 
-        self.nodejs_oneoff(data)
+        output_data = self.nodejs_oneoff(input_data)
+        print "CONTRACT CHECK OUTPUT GOES HERE..."
+
+        print "Action {} output {}".format(self.name, output_data)
+
+        
 
 
     def nodejs_oneoff(self, data):
@@ -81,7 +90,8 @@ class buildbot_action(object):
         var logic = require('{f_code_entry}');
         var data = {json_data};
         var result = logic.{function_name}(data);
-        console.log(result);
+        var output = JSON.stringify(result);
+        console.log(output);
         '''
         args = {
             "f_code_entry":self.code_entry,
@@ -89,9 +99,25 @@ class buildbot_action(object):
             "json_data":json.dumps(data),
         }
 
-        cmd = nodejs_template.format(**args)
-        
-        #proc = subprocess.Popen(
-    
+        nodejs_code = nodejs_template.format(**args)
+        cmd = "nodejs"
+
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.write(nodejs_code)
+            temp.flush()
+
+
+            proc = subprocess.Popen([cmd,temp.name],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            output,err = proc.communicate()
+
+            if err:
+                msg = "Problem with nodejs code\n{}".format(err)
+                raise SyntaxError(msg)
+
+
+        output_data = json.loads(output)
+        return output_data
     
 

@@ -5,7 +5,7 @@
         "package_description" : "Logs your IP address and a timestamp."
     },
     "requires" : [],
-    "code_entry" : "logic.js",
+    "code_entry" : "packages/checkin/logic.js",
     
     "nodes" : {
         "ping" : {
@@ -29,6 +29,5 @@
             "description" : "Records an IP address and time."
         }
     }
-
 }
 

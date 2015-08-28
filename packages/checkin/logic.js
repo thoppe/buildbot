@@ -6,7 +6,3 @@ exports.pingme = function (data) {
     }
     return output;   
 };
-
-// require('./logic.js');
-// example_data = {"ip":"98.207.254.136"}
-// console.log(pingme(example_data));
