@@ -24,7 +24,8 @@ test_order = [
     "test_interface.py",
     "test_docker.py",
     "test_graph.py",
-    "test_buildbotAPI.py", 
+    "test_buildbotAPI.py",
+    "test_contracts.py", 
 ]
 
 def test():

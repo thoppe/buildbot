@@ -18,7 +18,6 @@ if __name__ == "__main__":
     gdb = enhanced_GraphDatabase(**neo4j_login)
     API.gdb = gdb
     func = gdb.package.actions["pingme"]
-
     func(name="travis")
     
     ###################################################################
