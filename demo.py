@@ -7,16 +7,21 @@ Implementing flows as a graph database.
 
 from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
 from buildbot.utils import neo4j_credentials_from_env
+from buildbot.REST_API_buildbot import API
 
 if __name__ == "__main__":
-    
+
     neo4j_login = neo4j_credentials_from_env()
+    neo4j_login["buildbot_package"]= "packages/checkin/checkin.json"
+
+    # Reload the database
     gdb = enhanced_GraphDatabase(**neo4j_login)
-
-    person = gdb.package.nodes["person"]
-    flow = gdb.package.nodes["flow"]
-    job  = gdb.package.nodes["job"]
-
+    API.gdb = gdb
+    func = gdb.package.actions["pingme"]
+    func(name="travis")
+    
+    ###################################################################
+    exit()
     hard_reset(gdb)
 
     f1 = gdb.add_node(flow(description = u"Install neo4j-rest-client"))

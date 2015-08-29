@@ -1,0 +1,34 @@
+{
+    "meta" : {
+        "package_author"      : "thoppe",
+        "package_name"        : "Checkin",
+        "package_description" : "Logs your IP address and a timestamp."
+    },
+    "requires" : [],
+    "code_entry" : "packages/checkin/logic.js",
+    
+    "nodes" : {
+        "ping" : {
+            "name"       : "",
+            "IP_address" : "",
+            "timestamp"  : 0
+        }
+    },
+    
+    "relationships" : [ ],
+
+    "contracts" : [
+        "contracts/ipify.swagger" 
+    ],
+
+    "actions" : {
+        "pingme" : {
+            "pre" : "https://api.ipify.org?format=json",
+            "post": "/node/ping/create",
+            "input"  : ["name"],
+            "output" : ["IP_address", "timestamp","name"],
+            "description" : "Records an IP address and time."
+        }
+    }
+}
+
