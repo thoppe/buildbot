@@ -5,22 +5,32 @@ from recordtype import recordtype
 
 
 def fancy_record(name, keys, **kwargs):
-    val_types = [kwargs[k] if k in kwargs else ""
+    val_types = [kwargs[k]() if k in kwargs else ""
                  for k in keys]
     defaults  = zip(keys,val_types)
 
     return recordtype(name, defaults)
 
-info_keys = ['version',
-             'title',
-             'description',
-             'contact']
-obj = fancy_record('info', info_keys, contacts={})
+license = fancy_record('license', ['name'])
+
+info_keys = ['version','title','description',
+             'contact', 'license']
+obj = fancy_record('info', info_keys, license=license)
 
 x = obj(version=1.0)
 print x
 x.version *= 2
 print x
+x.license.name = 'bob'
+
+y = obj(version=1.0)
+print y
+y.version *= 2
+print y
+y.license.name = 'sue'
+
+print x.license.name,y.license.name
+
 exit()  
 
 
