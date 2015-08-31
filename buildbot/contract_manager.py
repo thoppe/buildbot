@@ -20,7 +20,7 @@ class buildbot_contract(object):
         if validate_spec(js) is None:
             self.data = js
             return True
-
+        
         msg = "Bad swaggerfile {}".format(f_swagger)
         raise SyntaxError(msg)
 

@@ -41,6 +41,21 @@
                     }
                 ],
                 "responses": {
+
+                    "200": {
+                        "description": "ip response",
+                        "schema": {
+                          "type": "string",
+                          "items": {
+                            "$ref": "#/definitions/ip_address"
+                          }
+                        },
+                        "headers": {
+                          "x-expires": {
+                            "type": "string"
+                          }
+                        }
+                      },
                     "default": {
                         "description": "unexpected error",
                         "schema": {
@@ -51,7 +66,23 @@
             }
         }
     },
+
     "definitions": {
+
+        "ip_address": {
+              "type": "object",
+              "required": [
+                "ip"
+              ],
+              "properties": {
+                "ip": {
+                  "type"  : "string",
+                  "format": "ip-address"
+                }
+              }
+            },
+
+
         "ErrorModel": {
             "type": "object",
             "required": [
