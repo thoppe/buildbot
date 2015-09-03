@@ -115,58 +115,9 @@ class buildbot_package(object):
 
 
 if __name__ == "__main__":
-    #f_flows = "packages/flows.json"
     f_flows = "packages/project_management.json"
 
     with open(f_flows) as FIN:
         raw = FIN.read()
 
     P = buildbot_package(raw)
-
-
-#############################################################
-# Flow nodes
-#############################################################
-
-#############################################################
-# Organizational nodes
-#############################################################
-
-#############################################################
-# SCRUM nodes
-#############################################################
-
-'''
-#############################################################
-Allowed relationships, read as (A)->[is]->(B). Defined in this way 
-so everything is explict and properities can be added later.
-#############################################################
-'''
-
-#############################################################
-# Node label mappings for imports
-#############################################################
-
-'''
-
-import sys
-import inspect
-import collections
-
-class_introspection = inspect.getmembers(sys.modules[__name__],
-                                         inspect.isclass)
-
-# Programmatically construct the defined nodes from above
-defined_nodes = {}
-for name,cls in class_introspection:
-    if node_container in cls.mro() and cls is not node_container:
-        defined_nodes[name] = cls
-
-# Programmatically construct the relationships
-defined_relationships = collections.defaultdict(dict)
-for name,cls in class_introspection:
-    if edge_container in cls.mro() and cls is not edge_container:
-        key = (cls.start, cls.label, cls.end)
-        defined_relationships[key] = cls
-defined_relationships = dict(defined_relationships)
-'''
