@@ -114,27 +114,42 @@ class buildbot_package(object):
         self.relationships[key] = _rel_factory
 
 ###################################################################
+
+type_lookup = {
+    int:"integer",
+    float:"number",
+    bool:"boolean",
+    str:"string",
+    unicode:"string",
+}
+
 def minimal_peacock():
     ''' Return a minimal working swagger file object (peacock) '''
     info = peacock.Info(title="",version="")
     return peacock.Swagger(info=info,
                            paths=peacock.Paths())
 
-def export_package_to_swagger(p):
-    type_lookup = {
-        int:"integer",
-        float:"number",
-        bool:"boolean",
-        str:"string",
-        unicode:"string",
-    }
+def build_operation(node,**kwargs):
+
+    desc = "A {name} node.".format(**kwargs)
+    pass_response = peacock.Response(description=desc)
+    all_responses = peacock.Responses({"200":pass_response})
+
+    desc = "{verb} a {name} node.".format(**kwargs)
+    op = peacock.Operation(description=desc,
+                           responses=all_responses)
     
+    return op
+
+def export_package_to_swagger(p):
+    return True
     S = minimal_peacock()
     S.info.title   = p.meta["title"]
     S.info.version = p.meta["version"]
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
 
+    # Definitions taken from package nodes
     defs = []
     for key,node in p.nodes.items():
         
@@ -148,11 +163,21 @@ def export_package_to_swagger(p):
         schema = peacock.Schema(type_="object",
                                 properties=props)
         defs.append(schema)
+
+    S.definitions = peacock.Definitions(zip(p.nodes, defs))
+
+    for key,node in p.nodes.items():
+        print key, node
+        get_op = build_operation(node, name=key, verb="Gets")
+        prop = peacock.Parameter(name="id",in_="query",type_="integer")
+        get_op.parameters = peacock.Parameters([prop])        
+        print props
+        exit()
+
+        print get_op
+       
     
-    defs = zip(p.nodes, defs)
-    S.definitions = peacock.Definitions(defs)
-    
-    print S
+    #print S
     exit()
 
 ###################################################################

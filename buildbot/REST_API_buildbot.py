@@ -20,7 +20,6 @@ json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
 
 # API_DOCS
 rel_API = "<string:start_label>/<string:rel_label>/<string:end_label>"
-
 API_DOCS = {}
 
 API_DOCS["create_node"] = {
@@ -37,7 +36,7 @@ API_DOCS["update_node"] = {
 }
 
 API_DOCS["remove_node"] = {
-    "methods" : ["POST"],
+    "methods" : ["DELETE"],
     "description" : "Remove a node.",
     "url" : '/buildbot/api/v1.0/node/<string:label>/remove'
 }
@@ -63,7 +62,7 @@ API_DOCS["create_relationship"] = {
 }
 
 API_DOCS["remove_relationship"] = {
-    "methods" : ["POST"],
+    "methods" : ["DELETE"],
     "description" : "Remove a relationship.",
     "url" : '/buildbot/api/v1.0/relationship/{}/remove'.format(rel_API),
 }
