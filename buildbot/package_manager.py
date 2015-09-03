@@ -113,11 +113,57 @@ class buildbot_package(object):
 
         self.relationships[key] = _rel_factory
 
+###################################################################
+def minimal_peacock():
+    ''' Return a minimal working swagger file object (peacock) '''
+    info = peacock.Info(title="",version="")
+    return peacock.Swagger(info=info,
+                           paths=peacock.Paths())
+
+def export_package_to_swagger(p):
+    type_lookup = {
+        int:"integer",
+        float:"number",
+        bool:"boolean",
+        str:"string",
+        unicode:"string",
+    }
+    
+    S = minimal_peacock()
+    S.info.title   = p.meta["title"]
+    S.info.version = p.meta["version"]
+    S.info.description = p.meta["description"]
+    S.info.contact = peacock.Contact(name=p.meta["author"])
+
+    defs = []
+    for key,node in p.nodes.items():
+        
+        props = {}
+        for name,val in node._object_defaults.items():
+            obj_type = type_lookup[type(val)]
+            props[name] = peacock.Property(type_=obj_type)
+            
+        props  = peacock.Properties(props)
+        
+        schema = peacock.Schema(type_="object",
+                                properties=props)
+        defs.append(schema)
+    
+    defs = zip(p.nodes, defs)
+    S.definitions = peacock.Definitions(defs)
+    
+    print S
+    exit()
+
+###################################################################
+
+
 
 if __name__ == "__main__":
-    f_flows = "packages/project_management.json"
+    f_package = "packages/checkin/checkin.json"
 
-    with open(f_flows) as FIN:
+    with open(f_package) as FIN:
         raw = FIN.read()
 
     P = buildbot_package(raw)
+    export_package_to_swagger(P)
