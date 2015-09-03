@@ -7,6 +7,8 @@ import json
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
 from contract_manager  import buildbot_contract, buildbot_action
+import peacock
+
 
 class buildbot_package(object):
 
