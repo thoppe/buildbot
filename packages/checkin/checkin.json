@@ -2,7 +2,6 @@
     "meta" : {
         "title"       : "checkin",
         "author"      : "thoppe",
-        "name"        : "Checkin",
         "description" : "Logs your IP address and a timestamp.",
         "version"     : "0.0.1"
     },

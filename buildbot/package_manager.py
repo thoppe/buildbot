@@ -3,17 +3,21 @@ Nodes are dynamicaly loaded into the namespace with this module.
 '''
 
 import json
+import peacock
 
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
 from contract_manager  import buildbot_contract, buildbot_action
-import peacock
 
+# TO DO: let a buildbot_package be constrained by traits
+from traits.api import Int, Str, Float, List, Enum
+from traits.api import Bool, Any, Dict, Either, This
+from traits.api import Instance, HasTraits
 
 class buildbot_package(object):
 
     def __init__(self, string_input):
-        self.load_package(string_input)
+        self.load_package(string_input)        
 
     def __repr__(self):
         data = {
@@ -123,12 +127,6 @@ type_lookup = {
     unicode:"string",
 }
 
-def minimal_peacock():
-    ''' Return a minimal working swagger file object (peacock) '''
-    info = peacock.Info(title="",version="")
-    return peacock.Swagger(info=info,
-                           paths=peacock.Paths())
-
 def build_operation(node,**kwargs):
 
     desc = "A {name} node.".format(**kwargs)
@@ -142,37 +140,53 @@ def build_operation(node,**kwargs):
     return op
 
 def export_package_to_swagger(p):
-    return True
-    S = minimal_peacock()
+
+    S = peacock.Swagger()
     S.info.title   = p.meta["title"]
     S.info.version = p.meta["version"]
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
 
     # Definitions taken from package nodes
-    defs = []
+    defs = peacock.Definitions()
+
     for key,node in p.nodes.items():
-        
-        props = {}
+        defs[key] = peacock.Schema(type_="object")
+
         for name,val in node._object_defaults.items():
             obj_type = type_lookup[type(val)]
-            props[name] = peacock.Property(type_=obj_type)
-            
-        props  = peacock.Properties(props)
-        
-        schema = peacock.Schema(type_="object",
-                                properties=props)
-        defs.append(schema)
+            defs[key].properties[name] = peacock.Property(type_=obj_type)
 
-    S.definitions = peacock.Definitions(zip(p.nodes, defs))
+    # Assign the operations
 
     for key,node in p.nodes.items():
-        print key, node
-        get_op = build_operation(node, name=key, verb="Gets")
-        prop = peacock.Parameter(name="id",in_="query",type_="integer")
-        get_op.parameters = peacock.Parameters([prop])        
-        print props
+        path = peacock.Path()
+        ref = "#/definitions/{}".format(key)        
+        get_id,create,delete = [peacock.Operation() for x in range(3)]
+        
+        #get.description = "Retrieves a node by index."
+        #get.responses["200"] = peacock.Response()
+        #get.responses["200"].description = "Returns a {} node.".format(key)
+        #get.produces = ["application/json"]
+
+        create.description = "Creates a {} node.".format(key)
+        para = peacock.Parameter(name=key, in_="body")
+        para.description = "{} node to add.".format(key)
+        para.required = True
+        para.schema = peacock.Schema(ref_=ref)       
+        create.parameters.append(para)
+
+        # Set the path attributes
+        path.post = create
+        
+        print path
         exit()
+
+        #get_op = build_operation(node, name=key, verb="Gets")
+        #prop = peacock.Parameter(name="id",in_="query",type_="integer")
+        #get_op.parameters = peacock.Parameters([prop])        
+        #print props
+        #exit()
 
         print get_op
        
