@@ -46,7 +46,7 @@ def convert_json2node_container(js, package, ignore_id_check=False):
     except ValueError as Ex:
         msg = "convert_json2node_container received malformed json {}"
         raise ValueError(msg.format(Ex))
-
+    
     member_data = {}
     for name in _required_node_members:
         if ignore_id_check and name=="id":
@@ -56,7 +56,7 @@ def convert_json2node_container(js, package, ignore_id_check=False):
         except KeyError:
             msg = "convert_json2node_container received json with no {}."
             raise KeyError(msg.format(name))
-
+    
     label = member_data["label"]
 
     if label not in package.nodes:
@@ -66,7 +66,7 @@ def convert_json2node_container(js, package, ignore_id_check=False):
     node = package.nodes[label](**data)
 
     for name,value in member_data.items():
-        setattr(node, name, value)
+        node[name] = value
 
     return node
 

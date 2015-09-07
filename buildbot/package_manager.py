@@ -71,22 +71,21 @@ class buildbot_package(object):
             for name,data in js["actions"].items():
                 self.actions[name] = buildbot_action(name,data,self)
 
-    def add_node(self, key, data):
+    def add_node(self, key, schema_data):
 
         # Extract any json-LD context information (marked by @ keys)        
         context = {}
-        for data_key in data.keys():
+        for data_key in schema_data.keys():
             if data_key and data_key[0]=="@":
-                context[data_key] = data.pop(data_key)
-        
-        class _node_factory(node_container):
-            label = key
-            _object_defaults = data
-            _context = context
+                context[data_key] = schema_data.pop(data_key)
 
-        self.nodes[key] = _node_factory
+        # Create a class instance for the node
+        node = node_container(label=key, **schema_data)
+
+        self.nodes[key] = node
 
     def add_relationship(self, item):
+        
         data = {}
         if len(item)<3:
             msg = ("Relationships need at least three items\n"
@@ -104,18 +103,18 @@ class buildbot_package(object):
             raise ValueError(msg.format(source))
         if target not in self.nodes:
             raise ValueError(msg.format(source))
-                    
-        class _rel_factory(edge_container):
-            start = source
-            end   = target
-            label = rel_name
-            _object_defaults = data
 
-        key = (_rel_factory.start,
-               _rel_factory.label,
-               _rel_factory.end)
+        data["label"] = rel_name
+        data["start"] = source
+        data["end"]   = target
 
-        self.relationships[key] = _rel_factory
+        edge = edge_container(**data)
+
+        key = (data["start"],
+               data["label"],
+               data["end"])
+
+        self.relationships[key] = edge
 
 ###################################################################
 
@@ -153,9 +152,10 @@ def export_package_to_swagger(p):
     for key,node in p.nodes.items():
         defs[key] = peacock.Schema(type_="object")
 
-        for name,val in node._object_defaults.items():
-            obj_type = type_lookup[type(val)]
-            defs[key].properties[name] = peacock.Property(type_=obj_type)
+        for name,obj_type in node._object_types.items():
+            swagger_type = type_lookup[obj_type]
+            prop = peacock.Property(type_=swagger_type) 
+            defs[key].properties[name] = prop
 
     # Assign the operations
 
@@ -178,8 +178,7 @@ def export_package_to_swagger(p):
 
         # Set the path attributes
         path.post = create
-        
-        print path
+
         exit()
 
         #get_op = build_operation(node, name=key, verb="Gets")
@@ -206,3 +205,5 @@ if __name__ == "__main__":
 
     P = buildbot_package(raw)
     export_package_to_swagger(P)
+
+    print P
