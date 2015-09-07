@@ -86,17 +86,19 @@ class enhanced_GraphDatabase(GraphDatabase):
 
     def update_node(self, node):
         self.validate_node(node)
-        
+
         # Make sure node has ID
         if node.id is None:
             msg = "Node must have id before update"
             raise ValueError(msg)
         obj = self.node[node.id]
+        _reserved_names = ["id","label"]
         
         for key in node:
-            val = node[key]
-            if obj.get(key) != node[key]:
-                obj.set(key, node[key])
+            if key not in _reserved_names:
+                val = node[key]
+                if obj.get(key) != node[key]:
+                    obj.set(key, node[key])
 
         return node
 

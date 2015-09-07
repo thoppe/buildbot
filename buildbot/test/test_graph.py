@@ -52,7 +52,7 @@ class test_basic_graph_operations(buildbot_test_suite):
         assert(node.id is not None)
 
         # Make sure data has been copied (check assigned status)
-        assert(node.data['status'] == status_level)
+        assert(node.status == status_level)
         
         return node
     

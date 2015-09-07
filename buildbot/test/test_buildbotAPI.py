@@ -66,8 +66,8 @@ class test_basic_API_operations(buildbotAPI_test_suite):
     def test_search_node(self):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
-        search_query = node1.data.copy()
-        search_query["label"] = node1.label
+        search_query = node1.dict()
+        search_query.pop("id")
         
         response = self.get('/buildbot/api/v1.0/node/{label}/search',
                             search_query)
@@ -79,7 +79,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
         url = '/buildbot/api/v1.0/node/{label}/{id}'
-        response = self.get(url, node1.as_dict())
+        response = self.get(url, node1.dict())
         node2 = interface.convert_json2node_container(response.data,self.P)
         
         # Check that they match
@@ -89,7 +89,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
         url = '/buildbot/api/v1.0/node/{label}/remove'
-        response = self.delete(url,node1.as_dict())
+        response = self.delete(url,node1.dict())
         stats = json.loads(response.data)
         assert(stats["nodes_deleted"]==1)
 
@@ -138,7 +138,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         json_string2 = node1.json()
         
         response = self.post('/buildbot/api/v1.0/node/{label}/update',
-                             node1.as_dict())
+                             node1.dict())
         node2 = interface.convert_json2node_container(response.data,self.P)
 
         # Check that the returned node is updated
