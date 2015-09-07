@@ -44,6 +44,12 @@ class buildbotAPI_test_suite(TestCase):
         return self.API.post(url, data=json_string,
                              content_type='application/json')
 
+    def delete(self, url, data={}):
+        url = url.format(**data)
+        json_string = json.dumps(data)
+        return self.API.delete(url, data=json_string,
+                               content_type='application/json')        
+
     def get(self, url, data={}):
         url = url.format(**data)
         js  = json.dumps(data)
@@ -83,7 +89,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
         js_node1 = self.test_create_flow_node()
         node1 = interface.convert_json2node_container(js_node1,self.P)
         url = '/buildbot/api/v1.0/node/{label}/remove'
-        response = self.post(url,node1.as_dict())
+        response = self.delete(url,node1.as_dict())
         stats = json.loads(response.data)
         assert(stats["nodes_deleted"]==1)
 
@@ -98,7 +104,7 @@ class test_basic_API_operations(buildbotAPI_test_suite):
             "label":rel.label,
         }
         url = '/buildbot/api/v1.0/relationship/{start}/{label}/{end}/remove'
-        response = self.post(url,rel_data)
+        response = self.delete(url,rel_data)
 
         stats = json.loads(response.data)
         assert(stats["relationship_deleted"]==1)
