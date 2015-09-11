@@ -147,21 +147,20 @@ def export_package_to_swagger(p):
     S.info.contact = peacock.Contact(name=p.meta["author"])
 
     # Definitions taken from package nodes
-    defs = peacock.Definitions()
+    S.definitions = defs = peacock.Definitions()
 
     for key,node in p.nodes.items():
-        defs[key] = peacock.Schema(type_="object")
+        defs[key] = peacock.Schema(type000="object")
 
         for name,obj_type in node._object_types.items():
             swagger_type = type_lookup[obj_type]
-            prop = peacock.Property(type_=swagger_type) 
+            prop = peacock.Property(type000=swagger_type) 
             defs[key].properties[name] = prop
 
     # Assign the operations
 
     for key,node in p.nodes.items():
-        path = peacock.Path()
-        ref = "#/definitions/{}".format(key)        
+        
         get_id,create,delete = [peacock.Operation() for x in range(3)]
         
         #get.description = "Retrieves a node by index."
@@ -169,29 +168,71 @@ def export_package_to_swagger(p):
         #get.responses["200"].description = "Returns a {} node.".format(key)
         #get.produces = ["application/json"]
 
-        create.description = "Creates a {} node.".format(key)
-        para = peacock.Parameter(name=key, in_="body")
+        ref = "#/definitions/{}".format(key)        
+
+        # Create NODE
+        url = "/node/{}/create".format(key)
+        path = peacock.Path()
+        path.post = peacock.Operation()
+        path.post.description = "Creates a {} node.".format(key)
+        para = peacock.Parameter(name=key, in000="body")
         para.description = "{} node to add.".format(key)
         para.required = True
-        para.schema = peacock.Schema(ref_=ref)       
-        create.parameters.append(para)
+        para.schema = peacock.Schema(ref000=ref)       
+        path.post.parameters.append(para)
+        S.paths[url] = path
 
-        # Set the path attributes
-        path.post = create
+        # Update NODE
+        url = "/node/{}/update".format(key)
+        path = peacock.Path()
+        path.post = peacock.Operation()
+        path.post.description = "Updates a {} node.".format(key)
+        para = peacock.Parameter(name=key, in000="body")
+        para.description = "{} node to update.".format(key)
+        para.required = True
+        para.schema = peacock.Schema(ref000=ref)       
+        path.post.parameters.append(para)
+        S.paths[url] = path
 
-        exit()
+        # Remove NODE
+        url = "/node/{}/remove".format(key)
+        path = peacock.Path()
+        path.post = peacock.Operation()
+        path.post.description = "Deletes a {} node.".format(key)
+        para = peacock.Parameter(name=key, in000="body")
+        para.description = "{} node to delete.".format(key)
+        para.required = True
+        para.schema = peacock.Schema(ref000=ref)       
+        path.delete.parameters.append(para)
+        S.paths[url] = path
 
-        #get_op = build_operation(node, name=key, verb="Gets")
-        #prop = peacock.Parameter(name="id",in_="query",type_="integer")
-        #get_op.parameters = peacock.Parameters([prop])        
-        #print props
-        #exit()
+        # Get single NODE
+        url = "/node/{}".format(key)
+        path = peacock.Path()
+        path.post = peacock.Operation()
+        path.post.description = "Gets a single {} node.".format(key)
+        para = peacock.Parameter(name="id", in000="body")
+        para.description = "{} node to get.".format(key)
+        para.required = True
+        path.get.parameters.append(para)
+        S.paths[url] = path
 
-        print get_op
-       
-    
-    #print S
-    exit()
+        # Search for a NODE
+        url = "/node/{}/search".format(key)
+        path = peacock.Path()
+        path.post = peacock.Operation()
+        path.post.description = "Searchs for a node.".format(key)
+        para = peacock.Parameter(name="id", in000="body")
+        para.description = "{} node to get.".format(key)
+        para.required = True
+        path.get.parameters.append(para)
+        S.paths[url] = path
+
+        # Create RELATIONSHIP [TODO]
+        # Delete RELATIONSHIP [TODO]                
+        # Add in tasks [TODO]
+        
+    return S
 
 ###################################################################
 
@@ -204,6 +245,5 @@ if __name__ == "__main__":
         raw = FIN.read()
 
     P = buildbot_package(raw)
-    export_package_to_swagger(P)
-
-    print P
+    S = export_package_to_swagger(P)
+    print S
