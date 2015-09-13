@@ -1,4 +1,13 @@
 {
+
+    
+    "meta" : {
+        "title"       : "flows",
+        "author"      : "thoppe",
+        "description" : "Demo app.",
+        "version"     : "0.0.1"
+    },
+    
     "nodes" : {
         "flow" : {
             "version"     : 1.0,

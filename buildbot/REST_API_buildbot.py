@@ -1,11 +1,14 @@
 #!flask/bin/python
 from flask import Flask, request, abort, render_template, redirect
 
-import json
+import json, logging
 from utils import neo4j_credentials_from_env
 from graphDB import enhanced_GraphDatabase
 
 API = Flask(__name__)
+
+# DEBUG
+API.logger.setLevel(logging.DEBUG)
 
 # Startup the database connection
 neo4j_login = neo4j_credentials_from_env()

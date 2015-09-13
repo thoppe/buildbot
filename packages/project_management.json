@@ -1,8 +1,12 @@
 {
+
     "meta" : {
-        "package_author" : "thoppe",
-        "package_name"  : "project_management"
+        "title"       : "project_management",
+        "author"      : "thoppe",
+        "description" : "Simple project management demo.",
+        "version"     : "0.0.1"
     },
+
     "requires" : ["packages/flows.json"],
     
     "nodes" : {

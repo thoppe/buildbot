@@ -4,6 +4,9 @@ The buildbot_contract manager loads and validates a swagger file.
 import os, json, requests, subprocess, tempfile
 from swagger_spec_validator.validator20 import validate_spec
 
+import urlparse
+
+
 class buildbot_contract(object):
 
     def __init__(self, f_swagger):
@@ -36,12 +39,13 @@ class buildbot_action(object):
         self.post = data["post"]
         self.input  = data["input"]
         self.output = data["output"]
+        self.contracts = pack.contracts
 
-        contracts = pack.contracts
-
+        self.package = pack
+        
         # Identify the [pre] contract
         self.pre_contract = None
-        for contract in contracts.values():
+        for contract in self.contracts.values():
             if contract.data["host"] in data["pre"]:
                 self.pre_contract = contract
 
@@ -84,11 +88,37 @@ class buildbot_action(object):
         print "CONTRACT CHECK OUTPUT GOES HERE... (unittest needed)"
         if set(output_data.keys()) != set(self.output):
             msg = "OUTPUT CONTRACT {} violated! {} vs {}"
-            raise ValueError(msg.format(self.name, output_data.keys(), self.output))
+            msg = msg.format(self.name, output_data.keys(), self.output)
+            raise ValueError(msg)
 
-        
-        print "EXECUTE NODE ACTION HERE"
-        
+        # Find the proper contract
+        print "POST condition here"
+        #for name, contract in self.contracts.items():
+        #    print name, contract
+        # Check if this is an internal post condition
+        url = self.post
+        if url[0] == "/":
+            if not self.package.swagger.has_path(url):
+                msg = "Internal swagger path {} not defined" 
+                raise ValueError(msg.format(url))
+            
+            host = self.package.swagger.host
+            path = self.package.swagger.basePath
+
+            x = "{host}{path}{url}"
+            x = x.format(host = host,
+                         path = path,
+                         url  = url)
+            url = x
+        else:
+            msg = "External IP's not done yet"
+            raise NotImplementedError(msg)
+
+        print "RUN THIS URL?", url
+        #r = requests.post(url,
+        #                  params=output_data)
+        #print r
+        #exit()
 
 
     def nodejs_oneoff(self, data):

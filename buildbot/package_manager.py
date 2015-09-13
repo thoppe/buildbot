@@ -10,14 +10,17 @@ from generic_datatypes import edge_container
 from contract_manager  import buildbot_contract, buildbot_action
 
 # TO DO: let a buildbot_package be constrained by traits
-from traits.api import Int, Str, Float, List, Enum
-from traits.api import Bool, Any, Dict, Either, This
-from traits.api import Instance, HasTraits
+#from traits.api import Int, Str, Float, List, Enum
+#from traits.api import Bool, Any, Dict, Either, This
+#from traits.api import Instance, HasTraits
 
 class buildbot_package(object):
 
     def __init__(self, string_input):
-        self.load_package(string_input)        
+        self.load_package(string_input)
+
+        # Build a swagger def of myself
+        self.swagger = export_package_to_swagger(self)
 
     def __repr__(self):
         data = {
@@ -70,7 +73,7 @@ class buildbot_package(object):
         if "actions" in js:
             for name,data in js["actions"].items():
                 self.actions[name] = buildbot_action(name,data,self)
-
+        
     def add_node(self, key, schema_data):
 
         # Extract any json-LD context information (marked by @ keys)        
@@ -145,6 +148,8 @@ def export_package_to_swagger(p):
     S.info.version = p.meta["version"]
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
+    S.basePath = "/buildbot/api/v1.0"
+    S.host = "http://localhost:5000"
 
     # Definitions taken from package nodes
     S.definitions = defs = peacock.Definitions()
