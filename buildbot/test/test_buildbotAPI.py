@@ -8,7 +8,6 @@ from buildbot.graphDB import enhanced_GraphDatabase
 import buildbot.interface_neo4j_json as interface
 
 from buildbot.utils import neo4j_credentials_from_env
-neo4j_login = neo4j_credentials_from_env()
 
 from buildbot.REST_API_buildbot import API
 API.config["DEBUG"] = True
@@ -18,6 +17,9 @@ class buildbotAPI_test_suite(TestCase):
     test_desc = "unittest"
 
     def setUp(self):
+        neo4j_login = neo4j_credentials_from_env()
+        neo4j_login["buildbot_package"]= "packages/project_management.json"
+        
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
         self.P   = self.gdb.package
         self.API = API.test_client()
@@ -58,7 +60,7 @@ class buildbotAPI_test_suite(TestCase):
 
 class test_basic_API_operations(buildbotAPI_test_suite):
 
-    def test_create_flow_node(self):       
+    def test_create_flow_node(self):
         response = self.post('/buildbot/api/v1.0/node/{label}/create',
                              self.flow_data1)
         return response.data

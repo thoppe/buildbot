@@ -3,16 +3,25 @@ from flask import Flask, request, abort, render_template, redirect
 
 import json, logging
 from utils import neo4j_credentials_from_env
-from graphDB import enhanced_GraphDatabase
+import graphDB 
 
-API = Flask(__name__)
+'''
+The Flask APP needs to be started with the proper enviorment variables set.
+'''
 
-# DEBUG
-API.logger.setLevel(logging.DEBUG)
+#####################################################################
 
-# Startup the database connection
+# Fire up a database connection
 neo4j_login = neo4j_credentials_from_env()
-gdb = enhanced_GraphDatabase(**neo4j_login)
+gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
+
+#graphDB.hard_reset(gdb)
+
+# Flask entry point
+API = Flask(__name__)
+info_msg = "Flask API running package {buildbot_package}"
+logging.warning(info_msg.format(**neo4j_login))
+
 
 # Helper functions
 import interface_neo4j_json as inter
@@ -74,6 +83,7 @@ API_DOCS["remove_relationship"] = {
 
 @API.route('/')
 def root_page():
+    return "Buildbot v1.0"
     return redirect("/help")
 
 @API.route('/help')
@@ -192,7 +202,8 @@ doc_key = "create_node"
 @API.route(API_DOCS[doc_key]["url"], methods=API_DOCS[doc_key]["methods"])
 def create_node(label):
     data = request.get_json()
-
+    
+    # Label is implict now
     if 'label' in data and label != data['label']:
        abort(500, "Label mismatch") 
 
@@ -200,6 +211,7 @@ def create_node(label):
     data["label"] = label
 
     json_text = json.dumps(data)
+
     node = json2node(json_text,ignore_id_check=True)
     
     # Add the node and set the ID
@@ -231,6 +243,18 @@ def update_node(label):
 ###########################################################################
 
 if __name__ == "__main__":
+
+    API.run(debug=True)
+
+    # DEBUG
+    API.logger.setLevel(logging.DEBUG)
+
+    exit()
+
+    # Startup the database connection
+    neo4j_login = neo4j_credentials_from_env()
+    gdb = enhanced_GraphDatabase(**neo4j_login)
+    
     import logging, sys
     API.logger.addHandler(logging.StreamHandler(sys.stdout))
     API.logger.setLevel(logging.DEBUG)

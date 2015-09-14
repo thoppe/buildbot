@@ -11,15 +11,11 @@ neo4j_login = neo4j_credentials_from_env()
 #API.config["DEBUG"] = True
 
 class buildbotAPI_test_suite(TestCase):
-    test_desc = "unittest"
 
     def setUp(self):
         neo4j_login["buildbot_package"]= "packages/checkin/checkin.json"
-
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
         self.func = self.gdb.package.actions["pingme"]
-        #API.gdb = gdb
-        #self.P   = self.gdb.package        
     
     def tearDown(self):
         pass

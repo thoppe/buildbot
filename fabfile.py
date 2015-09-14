@@ -6,9 +6,10 @@ ENV_VARS = {
     "NEO4J_PORT_7474_TCP_ADDR" : "localhost",
     "NEO4J_PORT_7474_TCP_PORT" : "7474",
     "NEO4J_ENV_NEO4J_AUTH"     : "buildbot:tulsa",
-    "buildbot_package"         : "packages/project_management.json"
+    "buildbot_package"         : "packages/checkin/checkin.json",
 }
-#ENV_VARS["buildbot_package"] = "packages/checkin/checkin.json"
+
+#ENV_VARS["buildbot_package"] = 
 
 # Split the ENV login keys if this is a local build
 a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")
@@ -27,19 +28,29 @@ test_order = [
     "test_buildbotAPI.py",
     "test_contracts.py", 
 ]
+test_package_requirements = {
+    "test_buildbotAPI.py" : "packages/project_management.json",
+    "test_contracts.py"   : "packages/checkin/checkin.json"
+}
 
-def test():
-    ENV_VARS["buildbot_package"] = "packages/project_management.json"    
-    test_str = ' '.join([os.path.join(test_directory,x)
-                         for x in test_order])
-    local("nosetests-2.7 -x -s -v {}".format(test_str))
+def test(args = "-x -v"):
+    
+    nose_cmd = "nosetests-2.7 {args} -s {f_test}"
+
+    for name in test_order:
+        f_test = os.path.join(test_directory, name)
+        if name in test_package_requirements:
+            os.environ["buildbot_package"] = test_package_requirements[name]
+        
+        local(nose_cmd.format(f_test=f_test,args=args))
+
 
 def clean():
     local("find . -name '*~' | xargs -I {} rm -vf {}")
     local("find . -name '*.pyc' | xargs -I {} rm -vf {}")
 
 def push():
-    local("nosetests-2.7")
+    test(args="")
     local("git status")
     local("git commit -a")
     local("git push")

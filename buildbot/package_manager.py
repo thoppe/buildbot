@@ -241,8 +241,6 @@ def export_package_to_swagger(p):
 
 ###################################################################
 
-
-
 if __name__ == "__main__":
     f_package = "packages/checkin/checkin.json"
 

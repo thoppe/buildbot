@@ -10,6 +10,12 @@
     "requires" : ["packages/flows.json"],
     
     "nodes" : {
+        "flow" : {
+            "version"     : 1.0,
+            "status"      : 0.0,
+            "description" : "",
+            "validation"  : ""
+        },
         "job" : {
             "description" : "",
             "title"  : ""
@@ -63,7 +69,8 @@
         ["organization", "has", "asset"],
         ["organization", "has", "project"],
         ["project", "has", "flow"],
-        ["project", "has", "project"]
+        ["project", "has", "project"],
+        ["flow", "depends", "flow", {"important":"True"}]
     ]
 }
 

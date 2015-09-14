@@ -114,11 +114,8 @@ class buildbot_action(object):
             msg = "External IP's not done yet"
             raise NotImplementedError(msg)
 
-        print "RUN THIS URL?", url
-        #r = requests.post(url,
-        #                  params=output_data)
-        #print r
-        #exit()
+        r = requests.post(url,json=output_data)
+        return r
 
 
     def nodejs_oneoff(self, data):
