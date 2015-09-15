@@ -1,0 +1,132 @@
+{
+  "info": {
+    "contact": {
+      "name": "thoppe"
+    }, 
+    "description": "Logs your IP address and a timestamp.", 
+    "version": "0.0.1", 
+    "title": "checkin"
+  }, 
+  "paths": {
+    "/node/ping/create": {
+      "post": {
+        "description": "Creates a ping node.", 
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/ping"
+            }, 
+            "description": "ping node to add.", 
+            "required": true, 
+            "name": "ping", 
+            "in": "body"
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }, 
+    "/node/ping": {
+      "get": {
+        "description": "Gets a single ping node.", 
+        "parameters": [
+          {
+            "schema": {}, 
+            "description": "ping node to get.", 
+            "required": true, 
+            "name": "id", 
+            "in": "body"
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }, 
+    "/node/ping/search": {
+      "get": {
+        "description": "Searchs for a node.", 
+        "parameters": [
+          {
+            "schema": {}, 
+            "description": "ping node to get.", 
+            "required": true, 
+            "name": "id", 
+            "in": "body"
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }, 
+    "/node/ping/remove": {
+      "delete": {
+        "description": "Deletes a ping node.", 
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/ping"
+            }, 
+            "description": "ping node to delete.", 
+            "required": true, 
+            "name": "ping", 
+            "in": "body"
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }, 
+    "/node/ping/update": {
+      "post": {
+        "description": "Updates a ping node.", 
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/ping"
+            }, 
+            "description": "ping node to update.", 
+            "required": true, 
+            "name": "ping", 
+            "in": "body"
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }, 
+  "basePath": "/buildbot/api/v1.0", 
+  "host": "localhost:5000", 
+  "definitions": {
+    "ping": {
+      "type": "object", 
+      "properties": {
+        "timestamp": {
+          "type": "integer"
+        }, 
+        "IP_address": {
+          "type": "string"
+        }, 
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  }, 
+  "swagger": "2.0"
+}
