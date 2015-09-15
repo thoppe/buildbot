@@ -95,6 +95,7 @@ class buildbot_action(object):
         print "POST condition here"
         #for name, contract in self.contracts.items():
         #    print name, contract
+        
         # Check if this is an internal post condition
         url = self.post
         if url[0] == "/":
@@ -105,7 +106,7 @@ class buildbot_action(object):
             host = self.package.swagger.host
             path = self.package.swagger.basePath
 
-            x = "{host}{path}{url}"
+            x = "http://{host}{path}{url}"
             x = x.format(host = host,
                          path = path,
                          url  = url)
@@ -153,7 +154,7 @@ class buildbot_action(object):
                 msg = "Problem with nodejs code\n{}".format(err)
                 raise SyntaxError(msg)
 
-        print "THIS!", nodejs_code
+        print nodejs_code
         print output
 
         output_data = json.loads(output)

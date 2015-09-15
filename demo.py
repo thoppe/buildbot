@@ -8,6 +8,7 @@ Implementing flows as a graph database.
 import os
 from buildbot.graphDB import enhanced_GraphDatabase, hard_reset
 from buildbot.utils import neo4j_credentials_from_env
+from buildbot.package_manager import export_package_to_swagger
 
 if __name__ == "__main__":
 
@@ -15,8 +16,11 @@ if __name__ == "__main__":
     
     # Reload the database
     gdb = enhanced_GraphDatabase(**neo4j_login)
-    func = gdb.package.actions["pingme"]
 
+    print export_package_to_swagger(gdb.package)
+    exit()
+    
+    func = gdb.package.actions["pingme"]
     print func(name="travis")
     
     ###################################################################

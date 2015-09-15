@@ -149,7 +149,7 @@ def export_package_to_swagger(p):
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
     S.basePath = "/buildbot/api/v1.0"
-    S.host = "http://localhost:5000"
+    S.host = "localhost:5000"
 
     # Definitions taken from package nodes
     S.definitions = defs = peacock.Definitions()
@@ -166,14 +166,10 @@ def export_package_to_swagger(p):
 
     for key,node in p.nodes.items():
         
-        get_id,create,delete = [peacock.Operation() for x in range(3)]
-        
-        #get.description = "Retrieves a node by index."
-        #get.responses["200"] = peacock.Response()
-        #get.responses["200"].description = "Returns a {} node.".format(key)
-        #get.produces = ["application/json"]
+        ref = "#/definitions/{}".format(key)
 
-        ref = "#/definitions/{}".format(key)        
+        stock_response = peacock.Responses()
+        stock_response["200"] = peacock.Response(description="Success")
 
         # Create NODE
         url = "/node/{}/create".format(key)
@@ -185,6 +181,7 @@ def export_package_to_swagger(p):
         para.required = True
         para.schema = peacock.Schema(ref000=ref)       
         path.post.parameters.append(para)
+        path.post.responses = stock_response
         S.paths[url] = path
 
         # Update NODE
@@ -197,40 +194,44 @@ def export_package_to_swagger(p):
         para.required = True
         para.schema = peacock.Schema(ref000=ref)       
         path.post.parameters.append(para)
+        path.post.responses = stock_response
         S.paths[url] = path
 
         # Remove NODE
         url = "/node/{}/remove".format(key)
         path = peacock.Path()
-        path.post = peacock.Operation()
-        path.post.description = "Deletes a {} node.".format(key)
+        path.delete = peacock.Operation()
+        path.delete.description = "Deletes a {} node.".format(key)
         para = peacock.Parameter(name=key, in000="body")
         para.description = "{} node to delete.".format(key)
         para.required = True
         para.schema = peacock.Schema(ref000=ref)       
         path.delete.parameters.append(para)
+        path.delete.responses = stock_response
         S.paths[url] = path
 
         # Get single NODE
         url = "/node/{}".format(key)
         path = peacock.Path()
-        path.post = peacock.Operation()
-        path.post.description = "Gets a single {} node.".format(key)
+        path.get = peacock.Operation()
+        path.get.description = "Gets a single {} node.".format(key)
         para = peacock.Parameter(name="id", in000="body")
         para.description = "{} node to get.".format(key)
         para.required = True
         path.get.parameters.append(para)
+        path.get.responses = stock_response
         S.paths[url] = path
 
         # Search for a NODE
         url = "/node/{}/search".format(key)
         path = peacock.Path()
-        path.post = peacock.Operation()
-        path.post.description = "Searchs for a node.".format(key)
+        path.get = peacock.Operation()
+        path.get.description = "Searchs for a node.".format(key)
         para = peacock.Parameter(name="id", in000="body")
         para.description = "{} node to get.".format(key)
         para.required = True
         path.get.parameters.append(para)
+        path.get.responses = stock_response
         S.paths[url] = path
 
         # Create RELATIONSHIP [TODO]
