@@ -45,7 +45,128 @@
 <br>
 <hr>
 <p>
-<h4><a href="http://thoppe.github.io/">Travis Hoppe</a></h4></p>
+<h4><a href="http://thoppe.github.io/">Travis Hoppe</a></h4><h4><a href="xxx">Mitchell Harris</a></h4></p>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h3>Let's build an app!</h3></p>
+<br>
+<p>
+<div display='inline' align='left'>Ingredents:</div><div display='inline' align='left'><h5>An idea</h5></div><div display='inline' align='left'><h5>A knowledge of the full stack</h5></div><div display='inline' align='left'>front-end, back-end, server hosting, OS, security, UX, UI, ...</div></p>
+<br>
+<p>
+Not everyone with an idea is a full-stack developer!<br>Empathatic software...</p>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h2><strong>BuildBot</strong></h2><h1>Turning<br>configuration<br>into design.</h1></p>
+</section><section   class="vertical-slide">
+<p>
+<h2>A design problem?</h2><h4>What is the data?</h4><h4>How is the data related?</h4></p>
+<br>
+<figure>
+    <a href="images/graph_schema.png">
+    <img class="" src="images/graph_schema.png" >
+    </a>
+    <figcaption>Natural representation as a graphDB.</figcaption>
+    </figure>
+</section><section   class="vertical-slide">
+<p>
+<h2>Describe the data</h2></p>
+<br>
+<p>
+What is a <code>job</code>? What is a <code>person</code>?</p>
+<br>
+<pre><code class=python>&quot;job&quot; : {
+    &quot;description&quot; : &quot;&quot;,
+    &quot;title&quot;  : &quot;Unassigned&quot;
+},</code></pre>
+<br>
+<pre><code class=python>&quot;person&quot; : {
+    &quot;@context&quot;: &quot;http://schema.org&quot;,
+    &quot;@type&quot;: &quot;Person&quot;,
+    &quot;name&quot; : &quot;&quot;,
+    &quot;username&quot; : &quot;&quot;,
+    &quot;userid&quot; : 0
+},</code></pre>
+<br>
+<p>
+Natural language description infers types and defaults.<br>Capability to handle JSON-LD like those from <a href="http://schema.org">schema.org</a>.</p>
+</section><section   class="vertical-slide">
+<p>
+<h2>What does BuildBot <em>do</em>?</h2></p>
+<br>
+<p>
+From a package:</p>
+<br>
+<ul><li>Creates a isolated dockerized neo4j database.</li>
+<li>Establishes a RESTful API for standard operations (create, delete, update).</li>
+<li>Connects any external API and enforces contracts via swaggerfiles.</li>
+<li>Creates API endpoints from high-level descriptions of logic.</li></ul>
+<br>
+<p>
+Want more?</p>
+<br>
+<ul><li>Template the logic (node.js, python)? BuildBot will execute it when called via the API.</li>
+<li>API calls can be chained together, completely mimicing others like Elastic.io and IFTT.</li>
+<li>Detialed RFPs can be auto generated!</li>
+<li>Site mockups can be infered and will function live!</li></ul>
+<br>
+<ul><li>A package is stored internally in git -- automatic source control!</li>
+<li>Packages can be built from each other, automatic imports!</li></ul>
+</section><section   class="vertical-slide">
+<p>
+<h1>Contracts</h1></p>
+<br>
+<pre><code class=python>&quot;contracts&quot; : [
+    &quot;contracts/ipify.swagger&quot; 
+],</code></pre>
+</section><section   class="vertical-slide">
+<p>
+<h1>Logic</h1>package def:</p>
+<pre><code class=python>&quot;actions&quot; : { 
+    &quot;pingme&quot; : {
+        &quot;pre&quot; : &quot;https://api.ipify.org?format=json&quot;,
+        &quot;post&quot;: &quot;/node/ping/create&quot;,
+        &quot;input&quot;  : [&quot;name&quot;],
+        &quot;output&quot; : [&quot;IP_address&quot;, &quot;timestamp&quot;,&quot;name&quot;],
+        &quot;description&quot; : &quot;Records an IP address and time.&quot;
+    }
+}</code></pre>
+<br>
+<p>
+logic (optional):</p>
+<pre><code class=python>exports.pingme = function (data) {
+  var d = new Date();
+  output = {
+    &quot;IP_address&quot; : data.ip,
+    &quot;timestamp&quot;  : d.getTime(),
+    &quot;name&quot; : data.name,
+  }
+  return output;   
+};</code></pre>
+</section><section   class="vertical-slide">
+<p>
+Where to go from here?</p>
+<br>
+<p>
+18f?</p>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+But, but, but! Questions!</p>
+<br>
+<p>
+My data is not a graph!<br>(doesn't matter)</p>
+<br>
+<p>
+Will this scale?<br>(no, but it doesn't matter)</p>
+<br>
+<p>
+Hasn't this been done before?<br>(maybe, ...)</p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
