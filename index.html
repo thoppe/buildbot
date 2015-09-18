@@ -45,7 +45,7 @@
 <br>
 <hr>
 <p>
-<h4><a href="http://thoppe.github.io/">Travis Hoppe</a></h4><h4><a href="xxx">Mitchell Harris</a></h4></p>
+<h4><a href="http://thoppe.github.io/">Travis Hoppe</a></h4><h4><a href="https://angel.co/mitharris">Mitchell Harris</a></h4></p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
@@ -64,30 +64,40 @@ Not everyone with an idea is a full-stack developer!<br>Empathetic software...</
 <h2><strong>BuildBot</strong></h2><h1>Turning<br>configuration<br>into design.</h1></p>
 </section><section   class="vertical-slide">
 <p>
-<h2>A design problem?</h2></p>
+<h2><strong>BuildBot Design</strong></h2></p>
 <br>
 <p>
-<h4>What is the data?</h4></p>
+<h2>Data + Contracts + Logic</h2></p>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h2>Step #1: Data</h2></p>
+<br>
+<p>
+<h4>Describe the data.</h4><h4>Describe how the the data related?</h4></p>
 <figure>
     <a href="images/graph_schema.png">
     <img class="" src="images/graph_schema.png" >
     </a>
     
     </figure>
-<p>
-<h4>How is the data related?</h4></p>
 </section><section   class="vertical-slide">
 <p>
 <h2>Describe the data</h2></p>
 <br>
 <p>
-What is a <code>job</code>? What is a <code>person</code>?</p>
+Natural language description infers types and defaults.<br>Capability to handle JSON-LD like those from <a href="http://schema.org">schema.org</a>.</p>
 <br>
+<p>
+What is a <code>job</code>?</p>
 <pre><code class=python>&quot;job&quot; : {
     &quot;description&quot; : &quot;&quot;,
     &quot;title&quot;  : &quot;Unassigned&quot;
 },</code></pre>
 <br>
+<p>
+What is a <code>person</code>?</p>
 <pre><code class=python>&quot;person&quot; : {
     &quot;@context&quot;: &quot;http://schema.org&quot;,
     &quot;@type&quot;: &quot;Person&quot;,
@@ -95,44 +105,51 @@ What is a <code>job</code>? What is a <code>person</code>?</p>
     &quot;username&quot; : &quot;&quot;,
     &quot;userid&quot; : 0
 },</code></pre>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h2>Step #2: Contracts</h2></p>
 <br>
 <p>
-Natural language description infers types and defaults.<br>Capability to handle JSON-LD like those from <a href="http://schema.org">schema.org</a>.</p>
-</section><section   class="vertical-slide">
-<p>
-<h2>What does BuildBot <em>do</em>?</h2></p>
-<br>
-<p>
-From a package:</p>
-<br>
-<ul><li>Creates a isolated dockerized neo4j database.</li>
-<li>Establishes a RESTful API for standard operations (create, delete, update).</li>
-<li>Connects any external API and enforces contracts via swagger files.</li>
-<li>Creates API endpoints from high-level descriptions of logic.</li></ul>
-<br>
-<p>
-Want more?</p>
-<br>
-<ul><li>Template the logic (node.js, python)? BuildBot will execute it when called via the API.</li>
-<li>API calls can be chained together, completely mimicking others like Elastic.io and IFTT.</li>
-<li>Detailed RFPs can be auto generated!</li>
-<li>Site mock-ups can be inferred and will function live!</li></ul>
-<br>
-<ul><li>A package is stored internally in git -- automatic source control!</li>
-<li>Packages can be built from each other, automatic imports!</li></ul>
-</section><section   class="vertical-slide">
-<p>
-<h1>Contracts</h1></p>
+Leverage emerging industry standard, <a href="http://swagger.io/">swagger</a>.</p>
 <br>
 <p>
 Enforcement of contraints from one API to another.</p>
+<br>
+<p>
+They can be quite complicated!</p>
+<pre><code class=python>  &quot;paths&quot;: {
+    &quot;/&quot;: {
+        &quot;get&quot;: {
+            &quot;description&quot;: &quot;Using ipify is ridiculously simple. You have three options. You can get your public IP directly (in plain text), you can get your public IP in JSON format, or you can get your public IP information in JSONP format (useful for Javascript developers).&quot;,
+            &quot;produces&quot;: [
+                &quot;application/json&quot;,
+                &quot;text/xml&quot;
+            ],
+            &quot;parameters&quot;: [
+                {
+                    &quot;name&quot;: &quot;format&quot;,
+                    &quot;in&quot;: &quot;query&quot;,
+            ...</code></pre>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h3>Contracts in BuildBot</h3></p>
+<br>
+<p>
+Local or publicaly accessible URLS:</p>
 <br>
 <pre><code class=python>&quot;contracts&quot; : [
     &quot;contracts/ipify.swagger&quot; 
 ],</code></pre>
 </section><section   class="vertical-slide">
 <p>
-<h1>Logic</h1>package def:</p>
+<h2>Step #3: Logic</h2></p>
+<br>
+<p>
+package def:</p>
 <pre><code class=python>&quot;actions&quot; : { 
     &quot;pingme&quot; : {
         &quot;pre&quot; : &quot;https://api.ipify.org?format=json&quot;,
@@ -154,7 +171,48 @@ logic (optional):</p>
   }
   return output;   
 };</code></pre>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
+<h2>What does BuildBot <em>do</em>?</h2></p>
+<br>
+<p>
+<h3>Persistant, presonalizted data storage</h3></p>
+<ul><li>Creates a isolated dockerized neo4j database.</li></ul>
+<br>
+<br>
+<p>
+<h3>Standard data interactions.</h3></p>
+<ul><li>Establishes a RESTful API for standard operations (create, delete, update).</li></ul>
+<br>
+<br>
+<p>
+<h3>Efficicent pass through of extenral data</h3></p>
+<ul><li>Connects any external API and enforces contracts via swagger files.</li></ul>
+<br>
+<br>
+<p>
+<h3>Templating functionality</h3></p>
+<ul><li>Creates API endpoints from high-level descriptions of logic.</li></ul>
 </section><section   class="vertical-slide">
+<p>
+<h2>What <em>will</em> BuildBot do?</h2></p>
+<br>
+<ul><li>Fill in the logic (node.js, python)? BuildBot will execute it when called via the API.</li></ul>
+<br>
+<ul><li>Chain API calls together, mimicking others like Elastic.io and IFTT.</li></ul>
+<br>
+<ul><li>Generate detailed RFPs automatically.</li></ul>
+<br>
+<ul><li>Site mock-ups can be inferred and will function live!</li></ul>
+<br>
+<ul><li>A package is stored internally in git -- automatic source control!</li></ul>
+<br>
+<ul><li>Packages can be built from each other, automatic imports!</li></ul>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
 <p>
 Where to go from here?</p>
 <br>
@@ -178,7 +236,7 @@ Hasn't this been done before?<br>(maybe, ...)</p>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
 <p>
-<h1>Thank you.</h1></p>
+<h1>Thanks, you.</h1></p>
 </section>
 </section>
     </div></div>

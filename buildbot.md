@@ -2,8 +2,8 @@
 _(the backend of FABRIC)_
 
 ----------
-#### [Travis Hoppe](http://thoppe.github.io/)
-#### [Mitchell Harris](xxx)
+#### [Travis Hoppe](http://thoppe.github.io/) 
+#### [Mitchell Harris](https://angel.co/mitharris)
 
 ====
 
@@ -24,25 +24,35 @@ Empathetic software...
 
 ====*
 
-## A design problem?
+## *BuildBot Design*
+  
+## Data + Contracts + Logic
+%## (you) + (us) + (them) 
 
-#### What is the data?
+====
+
+## Step #1: Data
+
+#### Describe the data.
+#### Describe how the the data related?
 !(images/graph_schema.png)
-#### How is the data related?
-
+% Example project management app.
 %  Natural representation as a graphDB.
 
 ====*
 
 ## Describe the data
 
-What is a `job`? What is a `person`?
+Natural language description infers types and defaults.
+Capability to handle JSON-LD like those from [schema.org](http://schema.org).
 
+What is a `job`?
     "job" : {
         "description" : "",
         "title"  : "Unassigned"
     },
-  
+
+What is a `person`?  
     "person" : {
         "@context": "http://schema.org",
         "@type": "Person",
@@ -51,41 +61,42 @@ What is a `job`? What is a `person`?
         "userid" : 0
     },
 
-Natural language description infers types and defaults.
-Capability to handle JSON-LD like those from [schema.org](http://schema.org).
+====
 
-====*
+## Step #2: Contracts 
 
-## What does BuildBot _do_?
+Leverage emerging industry standard, [swagger](http://swagger.io/).
 
-From a package:
+Enforcement of contraints from one API to another.    
+  
+They can be quite complicated! 
+      "paths": {
+        "/": {
+            "get": {
+                "description": "Using ipify is ridiculously simple. You have three options. You can get your public IP directly (in plain text), you can get your public IP in JSON format, or you can get your public IP information in JSONP format (useful for Javascript developers).",
+                "produces": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                ...
+====
 
-+ Creates a isolated dockerized neo4j database.
-+ Establishes a RESTful API for standard operations (create, delete, update).
-+ Connects any external API and enforces contracts via swagger files.
-+ Creates API endpoints from high-level descriptions of logic.
+### Contracts in BuildBot
 
-Want more?
-
-+ Template the logic (node.js, python)? BuildBot will execute it when called via the API.
-+ API calls can be chained together, completely mimicking others like Elastic.io and IFTT.
-+ Detailed RFPs can be auto generated!
-+ Site mock-ups can be inferred and will function live!
-
-+ A package is stored internally in git -- automatic source control!
-+ Packages can be built from each other, automatic imports!
-
-====*
-# Contracts
-
-Enforcement of contraints from one API to another. 
+Local or publicaly accessible URLS:  
 
     "contracts" : [
         "contracts/ipify.swagger" 
     ],
-  
+   
 ====*
-# Logic
+  
+## Step #3: Logic
+  
 package def: 
     "actions" : { 
         "pingme" : {
@@ -108,7 +119,43 @@ logic (optional):
       return output;   
     };
 
+====
+
+## What does BuildBot _do_?
+
+### Persistant, presonalizted data storage
++ Creates a isolated dockerized neo4j database.
+
+  
+### Standard data interactions.
++ Establishes a RESTful API for standard operations (create, delete, update).
+
+  
+### Efficicent pass through of extenral data
++ Connects any external API and enforces contracts via swagger files.
+
+  
+### Templating functionality
++ Creates API endpoints from high-level descriptions of logic.
+
+  
 ====*
+
+## What _will_ BuildBot do?
+
++ Fill in the logic (node.js, python)? BuildBot will execute it when called via the API.
+  
++ Chain API calls together, mimicking others like Elastic.io and IFTT.
+  
++ Generate detailed RFPs automatically.
+  
++ Site mock-ups can be inferred and will function live!
+
++ A package is stored internally in git -- automatic source control!
+
++ Packages can be built from each other, automatic imports!
+
+====
 
 Where to go from here?
   
@@ -130,4 +177,4 @@ Hasn't this been done before?
 
 ====
 
-# Thank you.
+# Thanks, you.
