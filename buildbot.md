@@ -7,15 +7,14 @@ _(the backend of FABRIC)_
 
 ====
 
-### Let's build an app!
+### "I've got an idea for an app..."
+!(images/full_stack.jpg) Not everyone with an idea is a full-stack developer!
 
-|Ingredients:
-|##### An idea
-|##### A knowledge of the full stack
-|front-end, back-end, server hosting, OS, security, UX, UI, ...
 
-Not everyone with an idea is a full-stack developer!
-Empathetic software...
+
+### Question: How do we turn an idea into a prototype? 
+
+%Empathetic software...
   
 ====
 
@@ -34,23 +33,23 @@ Empathetic software...
 ## Step #1: Data
 
 #### Describe the data.
-#### Describe how the the data related?
 !(images/graph_schema.png)
+#### Describe how the data is related.
+
 % Example project management app.
 %  Natural representation as a graphDB.
 
 ====*
 
-## Describe the data
-
-Natural language description infers types and defaults.
-Capability to handle JSON-LD like those from [schema.org](http://schema.org).
+## Describe the data in detail
 
 What is a `job`?
     "job" : {
         "description" : "",
         "title"  : "Unassigned"
     },
+Natural description infers types and defaults.  
+
 
 What is a `person`?  
     "person" : {
@@ -60,38 +59,58 @@ What is a `person`?
         "username" : "",
         "userid" : 0
     },
+Capability to handle JSON-LD like those from [schema.org](http://schema.org).
 
 ====
 
 ## Step #2: Contracts 
 
-Leverage emerging industry standard, [swagger](http://swagger.io/).
+Leverage emerging industry standard for API communication, 
 
-Enforcement of contraints from one API to another.    
+!(images/swagger-logo.png)<<height:200px;transparent>> 
+## [swagger.io](http://swagger.io/)
+
+====*
+
+### What is swagger?
+A protocal describing an API interface.
+
+Pros: 
+Machine interface for API calls, automatic documentation, code templating!
   
-They can be quite complicated! 
-      "paths": {
-        "/": {
+Cons: They can be quite complicated! 
+    "paths": {
+        "/statuses/mentions_timeline": {
             "get": {
-                "description": "Using ipify is ridiculously simple. You have three options. You can get your public IP directly (in plain text), you can get your public IP in JSON format, or you can get your public IP information in JSONP format (useful for Javascript developers).",
-                "produces": [
-                    "application/json",
-                    "text/xml"
+                "description": "Returns the 20 most recent mentions for the authenticating user",
+                "security": [
+                    {
+                        "oauth": [
+                            "basic"
+                        ]
+                    }
                 ],
                 "parameters": [
                     {
-                        "name": "format",
+                        "name": "count",
                         "in": "query",
-                ...
+                        "description": "Specifies the number of tweets to try and retrieve",
+                        "required": false,
+                        "type": "string"
+                    },
+
 ====
 
 ### Contracts in BuildBot
+BuildBot automaticlly generates swagger files from a simple package file.
 
-Local or publicaly accessible URLS:  
-
+Link to local swagger files or publicaly accessible URLS:  
     "contracts" : [
         "contracts/ipify.swagger" 
     ],
+
+All API calls are type-checked through the swagger file ensuring data consistancy. 
+
    
 ====*
   
@@ -136,24 +155,27 @@ logic (optional):
 
   
 ### Templating functionality
-+ Creates API endpoints from high-level descriptions of logic.
-
++ Creates API endpoints from high-level descriptions of logic
   
 ====*
 
 ## What _will_ BuildBot do?
 
-+ Fill in the logic (node.js, python)? BuildBot will execute it when called via the API.
-  
-+ Chain API calls together, mimicking others like Elastic.io and IFTT.
-  
-+ Generate detailed RFPs automatically.
-  
-+ Site mock-ups can be inferred and will function live!
+### Complex multi-domain actions 
++ Chain API calls together, mimicking others like [Elastic.io](http://www.elastic.io/) and [IFTT](https://ifttt.com/).
 
-+ A package is stored internally in git -- automatic source control!
 
-+ Packages can be built from each other, automatic imports!
+### Project planning
++ Generate detailed [RFPs](https://en.wikipedia.org/wiki/Request_for_proposal) automatically.
+
+  
+### Project templating
++ Infer a site mock-up that functions live.
+
+
+### Leverage exisiting apps
+Packages stored internally in git, automatic source control and
+importing from other packages can expand functionality.
 
 ====
 

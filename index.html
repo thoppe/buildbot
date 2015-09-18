@@ -50,13 +50,18 @@
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
 <p>
-<h3>Let's build an app!</h3></p>
+<h3>"I've got an idea for an app..."</h3></p>
+<figure>
+    <a href="images/full_stack.jpg">
+    <img class="" src="images/full_stack.jpg" >
+    </a>
+    <figcaption>Not everyone with an idea is a full-stack developer!</figcaption>
+    </figure>
+<br>
+<br>
 <br>
 <p>
-<div display='inline' align='left'>Ingredients:</div><div display='inline' align='left'><h5>An idea</h5></div><div display='inline' align='left'><h5>A knowledge of the full stack</h5></div><div display='inline' align='left'>front-end, back-end, server hosting, OS, security, UX, UI, ...</div></p>
-<br>
-<p>
-Not everyone with an idea is a full-stack developer!<br>Empathetic software...</p>
+<h3>Question: How do we turn an idea into a prototype?</h3></p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
@@ -75,19 +80,18 @@ Not everyone with an idea is a full-stack developer!<br>Empathetic software...</
 <h2>Step #1: Data</h2></p>
 <br>
 <p>
-<h4>Describe the data.</h4><h4>Describe how the the data related?</h4></p>
+<h4>Describe the data.</h4></p>
 <figure>
     <a href="images/graph_schema.png">
     <img class="" src="images/graph_schema.png" >
     </a>
     
     </figure>
+<p>
+<h4>Describe how the data is related.</h4></p>
 </section><section   class="vertical-slide">
 <p>
-<h2>Describe the data</h2></p>
-<br>
-<p>
-Natural language description infers types and defaults.<br>Capability to handle JSON-LD like those from <a href="http://schema.org">schema.org</a>.</p>
+<h2>Describe the data in detail</h2></p>
 <br>
 <p>
 What is a <code>job</code>?</p>
@@ -95,6 +99,9 @@ What is a <code>job</code>?</p>
     &quot;description&quot; : &quot;&quot;,
     &quot;title&quot;  : &quot;Unassigned&quot;
 },</code></pre>
+<p>
+Natural description infers types and defaults.</p>
+<br>
 <br>
 <p>
 What is a <code>person</code>?</p>
@@ -105,6 +112,8 @@ What is a <code>person</code>?</p>
     &quot;username&quot; : &quot;&quot;,
     &quot;userid&quot; : 0
 },</code></pre>
+<p>
+Capability to handle JSON-LD like those from <a href="http://schema.org">schema.org</a>.</p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
@@ -112,38 +121,58 @@ What is a <code>person</code>?</p>
 <h2>Step #2: Contracts</h2></p>
 <br>
 <p>
-Leverage emerging industry standard, <a href="http://swagger.io/">swagger</a>.</p>
+Leverage emerging industry standard for API communication,</p>
+<br>
+<figure>
+    <a href="images/swagger-logo.png">
+    <img class="transparent_image" src="images/swagger-logo.png" height="200px">
+    </a>
+    
+    </figure>
+<p>
+<h2><a href="http://swagger.io/">swagger.io</a></h2></p>
+</section><section   class="vertical-slide">
+<p>
+<h3>What is swagger?</h3>A protocal describing an API interface.</p>
 <br>
 <p>
-Enforcement of contraints from one API to another.</p>
+Pros:<br>Machine interface for API calls, automatic documentation, code templating!</p>
 <br>
 <p>
-They can be quite complicated!</p>
-<pre><code class=python>  &quot;paths&quot;: {
-    &quot;/&quot;: {
+Cons: They can be quite complicated!</p>
+<pre><code class=python>&quot;paths&quot;: {
+    &quot;/statuses/mentions_timeline&quot;: {
         &quot;get&quot;: {
-            &quot;description&quot;: &quot;Using ipify is ridiculously simple. You have three options. You can get your public IP directly (in plain text), you can get your public IP in JSON format, or you can get your public IP information in JSONP format (useful for Javascript developers).&quot;,
-            &quot;produces&quot;: [
-                &quot;application/json&quot;,
-                &quot;text/xml&quot;
+            &quot;description&quot;: &quot;Returns the 20 most recent mentions for the authenticating user&quot;,
+            &quot;security&quot;: [
+                {
+                    &quot;oauth&quot;: [
+                        &quot;basic&quot;
+                    ]
+                }
             ],
             &quot;parameters&quot;: [
                 {
-                    &quot;name&quot;: &quot;format&quot;,
+                    &quot;name&quot;: &quot;count&quot;,
                     &quot;in&quot;: &quot;query&quot;,
-            ...</code></pre>
+                    &quot;description&quot;: &quot;Specifies the number of tweets to try and retrieve&quot;,
+                    &quot;required&quot;: false,
+                    &quot;type&quot;: &quot;string&quot;
+                },</code></pre>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
 <p>
-<h3>Contracts in BuildBot</h3></p>
+<h3>Contracts in BuildBot</h3>BuildBot automaticlly generates swagger files from a simple package file.</p>
 <br>
 <p>
-Local or publicaly accessible URLS:</p>
-<br>
+Link to local swagger files or publicaly accessible URLS:</p>
 <pre><code class=python>&quot;contracts&quot; : [
     &quot;contracts/ipify.swagger&quot; 
 ],</code></pre>
+<br>
+<p>
+All API calls are type-checked through the swagger file ensuring data consistancy.</p>
 </section><section   class="vertical-slide">
 <p>
 <h2>Step #3: Logic</h2></p>
@@ -194,22 +223,28 @@ logic (optional):</p>
 <br>
 <p>
 <h3>Templating functionality</h3></p>
-<ul><li>Creates API endpoints from high-level descriptions of logic.</li></ul>
+<ul><li>Creates API endpoints from high-level descriptions of logic</li></ul>
 </section><section   class="vertical-slide">
 <p>
 <h2>What <em>will</em> BuildBot do?</h2></p>
 <br>
-<ul><li>Fill in the logic (node.js, python)? BuildBot will execute it when called via the API.</li></ul>
+<p>
+<h3>Complex multi-domain actions</h3></p>
+<ul><li>Chain API calls together, mimicking others like <a href="http://www.elastic.io/">Elastic.io</a> and <a href="https://ifttt.com/">IFTT</a>.</li></ul>
 <br>
-<ul><li>Chain API calls together, mimicking others like Elastic.io and IFTT.</li></ul>
 <br>
-<ul><li>Generate detailed RFPs automatically.</li></ul>
+<p>
+<h3>Project planning</h3></p>
+<ul><li>Generate detailed <a href="https://en.wikipedia.org/wiki/Request_for_proposal">RFPs</a> automatically.</li></ul>
 <br>
-<ul><li>Site mock-ups can be inferred and will function live!</li></ul>
 <br>
-<ul><li>A package is stored internally in git -- automatic source control!</li></ul>
+<p>
+<h3>Project templating</h3></p>
+<ul><li>Infer a site mock-up that functions live.</li></ul>
 <br>
-<ul><li>Packages can be built from each other, automatic imports!</li></ul>
+<br>
+<p>
+<h3>Leverage exisiting apps</h3>Packages stored internally in git, automatic source control and<br>importing from other packages can expand functionality.</p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
