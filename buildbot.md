@@ -73,7 +73,7 @@ Leverage emerging industry standard for API communication,
 ====*
 
 ### What is swagger?
-A protocal describing an API interface.
+A protocol describing an API interface.
 
 Pros: 
 Machine interface for API calls, automatic documentation, code templating!
@@ -102,14 +102,14 @@ Cons: They can be quite complicated!
 ====
 
 ### Contracts in BuildBot
-BuildBot automaticlly generates swagger files from a simple package file.
+BuildBot automatically generates swagger files from a simple package file.
 
-Link to local swagger files or publicaly accessible URLS:  
+Link to local swagger files or publicly accessible URLS:  
     "contracts" : [
         "contracts/ipify.swagger" 
     ],
 
-All API calls are type-checked through the swagger file ensuring data consistancy. 
+All API calls are type-checked through the swagger file ensuring data consistency. 
 
    
 ====*
@@ -142,7 +142,7 @@ logic (optional):
 
 ## What does BuildBot _do_?
 
-### Persistant, presonalizted data storage
+### Persistent, personalized data storage
 + Creates a isolated dockerized neo4j database.
 
   
@@ -150,7 +150,7 @@ logic (optional):
 + Establishes a RESTful API for standard operations (create, delete, update).
 
   
-### Efficicent pass through of extenral data
+### Efficient pass through of external data
 + Connects any external API and enforces contracts via swagger files.
 
   
@@ -173,7 +173,7 @@ logic (optional):
 + Infer a site mock-up that functions live.
 
 
-### Leverage exisiting apps
+### Leverage existing apps
 Packages stored internally in git, automatic source control and
 importing from other packages can expand functionality.
 
