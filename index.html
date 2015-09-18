@@ -133,7 +133,7 @@ Leverage emerging industry standard for API communication,</p>
 <h2><a href="http://swagger.io/">swagger.io</a></h2></p>
 </section><section   class="vertical-slide">
 <p>
-<h3>What is swagger?</h3>A protocol describing an API interface.</p>
+<h3>What is swagger?</h3>A protocal describing an API interface.</p>
 <br>
 <p>
 Pros:<br>Machine interface for API calls, automatic documentation, code templating!</p>
@@ -163,16 +163,16 @@ Cons: They can be quite complicated!</p>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
 <p>
-<h3>Contracts in BuildBot</h3>BuildBot automatically generates swagger files from a simple package file.</p>
+<h3>Contracts in BuildBot</h3>BuildBot automaticlly generates swagger files from a simple package file.</p>
 <br>
 <p>
-Link to local swagger files or publicly accessible URLS:</p>
+Link to local swagger files or publicaly accessible URLS:</p>
 <pre><code class=python>&quot;contracts&quot; : [
     &quot;contracts/ipify.swagger&quot; 
 ],</code></pre>
 <br>
 <p>
-All API calls are type-checked through the swagger file ensuring data consistency.</p>
+All API calls are type-checked through the swagger file ensuring data consistancy.</p>
 </section><section   class="vertical-slide">
 <p>
 <h2>Step #3: Logic</h2></p>
@@ -204,10 +204,52 @@ logic (optional):</p>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
 <p>
+<h3>Example documentation</h3></p>
+<pre><code class=python>{
+&quot;meta&quot; : {
+    &quot;title&quot;       : &quot;checkin&quot;,
+    &quot;author&quot;      : &quot;thoppe&quot;,
+    &quot;description&quot; : &quot;Logs your IP address and a timestamp.&quot;,
+    &quot;version&quot;     : &quot;0.0.1&quot;
+},
+&quot;requires&quot; : [],
+&quot;code_entry&quot; : &quot;packages/checkin/logic.js&quot;,
+
+&quot;nodes&quot; : {
+    &quot;ping&quot; : {
+        &quot;name&quot;       : &quot;&quot;,
+        &quot;IP_address&quot; : &quot;&quot;,
+        &quot;timestamp&quot;  : 0
+    }
+},
+&quot;relationships&quot; : [ ],
+&quot;contracts&quot; : [
+    &quot;contracts/ipify.swagger&quot; 
+],
+&quot;actions&quot; : {
+    &quot;pingme&quot; : {
+        &quot;pre&quot; : &quot;https://api.ipify.org?format=json&quot;,
+        &quot;post&quot;: &quot;/node/ping/create&quot;,
+        &quot;input&quot;  : [&quot;name&quot;],
+        &quot;output&quot; : [&quot;IP_address&quot;, &quot;timestamp&quot;,&quot;name&quot;],
+        &quot;description&quot; : &quot;Records an IP address and time.&quot;
+    }
+}
+}</code></pre>
+<br>
+<p>
+Exported swagger file from package:<br><a href="https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json">https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json</a></p>
+<br>
+<p>
+<a href="http://petstore.swagger.io/">Automatic documentation</a></p>
+</section>
+</section><section class="vertical-stack">
+<section   class="vertical-slide">
+<p>
 <h2>What does BuildBot <em>do</em>?</h2></p>
 <br>
 <p>
-<h3>Persistent, personalized data storage</h3></p>
+<h3>Persistant, presonalizted data storage</h3></p>
 <ul><li>Creates a isolated dockerized neo4j database.</li></ul>
 <br>
 <br>
@@ -217,7 +259,7 @@ logic (optional):</p>
 <br>
 <br>
 <p>
-<h3>Efficient pass through of external data</h3></p>
+<h3>Efficicent pass through of extenral data</h3></p>
 <ul><li>Connects any external API and enforces contracts via swagger files.</li></ul>
 <br>
 <br>
@@ -244,7 +286,7 @@ logic (optional):</p>
 <br>
 <br>
 <p>
-<h3>Leverage existing apps</h3>Packages stored internally in git, automatic source control and<br>importing from other packages can expand functionality.</p>
+<h3>Leverage exisiting apps</h3>Packages stored internally in git, automatic source control and<br>importing from other packages can expand functionality.</p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">

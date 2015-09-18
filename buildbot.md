@@ -73,7 +73,7 @@ Leverage emerging industry standard for API communication,
 ====*
 
 ### What is swagger?
-A protocol describing an API interface.
+A protocal describing an API interface.
 
 Pros: 
 Machine interface for API calls, automatic documentation, code templating!
@@ -102,14 +102,14 @@ Cons: They can be quite complicated!
 ====
 
 ### Contracts in BuildBot
-BuildBot automatically generates swagger files from a simple package file.
+BuildBot automaticlly generates swagger files from a simple package file.
 
-Link to local swagger files or publicly accessible URLS:  
+Link to local swagger files or publicaly accessible URLS:  
     "contracts" : [
         "contracts/ipify.swagger" 
     ],
 
-All API calls are type-checked through the swagger file ensuring data consistency. 
+All API calls are type-checked through the swagger file ensuring data consistancy. 
 
    
 ====*
@@ -140,9 +140,49 @@ logic (optional):
 
 ====
 
+### Example documentation 
+    {
+    "meta" : {
+        "title"       : "checkin",
+        "author"      : "thoppe",
+        "description" : "Logs your IP address and a timestamp.",
+        "version"     : "0.0.1"
+    },
+    "requires" : [],
+    "code_entry" : "packages/checkin/logic.js",
+    
+    "nodes" : {
+        "ping" : {
+            "name"       : "",
+            "IP_address" : "",
+            "timestamp"  : 0
+        }
+    },
+    "relationships" : [ ],
+    "contracts" : [
+        "contracts/ipify.swagger" 
+    ],
+    "actions" : {
+        "pingme" : {
+            "pre" : "https://api.ipify.org?format=json",
+            "post": "/node/ping/create",
+            "input"  : ["name"],
+            "output" : ["IP_address", "timestamp","name"],
+            "description" : "Records an IP address and time."
+        }
+    }
+    }
+
+Exported swagger file from package:
+[https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json](https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json)
+
+[Automatic documentation](http://petstore.swagger.io/)
+
+====
+
 ## What does BuildBot _do_?
 
-### Persistent, personalized data storage
+### Persistant, presonalizted data storage
 + Creates a isolated dockerized neo4j database.
 
   
@@ -150,7 +190,7 @@ logic (optional):
 + Establishes a RESTful API for standard operations (create, delete, update).
 
   
-### Efficient pass through of external data
+### Efficicent pass through of extenral data
 + Connects any external API and enforces contracts via swagger files.
 
   
@@ -173,7 +213,7 @@ logic (optional):
 + Infer a site mock-up that functions live.
 
 
-### Leverage existing apps
+### Leverage exisiting apps
 Packages stored internally in git, automatic source control and
 importing from other packages can expand functionality.
 
