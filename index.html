@@ -53,10 +53,10 @@
 <h3>Let's build an app!</h3></p>
 <br>
 <p>
-<div display='inline' align='left'>Ingredents:</div><div display='inline' align='left'><h5>An idea</h5></div><div display='inline' align='left'><h5>A knowledge of the full stack</h5></div><div display='inline' align='left'>front-end, back-end, server hosting, OS, security, UX, UI, ...</div></p>
+<div display='inline' align='left'>Ingredients:</div><div display='inline' align='left'><h5>An idea</h5></div><div display='inline' align='left'><h5>A knowledge of the full stack</h5></div><div display='inline' align='left'>front-end, back-end, server hosting, OS, security, UX, UI, ...</div></p>
 <br>
 <p>
-Not everyone with an idea is a full-stack developer!<br>Empathatic software...</p>
+Not everyone with an idea is a full-stack developer!<br>Empathetic software...</p>
 </section>
 </section><section class="vertical-stack">
 <section   class="vertical-slide">
@@ -64,14 +64,18 @@ Not everyone with an idea is a full-stack developer!<br>Empathatic software...</
 <h2><strong>BuildBot</strong></h2><h1>Turning<br>configuration<br>into design.</h1></p>
 </section><section   class="vertical-slide">
 <p>
-<h2>A design problem?</h2><h4>What is the data?</h4><h4>How is the data related?</h4></p>
+<h2>A design problem?</h2></p>
 <br>
+<p>
+<h4>What is the data?</h4></p>
 <figure>
     <a href="images/graph_schema.png">
     <img class="" src="images/graph_schema.png" >
     </a>
-    <figcaption>Natural representation as a graphDB.</figcaption>
+    
     </figure>
+<p>
+<h4>How is the data related?</h4></p>
 </section><section   class="vertical-slide">
 <p>
 <h2>Describe the data</h2></p>
@@ -103,22 +107,25 @@ From a package:</p>
 <br>
 <ul><li>Creates a isolated dockerized neo4j database.</li>
 <li>Establishes a RESTful API for standard operations (create, delete, update).</li>
-<li>Connects any external API and enforces contracts via swaggerfiles.</li>
+<li>Connects any external API and enforces contracts via swagger files.</li>
 <li>Creates API endpoints from high-level descriptions of logic.</li></ul>
 <br>
 <p>
 Want more?</p>
 <br>
 <ul><li>Template the logic (node.js, python)? BuildBot will execute it when called via the API.</li>
-<li>API calls can be chained together, completely mimicing others like Elastic.io and IFTT.</li>
-<li>Detialed RFPs can be auto generated!</li>
-<li>Site mockups can be infered and will function live!</li></ul>
+<li>API calls can be chained together, completely mimicking others like Elastic.io and IFTT.</li>
+<li>Detailed RFPs can be auto generated!</li>
+<li>Site mock-ups can be inferred and will function live!</li></ul>
 <br>
 <ul><li>A package is stored internally in git -- automatic source control!</li>
 <li>Packages can be built from each other, automatic imports!</li></ul>
 </section><section   class="vertical-slide">
 <p>
 <h1>Contracts</h1></p>
+<br>
+<p>
+Enforcement of contraints from one API to another.</p>
 <br>
 <pre><code class=python>&quot;contracts&quot; : [
     &quot;contracts/ipify.swagger&quot; 

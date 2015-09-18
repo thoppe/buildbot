@@ -9,13 +9,13 @@ _(the backend of FABRIC)_
 
 ### Let's build an app!
 
-|Ingredents:
+|Ingredients:
 |##### An idea
 |##### A knowledge of the full stack
 |front-end, back-end, server hosting, OS, security, UX, UI, ...
 
 Not everyone with an idea is a full-stack developer!
-Empathatic software...
+Empathetic software...
   
 ====
 
@@ -25,10 +25,12 @@ Empathatic software...
 ====*
 
 ## A design problem?
+
 #### What is the data?
+!(images/graph_schema.png)
 #### How is the data related?
 
-!(images/graph_schema.png) Natural representation as a graphDB.
+%  Natural representation as a graphDB.
 
 ====*
 
@@ -60,21 +62,23 @@ From a package:
 
 + Creates a isolated dockerized neo4j database.
 + Establishes a RESTful API for standard operations (create, delete, update).
-+ Connects any external API and enforces contracts via swaggerfiles.
++ Connects any external API and enforces contracts via swagger files.
 + Creates API endpoints from high-level descriptions of logic.
 
 Want more?
 
 + Template the logic (node.js, python)? BuildBot will execute it when called via the API.
-+ API calls can be chained together, completely mimicing others like Elastic.io and IFTT.
-+ Detialed RFPs can be auto generated!
-+ Site mockups can be infered and will function live!
++ API calls can be chained together, completely mimicking others like Elastic.io and IFTT.
++ Detailed RFPs can be auto generated!
++ Site mock-ups can be inferred and will function live!
 
 + A package is stored internally in git -- automatic source control!
 + Packages can be built from each other, automatic imports!
 
 ====*
 # Contracts
+
+Enforcement of contraints from one API to another. 
 
     "contracts" : [
         "contracts/ipify.swagger" 
