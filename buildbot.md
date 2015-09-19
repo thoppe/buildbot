@@ -73,12 +73,11 @@ Leverage emerging industry standard for API communication,
 ====*
 
 ### What is swagger?
-A protocal describing an API interface.
+A protocol describing an API interface.
 
-Pros: 
-Machine interface for API calls, automatic documentation, code templating!
+#### Pros: Auto Docs, interface for API calls, and code templating!
   
-Cons: They can be quite complicated! 
+#### Cons: Complicated & cumbersome...
     "paths": {
         "/statuses/mentions_timeline": {
             "get": {
@@ -99,22 +98,25 @@ Cons: They can be quite complicated!
                         "type": "string"
                     },
 
-====
+====*
 
 ### Contracts in BuildBot
-BuildBot automaticlly generates swagger files from a simple package file.
+BuildBot automatically generates swagger files from a simple package file.
 
-Link to local swagger files or publicaly accessible URLS:  
+Link to local swagger files or publicly accessible URLS:  
     "contracts" : [
         "contracts/ipify.swagger" 
     ],
 
-All API calls are type-checked through the swagger file ensuring data consistancy. 
+External contracts (swagger files) only need to be written once and can be shared.
+
+All API calls are type-checked through the swagger file ensuring data consistency. 
 
    
-====*
+====
   
 ## Step #3: Logic
+Specify the only pre & post conditions, types inferred and checked from contracts.
   
 package def: 
     "actions" : { 
@@ -131,7 +133,7 @@ logic (optional):
     exports.pingme = function (data) {
       var d = new Date();
       output = {
-        "IP_address" : data.ip,
+        "IP_address" : data.IP,
         "timestamp"  : d.getTime(),
         "name" : data.name,
       }
@@ -140,7 +142,45 @@ logic (optional):
 
 ====
 
-### Example documentation 
+## What does BuildBot _do_?
+
+### Persistent, personalized data storage
++ Creates a isolated dockerized neo4j database.
+
+  
+### Standard data interactions.
++ Establishes a RESTful API for standard (create, delete, update) operations.
+
+  
+### Connect external data sources
++ Connects any external API and enforces contracts via swagger files.
+
+  
+### Logic templating
++ Creates API endpoints from high-level descriptions of desired actions.
+  
+====*
+
+## What _will_ BuildBot do?
+
+### Project templating
++ Infer a site mock-up that functions live.
+
+
+### Project planning
++ Generate detailed [RFPs](https://en.wikipedia.org/wiki/Request_for_proposal) automatically.
+
+
+### Complex multi-domain actions 
++ Chain API calls together, mimicking [Elastic.io](http://www.elastic.io/) and [IFTT](https://ifttt.com/).
+
+    
+### Modular design, leverage prior work
+Automatic source control & importing from other packages.
+
+====
+
+### Minimal example
     {
     "meta" : {
         "title"       : "checkin",
@@ -173,69 +213,30 @@ logic (optional):
     }
     }
 
-Exported swagger file from package:
-[https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json](https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json)
+swagger export: [https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json](https://raw.githubusercontent.com/tulsa/demo_swagger_files/master/swagger.json)
 
-[Automatic documentation](http://petstore.swagger.io/)
-
-====
-
-## What does BuildBot _do_?
-
-### Persistant, presonalizted data storage
-+ Creates a isolated dockerized neo4j database.
-
-  
-### Standard data interactions.
-+ Establishes a RESTful API for standard operations (create, delete, update).
-
-  
-### Efficicent pass through of extenral data
-+ Connects any external API and enforces contracts via swagger files.
-
-  
-### Templating functionality
-+ Creates API endpoints from high-level descriptions of logic
-  
-====*
-
-## What _will_ BuildBot do?
-
-### Complex multi-domain actions 
-+ Chain API calls together, mimicking others like [Elastic.io](http://www.elastic.io/) and [IFTT](https://ifttt.com/).
-
-
-### Project planning
-+ Generate detailed [RFPs](https://en.wikipedia.org/wiki/Request_for_proposal) automatically.
-
-  
-### Project templating
-+ Infer a site mock-up that functions live.
-
-
-### Leverage exisiting apps
-Packages stored internally in git, automatic source control and
-importing from other packages can expand functionality.
+### [Automatic documentation](http://petstore.swagger.io/)
 
 ====
 
-Where to go from here?
-  
-18f?
+# *BuildBot* + *Fabric*
 
-    
+BuildBot is the backend, CLI, for the hobbyist.
+
+Fabric is the frontend, UI, graphical packages design.
+  
 ====
 
-But, but, but! Questions!
+# FAQ
 
-My data is not a graph!
-(doesn't matter)
+My data is not a graph! (doesn't matter)
 
-Will this scale?
-(no, but it doesn't matter)
+Will this scale? (no, but it doesn't matter)
+
+Isn't Fabric already taken? (Fab.RC)
   
-Hasn't this been done before?
-(maybe, ...)
+Hasn't this been done before? (maybe, ...)
+  
 
 ====
 
