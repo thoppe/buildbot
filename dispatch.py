@@ -7,7 +7,12 @@ parser.add_argument('--list',
                     default=False,
                     action='store_true',
                     help='Returns the running buildbot instances.')
+parser.add_argument('--neo4j',
+                    nargs=2, default=None,
+                    help='Starts a neo4j instance (port/location)',)
+
 args = vars(parser.parse_args())
+
 logging.basicConfig(level=logging.INFO)
 
 required_containers = [
@@ -76,6 +81,10 @@ for container_name in required_containers:
         time.sleep(10)
         docker_pull(container_name)
 
+
+if args["neo4j"] is not None:
+    logging.error("TODO: Building NEO4J now")
+    exit(2)
 
 
 
