@@ -37,7 +37,11 @@ def docker_stop_neo4j(**kwargs):
     exit()
     
 
-def docker_launch_neo4j(**kwargs):
+def docker_start_neo4j(**kwargs):
+    '''
+    Starts a new neo4j instances, returns the generated ID.
+    '''
+    
     kwargs["USERNAME"] = "buildbot"
     kwargs["PASSWORD"] = "tulsa"
     kwargs["container_name"] = "buildbot_neo4j_{NEO4J_PORT}".format(**kwargs)
@@ -46,17 +50,18 @@ def docker_launch_neo4j(**kwargs):
         "docker run "
         "-v {NEO4J_DATABASE_LOCATION}:/var/lib/neo4j/data "
         "-i -t -d "
-        "--rm "
         "-e NEO4J_AUTH={USERNAME}:{PASSWORD} "
         "--name {container_name} "
+        "--label neo4j.port={NEO4J_PORT} "
+        "--label neo4j=1 "
         "--cap-add=SYS_RESOURCE "
         "-p {NEO4J_PORT}:7474 "
         "tpires/neo4j"
     )
     cmd = bcmd.format(**kwargs)
     logging.info("Running {}".format(cmd))
-    output = subprocess.call(cmd, shell=True)
-    print "OUTPUET!", output
+    output = subprocess.check_output(cmd, shell=True)
+    return output
 
 def docker_pull(name):
     args = {"name": name}
@@ -69,41 +74,55 @@ def docker_inspect(name):
     output = subprocess.check_output(cmd, shell=True)
     return json.loads(output)
 
-def docker_ps(images=False):
+def docker_ps(show_all=True):
     '''
-    Returns a list of dictionaries describing
-    the open BuildBot instances.
+    Runs inpsect on all neo4j instances and returns a dict
+    mapping names to dictionary of docker inspect.
     '''
-    names = ["ID", "Image", "Command", "CreatedAt",
-             "RunningFor","Ports", "Status", "Size", "Labels"]
 
     args = {
         "images" : "",
-        "format" : ','.join(["{{.%s}}"%x for x in names])
+        "format" : '{{.ID}}',
     }
 
     # Show images instead of containers
-    if images:
-        args["images"] = '-a'
-        
-    cmd = 'docker ps {images} --format {format}'.format(**args)
+    if show_all:
+        args["show_all"] = '-a'
+    
+    # Search only for containers with neo4j label
+    cmd = 'docker ps {show_all} --format {format} --filter "label=neo4j=1"'
+    cmd = cmd.format(**args)
+    
     output = subprocess.check_output(cmd, shell=True)
+    NAMES  = output.strip().split('\n')
 
-    data   = [dict(zip(names, line.split(',')))
-              for line in output.strip().split('\n')
-              if line]
+    data = {}
+    for name in NAMES:
+        cmd = 'docker inspect {}'.format(name)
+        output = subprocess.check_output(cmd, shell=True)
+        js = json.loads(output)[0]
+        data[js["Name"]] = js
+
     return data
 
+def docker_reduced_ps():
+    rdata = {}
+    for name,data in docker_ps().items():
+        rdata[name] = {
+            "name"    : name,
+            "created" : data["Created"],
+            "running" : data["State"]["Running"],
+            "port"    : int(data["Config"]["Labels"]["neo4j.port"]),
+        }
+    return rdata
 
 if args["list"]:
 
     print "** Running Containers **"
-    data = docker_ps()
-    print data
+    data = docker_reduced_ps()
+    for key,val in data.items():
+        pprint(val)
 
-    print "** Running Images **"
-    data = docker_ps(images=True)
-    print data
     exit(0)
 
 
@@ -132,11 +151,13 @@ if args["neo4j"] is not None:
             exit(2)
             
         action, port, location = args["neo4j"]
-        docker_launch_neo4j(NEO4J_PORT=port,
-                            NEO4J_DATABASE_LOCATION=location,
-                            **args)
+        ID = docker_start_neo4j(NEO4J_PORT=port,
+                                NEO4J_DATABASE_LOCATION=location,
+                                **args)
+        msg = "Started docker:neo4j {}".format(ID)
+        logging.info(msg)
         
-    if action == "stop":
+    elif action == "stop":
         if len(args["neo4j"])<2:
             msg = "--neo4j stop port"
             logging.error(msg)
@@ -145,7 +166,7 @@ if args["neo4j"] is not None:
         docker_stop_neo4j(NEO4J_PORT=port,**args)
     
     else:
-        msg = "Unrecgonized neo4j action {}".format(action)
+        msg = "Unrecognized neo4j action {}".format(action)
         logging.error(msg)
 
 
