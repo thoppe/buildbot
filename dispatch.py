@@ -13,8 +13,10 @@ parser.add_argument('--neo4j',
                     help='Starts a neo4j instance (port/location)',)
 
 args = vars(parser.parse_args())
-
 logging.basicConfig(level=logging.INFO)
+
+_default_location = "database/"
+
 
 required_containers = [
     'tpires/neo4j',
@@ -109,7 +111,6 @@ def docker_ps(show_all=True):
         NAMES = []
 
     data = {}
-    print NAMES
     for name in NAMES:
         cmd = 'docker inspect {}'.format(name)
         output = subprocess.check_output(cmd, shell=True)
@@ -136,6 +137,19 @@ def list_neo4j_ports():
     '''
     return [data["port"] for data in
             docker_reduced_ps().values()]
+
+def next_open_port():
+    starting_port = 7474
+    maximum_port  = 2**16
+    known_ports = list_neo4j_ports()
+    for n in xrange(starting_port, maximum_port):
+        port = str(n)
+        if port not in known_ports:
+            return port
+    msg = "Unable to find an open port"
+    logging.error(msg)
+    exit()
+    
 
 if args["list"]:
 
@@ -166,12 +180,22 @@ if args["neo4j"] is not None:
     action = args["neo4j"][0].lower()
 
     if action == "start":
-        if len(args["neo4j"])!=3:
-            msg = "--neo4j start port location"
+
+        n_args = len(args["neo4j"])
+        if n_args == 1:
+            msg = "Location not specified (use only for testing!)"
+            logging.warning(msg)
+            location = _default_location
+            port = next_open_port()
+        elif n_args == 2:
+            port = next_open_port()        
+        elif n_args == 3:
+            action, location, port = args["neo4j"]
+        else:
+            msg = "--neo4j start location port"
             logging.error(msg)
             exit(2)
-
-        action, port, location = args["neo4j"]
+        
         ID = docker_start_neo4j(NEO4J_PORT=port,
                                 NEO4J_DATABASE_LOCATION=location,
                                 **args)
@@ -189,7 +213,3 @@ if args["neo4j"] is not None:
     else:
         msg = "Unrecognized neo4j action {}".format(action)
         logging.error(msg)
-
-
-
-
