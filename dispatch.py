@@ -41,6 +41,11 @@ def docker_start_neo4j(**kwargs):
     '''
     Starts a new neo4j instances, returns the generated ID.
     '''
+
+    if kwargs["NEO4J_PORT"] in list_neo4j_ports():
+        msg = 'neo4j port {NEO4J_PORT} already in use!'.format(**kwargs)
+        logging.critical(msg)
+        exit(3)
     
     kwargs["USERNAME"] = "buildbot"
     kwargs["PASSWORD"] = "tulsa"
@@ -112,9 +117,17 @@ def docker_reduced_ps():
             "name"    : name,
             "created" : data["Created"],
             "running" : data["State"]["Running"],
-            "port"    : int(data["Config"]["Labels"]["neo4j.port"]),
+            "port"    : data["Config"]["Labels"]["neo4j.port"],
         }
     return rdata
+
+
+def list_neo4j_ports():
+    '''
+    Lists all ports used by neo4j docker containers.
+    '''
+    return [data["port"] for data in
+            docker_reduced_ps().values()]
 
 if args["list"]:
 
@@ -129,8 +142,8 @@ if args["list"]:
 for container_name in required_containers:
     try:
         docker_inspect(container_name)
-        msg = "Found required container {}.".format(container_name)
-        logging.info(msg)
+        #msg = "Found required container {}.".format(container_name)
+        #logging.info(msg)
     except subprocess.CalledProcessError:
         msg = "Failed to load container {}.".format(container_name)
         logging.error(msg)
@@ -149,7 +162,7 @@ if args["neo4j"] is not None:
             msg = "--neo4j start port location"
             logging.error(msg)
             exit(2)
-            
+
         action, port, location = args["neo4j"]
         ID = docker_start_neo4j(NEO4J_PORT=port,
                                 NEO4J_DATABASE_LOCATION=location,
