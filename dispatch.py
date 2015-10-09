@@ -102,10 +102,14 @@ def docker_ps(show_all=True):
     cmd = 'docker ps {show_all} --format {format} --filter "label=neo4j=1"'
     cmd = cmd.format(**args)
     
-    output = subprocess.check_output(cmd, shell=True)
-    NAMES  = output.strip().split('\n')
+    output = subprocess.check_output(cmd, shell=True).strip()
+    if output:
+        NAMES = output.split('\n')
+    else:
+        NAMES = []
 
     data = {}
+    print NAMES
     for name in NAMES:
         cmd = 'docker inspect {}'.format(name)
         output = subprocess.check_output(cmd, shell=True)
