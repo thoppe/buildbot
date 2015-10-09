@@ -21,27 +21,31 @@ required_containers = [
 ]
 
 def docker_stop_neo4j(**kwargs):
-    # Find all running containers, and match with one that
-    stop_ID = None
+    # Stop the neo4j container running on a specific port
+
+    info = docker_ps()
     
-    data = docker_ps()
-    for item in data:
-        status = item["Status"].split('->')[0].strip()
-        if len(status.split(':')) == 2:
-            port = status.split(':')
-        print status, port
-            
-    print data
-    
-    print "HERE!"
-    exit()
+    if kwargs["NEO4J_PORT"] not in list_neo4j_ports():
+        msg = 'neo4j port {NEO4J_PORT} not open!'.format(**kwargs)
+        logging.critical(msg)
+        exit(3)
+
+    kwargs["name"] = "buildbot_neo4j_{NEO4J_PORT}".format(**kwargs)
+    msg = "Stopping container {name}"
+    logging.info(msg.format(**kwargs))
+
+    cmd = "docker stop {name}".format(**kwargs)
+    output = subprocess.call(cmd, shell=True)
+
+    cmd = "docker rm {name}".format(**kwargs)
+    output = subprocess.call(cmd, shell=True)
+
     
 
 def docker_start_neo4j(**kwargs):
     '''
     Starts a new neo4j instances, returns the generated ID.
     '''
-
     if kwargs["NEO4J_PORT"] in list_neo4j_ports():
         msg = 'neo4j port {NEO4J_PORT} already in use!'.format(**kwargs)
         logging.critical(msg)
