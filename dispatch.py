@@ -8,9 +8,11 @@ parser.add_argument('--list','-l',
                     default=False,
                     action='store_true',
                     help='Returns the running buildbot instances.')
+
+## TO DO: Write a sub-parser for this command
 parser.add_argument('--neo4j',
                     nargs='+', default=None,
-                    help='Starts a neo4j instance (port/location)',)
+                    help='Starts/stops neo4j instances (port/location)',)
 
 args = vars(parser.parse_args())
 logging.basicConfig(level=logging.INFO)
@@ -37,10 +39,10 @@ def docker_stop_neo4j(**kwargs):
     logging.info(msg.format(**kwargs))
 
     cmd = "docker stop {name}".format(**kwargs)
-    output = subprocess.call(cmd, shell=True)
+    output = subprocess.check_output(cmd, shell=True)
 
     cmd = "docker rm {name}".format(**kwargs)
-    output = subprocess.call(cmd, shell=True)
+    output = subprocess.check_output(cmd, shell=True)
 
     
 
@@ -70,14 +72,15 @@ def docker_start_neo4j(**kwargs):
         "tpires/neo4j"
     )
     cmd = bcmd.format(**kwargs)
-    logging.info("Running {}".format(cmd))
+    #logging.info("Running {}".format(cmd))
     output = subprocess.check_output(cmd, shell=True)
     return output
 
 def docker_pull(name):
     args = {"name": name}
     cmd = 'docker pull {name}'.format(**args)
-    output = subprocess.call(cmd, shell=True)
+    output = subprocess.check_output(cmd, shell=True)
+    return output
 
 def docker_inspect(name):
     args = {"name": name}
@@ -180,7 +183,6 @@ if args["neo4j"] is not None:
     action = args["neo4j"][0].lower()
 
     if action == "start":
-
         n_args = len(args["neo4j"])
         if n_args == 1:
             msg = "Location not specified (use only for testing!)"
@@ -199,16 +201,29 @@ if args["neo4j"] is not None:
         ID = docker_start_neo4j(NEO4J_PORT=port,
                                 NEO4J_DATABASE_LOCATION=location,
                                 **args)
-        msg = "Started docker:neo4j {}".format(ID)
+        msg = "Started docker:neo4j {}".format(ID.strip())
         logging.info(msg)
         
     elif action == "stop":
-        if len(args["neo4j"])<2:
-            msg = "--neo4j stop port"
-            logging.error(msg)
+        n_args = len(args["neo4j"])
+
+        n_args_msg = "--neo4j stop port [or 'all']"
+        if n_args<2:
+            logging.error(n_args_msg)
             exit(2)
+
         action, port = args["neo4j"][:2]
-        docker_stop_neo4j(NEO4J_PORT=port,**args)
+
+        try:
+            port = int(port)
+            docker_stop_neo4j(NEO4J_PORT=port,**args)
+        except:
+            if port == "all":
+                for n in list_neo4j_ports()[::-1]:
+                    docker_stop_neo4j(NEO4J_PORT=n,**args)
+            else:
+                logging.error(n_args_msg)
+                exit(2)
     
     else:
         msg = "Unrecognized neo4j action {}".format(action)
