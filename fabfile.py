@@ -26,8 +26,8 @@ test_order = [
 #    "test_interface.py",
 #    "test_docker.py",
 #    "test_graph.py",
-    "test_buildbotAPI.py",
-#    "test_contracts.py", 
+#    "test_buildbotAPI.py",
+    "test_contracts.py", 
 ]
 test_package_requirements = {
     "test_buildbotAPI.py" : "packages/project_management.json",
@@ -75,17 +75,17 @@ def start():
     Starts a test instance of NEO4J
     '''
     with fabric.api.settings(warn_only=True):
-        local("./dispatch.py --neo4j start database 7474")
+        local("./dispatch.py --neo4j start database {NEO4J_TCP_PORT}".format(**ENV_VARS))
         time.sleep(5)
-        local("./dispatch.py --buildbot start packages/checkin/checkin.json 5001 7474 localhost")
+        local("./dispatch.py --buildbot start packages/checkin/checkin.json {BUILDBOT_PORT} {NEO4J_TCP_PORT} {NEO4J_TCP_ADDR}".format(**ENV_VARS))
 
 def stop():
     '''
     Stops the test instance of NEO4J
     '''
     with fabric.api.settings(warn_only=True):
-        local("./dispatch.py --neo4j stop 7474")
-        local("./dispatch.py --buildbot stop 5001")
+        local("./dispatch.py --neo4j stop {NEO4J_TCP_PORT}".format(**ENV_VARS))
+        local("./dispatch.py --buildbot stop {BUILDBOT_PORT}".format(**ENV_VARS))
     
 def api():
     local("python buildbot/REST_API_buildbot.py")
