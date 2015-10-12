@@ -31,5 +31,11 @@ This creates a file named `buildbot_instance.group`, which tracks the security g
 
      fab launch_EC2_instance
 
+This make take a few minutes to spin up. Once it's up load and save the public IP:
+
+    fab get_public_IP
+
+Make sure the the status is "running" before moving on.
+
 ### Deploying BuildBot
 

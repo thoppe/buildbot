@@ -7,7 +7,7 @@ AWS_AMI = {
 
 args = {
     "keypair_name"   : "AWS_buildbot",
-    "security_group" : "buildbot_instance",
+    "security_group_name" : "buildbot_instance",
     "instance_type"  : "t2.medium",
     "AWS_AMI" : AWS_AMI["Ubuntu:14.04"],
     "AWS_VPC" : os.environ["AWS_VPC"],
@@ -16,24 +16,45 @@ args = {
 
 # Create AWS key/pair
 def create_keypair():
-    f_keypair = "{keypair_name}.pem".format(**args)
+    f_keypair = "settings/{keypair_name}.pem".format(**args)
     if os.path.exists(f_keypair):
         msg = "keypair file already exists! exiting"
         raise ValueError(msg)
-    cmd = "ec2-create-keypair {keypair_name} > {keypair_name}.pem"
+    cmd = "ec2-create-keypair {keypair_name} > " + f_keypair
     local(cmd.format(**args))
 
 def _read_security_group():
-    f_group = "{security_group}.group".format(**args)
+    f_group = "settings/{security_group_name}.group".format(**args)
     
     # Determine the security group
     with open(f_group) as FIN:
         tokens = FIN.read().split()
-        args["security_group"] = tokens[1]    
+        args["security_group"] = tokens[1]
 
+def _read_instance_file():
+    _read_security_group()
+    f_instance = "settings/{security_group}.EC2".format(**args)
+        
+    # Determine the security group
+    with open(f_instance) as FIN:
+        tokens = FIN.read().split()
+        args["instance_name"] = tokens[4]
+
+def _read_public_IP():
+    _read_instance_file()
+    f_describe = "settings/{instance_name}.EC2".format(**args)
+        
+    # Determine the security group
+    with open(f_describe) as FIN:
+        tokens = FIN.read().split()
+        args["status"] = tokens[8]
+        args["public_IP"] = tokens[15] 
+        print "INSTANCE STATUS", args["status"]
+        print "PUBLIC IP", args["public_IP"]
+        
 # Create a security group
 def create_security_group():
-    f_group = "{security_group}.group".format(**args)
+    f_group = "settings/{security_group}.group".format(**args)
     
     if os.path.exists(f_group):
         msg = "group file already exists! exiting"
@@ -55,7 +76,7 @@ def create_security_group():
 def launch_EC2_instance():
     _read_security_group()
 
-    f_instance = "{security_group}.EC2".format(**args)
+    f_instance = "settings/{security_group}.EC2".format(**args)
 
     if os.path.exists(f_instance):
         msg = "instance file already exists! exiting"
@@ -71,3 +92,19 @@ def launch_EC2_instance():
     )
 
     local(bcmd.format(**args) + " > " + f_instance)
+
+# Get the state of the instance and save it
+def get_public_IP():
+    _read_instance_file()
+    f_describe = "settings/{instance_name}.EC2".format(**args)
+
+    #if os.path.exists(f_describe):
+    #    msg = "instance description already exists! skipping"
+    #    print msg
+    #else:
+    cmd = "ec2din {instance_name} > " + f_describe
+    local(cmd.format(**args) )
+        
+    _read_public_IP()
+
+    
