@@ -23,10 +23,10 @@ for key,val in ENV_VARS.items():
 
 test_directory = "buildbot/test"
 test_order = [
-#    "test_interface.py",
-#    "test_docker.py",
-#    "test_graph.py",
-#    "test_buildbotAPI.py",
+    "test_interface.py",
+    "test_docker.py",
+    "test_graph.py",
+    "test_buildbotAPI.py",
     "test_contracts.py", 
 ]
 test_package_requirements = {
