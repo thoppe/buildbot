@@ -12,7 +12,13 @@ parser.add_argument('--list','-l',
 ## TO DO: Write a sub-parser for this command
 parser.add_argument('--neo4j',
                     nargs='+', default=None,
-                    help='Starts/stops neo4j instances (port/location)',)
+                    help='Starts/stops neo4j instances (DBlocation/port)',)
+
+## TO DO: Write a sub-parser for this command
+parser.add_argument('--buildbot',
+                    nargs='+', default=None,
+                    help=('Starts/stops buildbot instances '
+                          '(package_file/bb port/neo4j port/neo4j addr)',))
 
 args = vars(parser.parse_args())
 logging.basicConfig(level=logging.INFO)
@@ -177,7 +183,26 @@ for container_name in required_containers:
         time.sleep(10)
         docker_pull(container_name)
 
+####################################################################
 
+def buildbot_start_API(**kwargs):
+    # Starts the buildbot API
+    bcmd = (
+        "python buildbot/REST_API_buildbot.py "
+        "--BUILDBOT_PORT {BUILDBOT_PORT} "
+        "--NEO4J_AUTH buildbot:tulsa "
+        "--NEO4J_TCP_PORT {NEO4J_PORT} "
+        "--NEO4J_TCP_ADDR {NEO4J_ADDR} "
+        "--buildbot_package {BUILDBOT_PACKAGE} "
+    )
+    cmd = bcmd.format(**kwargs)
+    print cmd
+    output = subprocess.check_output(cmd, shell=True)
+    print output
+    return output
+
+####################################################################
+    
 if args["neo4j"] is not None:
 
     action = args["neo4j"][0].lower()
@@ -227,3 +252,28 @@ if args["neo4j"] is not None:
     else:
         msg = "Unrecognized neo4j action {}".format(action)
         logging.error(msg)
+
+####################################################################
+        
+if args["buildbot"] is not None:
+
+    action = args["buildbot"][0].lower()
+
+    if action == "start":
+        n_args = len(args["buildbot"])
+        
+        if n_args == 5:
+            action, f_package,port,neo4j_port,neo4j_addr = args["buildbot"]
+        else:
+            msg = "--buildbot start package_file bb_port neo_port neo_addr"
+            logging.error(msg)
+            exit(2)
+            
+        ID = buildbot_start_API(
+            NEO4J_PORT=neo4j_port,
+            NEO4J_ADDR=neo4j_addr,
+            BUILDBOT_PORT=port,
+            BUILDBOT_PACKAGE=f_package,
+            **args)
+        msg = "Started buildbot:{}".format(ID.strip())
+        logging.info(msg)

@@ -12,6 +12,10 @@ The Flask APP needs to be started with the proper enviorment variables set.
 desc = '''BuildBot API'''
 parser = argparse.ArgumentParser(description=desc)
 
+parser.add_argument('--BUILDBOT_PORT','-b',
+                    default=None,
+                    help="buildbot's port")
+
 parser.add_argument('--NEO4J_TCP_PORT','-p',
                     default=None,
                     help='NEO4J port')
@@ -24,9 +28,14 @@ parser.add_argument('--NEO4J_AUTH','-l',
                     default=None,
                     help='NEO4J username:password')
 
-parser.add_argument('--buildbot_package','-b',
+parser.add_argument('--buildbot_package','-f',
                     required=True,
                     help='BuildBot package file to load')
+
+parser.add_argument('--debug','-d',
+                    default=True,
+                    action="store_false",
+                    help='Turns off debug mode for Flask')
 
 args = vars(parser.parse_args())
 
@@ -48,8 +57,10 @@ gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 
 # Flask entry point
 API = Flask(__name__)
-info_msg = "Flask API running package {buildbot_package}"
-logging.warning(info_msg.format(**neo4j_login))
+API.logger.setLevel(logging.INFO)
+
+info_msg = "Buildbot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
+logging.warning(info_msg.format(**args))
 
 # Helper functions
 import interface_neo4j_json as inter
@@ -270,16 +281,20 @@ def update_node(label):
 
 if __name__ == "__main__":
 
-    API.run(debug=True)
+    API.run(
+        port =int(args["BUILDBOT_PORT"]),
+        debug=args["debug"],
+    )
 
+    '''
+    # Old inline-test code here
+    
     # DEBUG
     API.logger.setLevel(logging.DEBUG)
 
-    exit()
-
     # Startup the database connection
-    neo4j_login = neo4j_credentials_from_env()
-    gdb = enhanced_GraphDatabase(**neo4j_login)
+    #neo4j_login = neo4j_credentials_from_env()
+    #gdb = enhanced_GraphDatabase(**neo4j_login)
     
     import logging, sys
     API.logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -332,3 +347,4 @@ if __name__ == "__main__":
     url = '/buildbot/api/v1.0/node/{label}/remove'
     print post(url, json.loads(response_n1.data))
     print post(url, json.loads(response_n2.data))
+    '''
