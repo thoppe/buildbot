@@ -30,7 +30,10 @@ parser.add_argument('--buildbot_package','-b',
 
 args = vars(parser.parse_args())
 
-# Remove command line arguments that are None
+'''
+Remove command line arguments that are None (they will try to load
+from an env variable instead).
+'''
 none_args = [key for key,val in args.items() if val is None]
 for key in none_args:
     del args[key]
@@ -47,7 +50,6 @@ gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 API = Flask(__name__)
 info_msg = "Flask API running package {buildbot_package}"
 logging.warning(info_msg.format(**neo4j_login))
-
 
 # Helper functions
 import interface_neo4j_json as inter
@@ -104,8 +106,6 @@ API_DOCS["remove_relationship"] = {
     "description" : "Remove a relationship.",
     "url" : '/buildbot/api/v1.0/relationship/{}/remove'.format(rel_API),
 }
-
-
 
 @API.route('/')
 def root_page():

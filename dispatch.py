@@ -29,6 +29,7 @@ def docker_stop_neo4j(**kwargs):
     info = docker_ps()
     
     if kwargs["NEO4J_PORT"] not in list_neo4j_ports():
+        print list_neo4j_ports(), kwargs["NEO4J_PORT"]
         msg = 'neo4j port {NEO4J_PORT} not open!'.format(**kwargs)
         logging.critical(msg)
         exit(3)
@@ -214,7 +215,6 @@ if args["neo4j"] is not None:
         action, port = args["neo4j"][:2]
 
         try:
-            port = int(port)
             docker_stop_neo4j(NEO4J_PORT=port,**args)
         except:
             if port == "all":

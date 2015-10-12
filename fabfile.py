@@ -1,5 +1,6 @@
 import os
 from fabric.api import *
+import fabric.api
 
 ENV_VARS = {
     "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/"),
@@ -71,20 +72,20 @@ def metadraw():
 #    docker_neo4j()
 #    docker_api()
 
-def neo4j():
-    local("docker pull tpires/neo4j")
-    
-    cmd = ("docker run "
-           "-v {NEO4J_DATABASE_DIR}:/var/lib/neo4j/data "
-           "-i -t -d "
-           "-e NEO4J_AUTH={NEO4J_USERNAME}:{NEO4J_PASSWORD} "
-           "--name buildbot_neo4j "
-           "--cap-add=SYS_RESOURCE "
-           "-p {NEO4J_PORT_7474_TCP_PORT}:7474 "
-           "tpires/neo4j")
-        
-    local(cmd.format(**os.environ))
+def start():
+    '''
+    Starts a test instance of NEO4J
+    '''
+    with fabric.api.settings(warn_only=True):
+        local("python ./dispatch.py --neo4j start database 7474")
 
+def stop():
+    '''
+    Stops the test instance of NEO4J
+    '''
+    with fabric.api.settings(warn_only=True):
+        local("python ./dispatch.py --neo4j stop 7474")
+     
 #def docker_api():
 #    local("docker build -t buildbot_api_baseimage .")
 #    
