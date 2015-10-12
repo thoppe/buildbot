@@ -202,6 +202,12 @@ def buildbot_start_API(**kwargs):
     
     return kwargs["BUILDBOT_PORT"]
 
+def buildbot_stop_API(**kwargs):
+    import requests
+    url = "http://localhost:{BUILDBOT_PORT}/shutdown"
+    r = requests.post(url.format(**kwargs))
+    return r.text
+    
 ####################################################################
     
 if args["neo4j"] is not None:
@@ -278,3 +284,20 @@ if args["buildbot"] is not None:
             **args)
         msg = "Started buildbot:{}".format(ID.strip())
         logging.info(msg)
+
+
+    elif action == "stop":
+        n_args = len(args["buildbot"])
+
+        n_args_msg = "--neo4j stop bb_port [or 'all' (not implemented)]"
+        if n_args<2:
+            logging.error(n_args_msg)
+            exit(2)
+            
+        action, port = args["buildbot"][:2]
+        response = buildbot_stop_API(BUILDBOT_PORT=port)
+        print response
+
+    else:
+        print "UNKNOWN ACTION", action
+        exit(3)

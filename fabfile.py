@@ -71,16 +71,17 @@ def start():
     Starts a test instance of NEO4J
     '''
     with fabric.api.settings(warn_only=True):
-        local("python ./dispatch.py --neo4j start database 7474")
-        time.sleep(3)
-        local("python ./dispatch.py --buildbot start packages/checkin/checkin.json 5001 7474 localhost")
+        local("./dispatch.py --neo4j start database 7474")
+        time.sleep(5)
+        local("./dispatch.py --buildbot start packages/checkin/checkin.json 5001 7474 localhost")
 
 def stop():
     '''
     Stops the test instance of NEO4J
     '''
     with fabric.api.settings(warn_only=True):
-        local("python ./dispatch.py --neo4j stop 7474")
+        local("./dispatch.py --neo4j stop 7474")
+        local("./dispatch.py --buildbot stop 5001")
     
 def api():
     local("python buildbot/REST_API_buildbot.py")
