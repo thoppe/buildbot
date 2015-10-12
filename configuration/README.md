@@ -22,8 +22,10 @@ The `AWS_VPC` and `AWS_SUBNET` keys must be setup in the console for now.
 You should only need to do this once, or when you want to completely start over. First, build a valid keypair:
 
     fab create_keypair
-
-This generates a file `AWS_buildbot.pem`, which should **not** be checked into the repo. Now create a security group and enable SSH permissions
+    emacs settings/AWS_buildbot.pem 
+    chmod 400 settings/AWS_buildbot.pem
+    
+This generates a file `AWS_buildbot.pem`, which should **not** be checked into the repo. Edit it to remove the first line. Now create a security group and enable SSH permissions
 
     fab create_security_group
 
@@ -38,4 +40,5 @@ This make take a few minutes to spin up. Once it's up load and save the public I
 Make sure the the status is "running" before moving on.
 
 ### Deploying BuildBot
+
 

@@ -14,8 +14,14 @@ args = {
     "AWS_SUBNET" : os.environ["AWS_SUBNET"],
 }
 
+def KILL_ALL():
+    # This removes the keypair, security group and shuts down the instance
+    pass
+
 # Create AWS key/pair
 def create_keypair():
+    #ec2-delete-keypair AWS_buildbot
+
     f_keypair = "settings/{keypair_name}.pem".format(**args)
     if os.path.exists(f_keypair):
         msg = "keypair file already exists! exiting"
@@ -54,14 +60,14 @@ def _read_public_IP():
         
 # Create a security group
 def create_security_group():
-    f_group = "settings/{security_group}.group".format(**args)
+    f_group = "settings/{security_group_name}.group".format(**args)
     
     if os.path.exists(f_group):
         msg = "group file already exists! exiting"
         raise ValueError(msg)
     
     cmd = (
-        'ec2-create-group {security_group} '
+        'ec2-create-group {security_group_name} '
         '-d "BuildBot/Dispatch" '
         '--vpc {AWS_VPC} '
         '> '
@@ -106,5 +112,14 @@ def get_public_IP():
     local(cmd.format(**args) )
         
     _read_public_IP()
+
+
+def ssh():
+    _read_public_IP()
+    f_keypair = "settings/{keypair_name}.pem".format(**args)
+
+    cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP}"
+    local(cmd.format(**args))
+    
 
     
