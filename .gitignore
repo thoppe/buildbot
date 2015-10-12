@@ -9,3 +9,6 @@
 
 # Database directory
 database/*
+
+# SSH PEM files (good idea not to save these!)
+*.pem
