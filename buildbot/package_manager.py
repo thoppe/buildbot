@@ -4,6 +4,7 @@ Nodes are dynamicaly loaded into the namespace with this module.
 
 import json
 import peacock
+import os
 
 from generic_datatypes import node_container
 from generic_datatypes import edge_container
@@ -149,7 +150,7 @@ def export_package_to_swagger(p):
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
     S.basePath = "/buildbot/api/v1.0"
-    S.host = "localhost:5000"
+    S.host = "localhost:{BUILDBOT_PORT}".format(**os.environ)
 
     # Definitions taken from package nodes
     S.definitions = defs = peacock.Definitions()

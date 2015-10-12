@@ -3,9 +3,7 @@ The buildbot_contract manager loads and validates a swagger file.
 '''
 import os, json, requests, subprocess, tempfile
 from swagger_spec_validator.validator20 import validate_spec
-
 import urlparse
-
 
 class buildbot_contract(object):
 
