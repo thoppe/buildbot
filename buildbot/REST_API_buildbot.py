@@ -1,7 +1,7 @@
 #!flask/bin/python
 from flask import Flask, request, abort, render_template, redirect
 
-import json, logging
+import json, logging, argparse
 from utils import neo4j_credentials_from_env
 import graphDB 
 
@@ -9,10 +9,36 @@ import graphDB
 The Flask APP needs to be started with the proper enviorment variables set.
 '''
 
+desc = '''BuildBot API'''
+parser = argparse.ArgumentParser(description=desc)
+
+parser.add_argument('--NEO4J_TCP_PORT','-p',
+                    default=None,
+                    help='NEO4J port')
+
+parser.add_argument('--NEO4J_TCP_ADDR','-a',
+                    default=None,
+                    help='NEO4J TCP address')
+
+parser.add_argument('--NEO4J_AUTH','-l',
+                    default=None,
+                    help='NEO4J username:password')
+
+parser.add_argument('--buildbot_package','-b',
+                    required=True,
+                    help='BuildBot package file to load')
+
+args = vars(parser.parse_args())
+
+# Remove command line arguments that are None
+none_args = [key for key,val in args.items() if val is None]
+for key in none_args:
+    del args[key]
+
 #####################################################################
 
 # Fire up a database connection
-neo4j_login = neo4j_credentials_from_env()
+neo4j_login = neo4j_credentials_from_env(**args)
 gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 
 #graphDB.hard_reset(gdb)

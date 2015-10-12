@@ -19,7 +19,6 @@ logging.basicConfig(level=logging.INFO)
 
 _default_location = "database/"
 
-
 required_containers = [
     'tpires/neo4j',
 ]

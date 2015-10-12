@@ -8,17 +8,29 @@ def get_env_variable(key):
         raise KeyError(msg)
     return val
 
-def neo4j_credentials_from_env():
-    user_pass = get_env_variable("NEO4J_ENV_NEO4J_AUTH")
-    username, password = user_pass.split(':')
-    tcp_addr = get_env_variable("NEO4J_PORT_7474_TCP_ADDR")
-    tcp_port = get_env_variable("NEO4J_PORT_7474_TCP_PORT")
-    
+def neo4j_credentials_from_env(**kwargs):
+    cred = {}
+
+    env_keys = {
+        "auth"    : "NEO4J_AUTH",
+        "port": "NEO4J_TCP_PORT",
+        "addr": "NEO4J_TCP_ADDR",
+        "f_package" : "buildbot_package",
+    }
+
+    for key,name in env_keys.items():
+        if name in kwargs:
+            cred[key] = kwargs[name]
+        else:
+            cred[key] = get_env_variable(name)
+        
+    username, password = cred["auth"].split(':')
+
     return {
         "username" : username,
         "password" : password,
-        "url" : "http://{}:{}".format(tcp_addr, tcp_port),
-        "buildbot_package" : get_env_variable("buildbot_package"),
+        "url" : "http://{}:{}".format(cred["addr"], cred["port"]),
+        "buildbot_package" : cred["f_package"],
     }
 
 grassfile = '''
