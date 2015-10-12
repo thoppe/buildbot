@@ -59,7 +59,7 @@ gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
 
-info_msg = "Buildbot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
+info_msg = "Started BuildBot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
 logging.warning(info_msg.format(**args))
 
 # Helper functions

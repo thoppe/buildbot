@@ -196,10 +196,11 @@ def buildbot_start_API(**kwargs):
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
     cmd = bcmd.format(**kwargs)
-    print cmd
-    output = subprocess.check_output(cmd, shell=True)
-    print output
-    return output
+
+    # Run the process in the background
+    subprocess.Popen(cmd, shell=True)
+    
+    return kwargs["BUILDBOT_PORT"]
 
 ####################################################################
     

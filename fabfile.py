@@ -1,4 +1,4 @@
-import os
+import os, time
 from fabric.api import *
 import fabric.api
 
@@ -72,6 +72,8 @@ def start():
     '''
     with fabric.api.settings(warn_only=True):
         local("python ./dispatch.py --neo4j start database 7474")
+        time.sleep(3)
+        local("python ./dispatch.py --buildbot start packages/checkin/checkin.json 5001 7474 localhost")
 
 def stop():
     '''
