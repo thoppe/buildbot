@@ -12,6 +12,10 @@ From the AWS.IAM create an access key for yourself. Set the enviroment variables
 
      AWS_ACCESS_KEY="XXXXXXXXXXXXXXXXXXXX"
      AWS_SECRET_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+     AWS_VPC="XXXXXXXXXXXXXXXXXX"
+     AWS_SUBNET="XXXXXXXXXXXXXXXXXX"
+     
+The `AWS_VPC` and `AWS_SUBNET` keys must be setup in the console for now.
 
 ### Setting up an instance
 
@@ -23,5 +27,9 @@ This generates a file `AWS_buildbot.pem`, which should **not** be checked into t
 
     fab create_security_group
 
+This creates a file named `buildbot_instance.group`, which tracks the security group name created. Spin up a EC2 instance by running  
 
+     fab launch_EC2_instance
+
+### Deploying BuildBot
 

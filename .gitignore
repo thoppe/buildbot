@@ -13,3 +13,4 @@ database/*
 # Configuration files (good idea not to save these!)
 *.pem
 *.group
+*.EC2
