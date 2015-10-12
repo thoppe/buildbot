@@ -1,6 +1,9 @@
 import os
 from fabric.api import *
 
+# Get ssh commands working with this:
+# http://stackoverflow.com/questions/5327465/using-an-ssh-keyfile-with-fabric
+
 AWS_AMI = {
     "Ubuntu:14.04" : "d05e75b8",
 } 
@@ -13,6 +16,10 @@ args = {
     "AWS_VPC" : os.environ["AWS_VPC"],
     "AWS_SUBNET" : os.environ["AWS_SUBNET"],
 }
+
+env.hosts = [
+    'localhosts',
+]
 
 def KILL_ALL():
     # This removes the keypair, security group and shuts down the instance
@@ -121,5 +128,31 @@ def ssh():
     cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP}"
     local(cmd.format(**args))
     
+def install_deps():
+    sudo("apt-get update")
+    sudo("apt-get install -y python-dev git python-pip dtach")
+    sudo("pip install PyCrypto fabric")
 
+    # Install docker PGP key
+    cmd = (
+        "apt-key adv --keyserver "
+        "hkp://p80.pool.sks-keyservers.net:80 "
+        "--recv-keys 58118E89F3A912897C070ADBF76221572C52609D"
+    )
+    sudo(cmd)
+
+    cmd = (
+        "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' "
+        "| sudo tee -a /etc/apt/sources.list"
+    )
+    sudo(cmd)
+    
+    sudo("apt-get update")
+    sudo("apt-get install docker-engine")
+    sudo("usermod -a -G docker ubuntu")
+    
+    run('git clone {github_repo}'.format(**config))
+    with cd("buildbot"):
+        sudo("pip install -r requirements.txt")
+        run('fab docker_neo4j')
     
