@@ -1,43 +1,48 @@
 #!flask/bin/python
 from flask import Flask, request, abort, render_template, redirect
 
-import json, logging, argparse
+import json, logging, argparse, os
 from utils import neo4j_credentials_from_env
 import graphDB 
 
 '''
-The Flask APP needs to be started with the proper enviorment variables set.
+The Flask APP needs to be started with the proper enviorment variables set,
+or run with command-line arguments.
 '''
 
-desc = '''BuildBot API'''
-parser = argparse.ArgumentParser(description=desc)
+if __name__ == "__main__":
 
-parser.add_argument('--BUILDBOT_PORT','-b',
-                    default=None,
-                    help="buildbot's port")
+    desc = '''BuildBot API'''
+    parser = argparse.ArgumentParser(description=desc)
 
-parser.add_argument('--NEO4J_TCP_PORT','-p',
-                    default=None,
-                    help='NEO4J port')
+    parser.add_argument('--BUILDBOT_PORT','-b',
+                        default=None,
+                        help="buildbot's port")
 
-parser.add_argument('--NEO4J_TCP_ADDR','-a',
-                    default=None,
-                    help='NEO4J TCP address')
+    parser.add_argument('--NEO4J_TCP_PORT','-p',
+                        default=None,
+                        help='NEO4J port')
 
-parser.add_argument('--NEO4J_AUTH','-l',
-                    default=None,
-                    help='NEO4J username:password')
+    parser.add_argument('--NEO4J_TCP_ADDR','-a',
+                        default=None,
+                        help='NEO4J TCP address')
 
-parser.add_argument('--buildbot_package','-f',
-                    required=True,
-                    help='BuildBot package file to load')
+    parser.add_argument('--NEO4J_AUTH','-l',
+                        default=None,
+                        help='NEO4J username:password')
 
-parser.add_argument('--debug','-d',
-                    default=True,
-                    action="store_false",
-                    help='Turns off debug mode for Flask')
+    parser.add_argument('--buildbot_package','-f',
+                        default=None,
+                        help='BuildBot package file to load')
 
-args = vars(parser.parse_args())
+    parser.add_argument('--debug','-d',
+                        default=True,
+                        action="store_false",
+                        help='Turns off debug mode for Flask')
+
+    args = vars(parser.parse_args())
+else:
+    args = {"debug": True}
 
 '''
 Remove command line arguments that are None (they will try to load
@@ -60,7 +65,9 @@ API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
 
 info_msg = "Started BuildBot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
-logging.warning(info_msg.format(**args))
+all_args = args.copy()
+all_args.update(os.environ)
+logging.warning(info_msg.format(**all_args))
 
 # Helper functions
 import interface_neo4j_json as inter

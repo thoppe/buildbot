@@ -12,7 +12,7 @@ def neo4j_credentials_from_env(**kwargs):
     cred = {}
 
     env_keys = {
-        "auth"    : "NEO4J_AUTH",
+        "auth": "NEO4J_AUTH",
         "port": "NEO4J_TCP_PORT",
         "addr": "NEO4J_TCP_ADDR",
         "f_package" : "buildbot_package",

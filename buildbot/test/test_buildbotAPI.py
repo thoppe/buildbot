@@ -6,19 +6,18 @@ from buildbot.graphDB import enhanced_GraphDatabase
 
 # Helper functions
 import buildbot.interface_neo4j_json as interface
-
 from buildbot.utils import neo4j_credentials_from_env
-
-from buildbot.REST_API_buildbot import API
-API.config["DEBUG"] = True
 
 # Test basic graph operations
 class buildbotAPI_test_suite(TestCase):
     test_desc = "unittest"
 
     def setUp(self):
+        from buildbot.REST_API_buildbot import API
+        API.config["DEBUG"] = True
+
         neo4j_login = neo4j_credentials_from_env()
-        neo4j_login["buildbot_package"]= "packages/project_management.json"
+        
         
         self.gdb = enhanced_GraphDatabase(**neo4j_login)
         self.P   = self.gdb.package

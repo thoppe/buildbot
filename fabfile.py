@@ -2,11 +2,13 @@ import os, time
 from fabric.api import *
 import fabric.api
 
+# Testing arguments
 ENV_VARS = {
     "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/"),
     "NEO4J_TCP_ADDR" : "localhost",
     "NEO4J_TCP_PORT" : "7474",
     "NEO4J_AUTH"     : "buildbot:tulsa",
+    "BUILDBOT_PORT"  : "5001",
     "buildbot_package"         : "packages/checkin/checkin.json",
 }
 
@@ -21,11 +23,11 @@ for key,val in ENV_VARS.items():
 
 test_directory = "buildbot/test"
 test_order = [
-    "test_interface.py",
-    "test_docker.py",
-    "test_graph.py",
+#    "test_interface.py",
+#    "test_docker.py",
+#    "test_graph.py",
     "test_buildbotAPI.py",
-    "test_contracts.py", 
+#    "test_contracts.py", 
 ]
 test_package_requirements = {
     "test_buildbotAPI.py" : "packages/project_management.json",
@@ -38,10 +40,12 @@ def test(args = "-x -v"):
 
     for name in test_order:
         f_test = os.path.join(test_directory, name)
+        cmd = nose_cmd.format(f_test=f_test,args=args)
+        
         if name in test_package_requirements:
             os.environ["buildbot_package"] = test_package_requirements[name]
-        
-        local(nose_cmd.format(f_test=f_test,args=args))
+
+        local(cmd)
 
 
 def clean():
