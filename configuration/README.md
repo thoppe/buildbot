@@ -19,5 +19,9 @@ You should only need to do this once, or when you want to completely start over.
 
     fab create_keypair
 
-This generates a file `AWS_buildbot.pem`, which should **not** be checked into the repo.
+This generates a file `AWS_buildbot.pem`, which should **not** be checked into the repo. Now create a security group and enable SSH permissions
+
+    fab create_security_group
+
+
 

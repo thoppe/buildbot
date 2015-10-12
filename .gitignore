@@ -10,5 +10,6 @@
 # Database directory
 database/*
 
-# SSH PEM files (good idea not to save these!)
+# Configuration files (good idea not to save these!)
 *.pem
+*.group
