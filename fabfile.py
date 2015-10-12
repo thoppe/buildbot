@@ -10,8 +10,6 @@ ENV_VARS = {
     "buildbot_package"         : "packages/checkin/checkin.json",
 }
 
-#ENV_VARS["buildbot_package"] = 
-
 # Split the ENV login keys if this is a local build
 a,b = ENV_VARS["NEO4J_ENV_NEO4J_AUTH"].split(":")
 ENV_VARS["NEO4J_USERNAME"], ENV_VARS["NEO4J_PASSWORD"] = a,b
@@ -68,10 +66,6 @@ def metadraw():
 
 #########################################################################
 
-#def docker_build_test_env():
-#    docker_neo4j()
-#    docker_api()
-
 def start():
     '''
     Starts a test instance of NEO4J
@@ -85,35 +79,6 @@ def stop():
     '''
     with fabric.api.settings(warn_only=True):
         local("python ./dispatch.py --neo4j stop 7474")
-     
-#def docker_api():
-#    local("docker build -t buildbot_api_baseimage .")
-#    
-#    cmd = ("docker run "
-#           "--link buildbot_neo4j:NEO4J "
-#           "-i -t -d "
-#           "-p 5000:5000 "
-#           "--name buildbot_api "
-#           "buildbot_api_baseimage "
-#           )
-#    
-#    local(cmd.format(**os.environ))
-    
-#def docker_teardown_all():
-#    docker_teardown_neo4j()
-#    docker_teardown_api()
-    
-def neo4j_teardown():
-    try:
-        local("docker stop buildbot_neo4j")
-        local("docker rm buildbot_neo4j")
-    except: pass
-        
-#def docker_teardown_api():
-#    try:
-#        local("docker stop buildbot_api")
-#        local("docker rm buildbot_api")
-#    except: pass
     
 def api():
     local("python buildbot/REST_API_buildbot.py")
