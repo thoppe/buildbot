@@ -37,7 +37,11 @@ This make take a few minutes to spin up. Once it's up load and save the public I
 
     fab get_public_IP
 
-Make sure the the status is "running" before moving on.
+Make sure the the status is "running" before moving on. Next we need to install docker and all the other pre-reqs:
+
+    fab configure_server
+
+The server has to reboot (to load the docker user) so take a few minutes before moving on to the next part.
 
 ### Deploying BuildBot
 

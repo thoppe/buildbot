@@ -127,6 +127,20 @@ def ssh():
 
     cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP}"
     local(cmd.format(**args))
+
+def configure_server():
+    _read_public_IP()
+    f_keypair = "settings/{keypair_name}.pem".format(**args)
+
+    # Copy the file to the remote machine
+    cmd = "scp -i settings/{keypair_name}.pem configure_server.sh ubuntu@{public_IP}:/home/ubuntu"
+    local(cmd.format(**args))
+
+    cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP} 'sudo bash configure_server.sh'"
+    local(cmd.format(**args))
+
+    
+    
     
 def install_deps():
     sudo("apt-get update")
