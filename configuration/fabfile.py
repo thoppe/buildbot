@@ -128,45 +128,20 @@ def ssh():
     cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP}"
     local(cmd.format(**args))
 
-def configure_server():
+def _runscript(f_script):
     _read_public_IP()
     f_keypair = "settings/{keypair_name}.pem".format(**args)
 
     # Copy the file to the remote machine
-    cmd = "scp -i settings/{keypair_name}.pem configure_server.sh ubuntu@{public_IP}:/home/ubuntu"
-    local(cmd.format(**args))
+    cmd = "scp -i settings/{keypair_name}.pem {f_script} ubuntu@{public_IP}:/home/ubuntu"
+    local(cmd.format(f_script=f_script,**args))
 
-    cmd = "ssh -i settings/{keypair_name}.pem ubuntu@{public_IP} 'sudo bash configure_server.sh'"
-    local(cmd.format(**args))
+    cmd = "ssh -t -i settings/{keypair_name}.pem ubuntu@{public_IP} 'sudo bash {f_script}'"
+    local(cmd.format(f_script=f_script,**args))
 
-    
-    
-    
-def install_deps():
-    sudo("apt-get update")
-    sudo("apt-get install -y python-dev git python-pip dtach")
-    sudo("pip install PyCrypto fabric")
 
-    # Install docker PGP key
-    cmd = (
-        "apt-key adv --keyserver "
-        "hkp://p80.pool.sks-keyservers.net:80 "
-        "--recv-keys 58118E89F3A912897C070ADBF76221572C52609D"
-    )
-    sudo(cmd)
+def configure_server():
+    _runscript("configure_server.sh")
 
-    cmd = (
-        "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' "
-        "| sudo tee -a /etc/apt/sources.list"
-    )
-    sudo(cmd)
-    
-    sudo("apt-get update")
-    sudo("apt-get install docker-engine")
-    sudo("usermod -a -G docker ubuntu")
-    
-    run('git clone {github_repo}'.format(**config))
-    with cd("buildbot"):
-        sudo("pip install -r requirements.txt")
-        run('fab docker_neo4j')
-    
+def deploy():
+    _runscript("deploy_buildbot.sh")

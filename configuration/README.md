@@ -45,4 +45,4 @@ The server has to reboot (to load the docker user) so take a few minutes before 
 
 ### Deploying BuildBot
 
-
+    fab deploy

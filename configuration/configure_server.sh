@@ -7,7 +7,9 @@ fi
 # Grab basic python deps
 apt-get update
 apt-get install -y python-dev git python-pip dtach
-pip install PyCrypto fabric
+
+# Install SSL lib to remove pip warnings
+apt-get install -y libffi-dev libssl-dev
 
 # Install docker PGP key
 apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
