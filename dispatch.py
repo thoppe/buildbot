@@ -162,11 +162,9 @@ def next_open_port():
 
 if args["list"]:
 
-    print "** Running Containers **"
+    #print "** Running Containers **"
     data = docker_reduced_ps()
-    for key,val in data.items():
-        pprint(val)
-
+    print json.dumps(data,indent=2)
     exit(0)
 
 
