@@ -147,7 +147,7 @@ def list_neo4j_ports():
     return [data["port"] for data in
             docker_reduced_ps().values()]
 
-def next_open_port():
+def next_open_neo4j_port():
     starting_port = 7474
     maximum_port  = 2**16
     known_ports = list_neo4j_ports()
@@ -155,7 +155,7 @@ def next_open_port():
         port = str(n)
         if port not in known_ports:
             return port
-    msg = "Unable to find an open port"
+    msg = "Unable to find an open neo4j port"
     logging.error(msg)
     exit()
     
@@ -205,9 +205,27 @@ def buildbot_ps():
         data[package_name] = port
     return data
 
-if args["list"]:
+def list_buildbot_ports():
+    '''
+    Lists all ports used by buildbot Flask apps.
+    '''
+    return buildbot_ps().values()
 
-    #print "** Running Containers **"
+def next_open_buildbot_port():
+    starting_port = 5001
+    maximum_port  = 7000
+    known_ports   = list_buildbot_ports()
+    for n in xrange(starting_port, maximum_port):
+        port = str(n)
+        if port not in known_ports:
+            return port
+    msg = "Unable to find an open buildbot port"
+    logging.error(msg)
+    exit()
+    
+####################################################################################
+
+if args["list"]:
     data = {
         "neo4j"    : docker_reduced_ps(),
         "buildbot" : buildbot_ps()
@@ -241,9 +259,9 @@ if args["neo4j"] is not None:
             msg = "Location not specified (use only for testing!)"
             logging.warning(msg)
             location = _default_location
-            port = next_open_port()
+            port = next_open_neo4j_port()
         elif n_args == 2:
-            port = next_open_port()        
+            port = next_open_neo4j_port()        
         elif n_args == 3:
             action, location, port = args["neo4j"]
         else:
