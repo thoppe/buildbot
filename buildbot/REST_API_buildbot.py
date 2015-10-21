@@ -39,8 +39,11 @@ if __name__ == "__main__":
                         default=True,
                         action="store_false",
                         help='Turns off debug mode for Flask')
-
     args = vars(parser.parse_args())
+
+    if args["BUILDBOT_PORT"] is not None:
+        os.environ["BUILDBOT_PORT"] = args["BUILDBOT_PORT"]
+
 else:
     args = {"debug": True}
 
@@ -56,6 +59,8 @@ for key in none_args:
 
 # Fire up a database connection
 neo4j_login = neo4j_credentials_from_env(**args)
+
+print neo4j_login
 gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 
 #graphDB.hard_reset(gdb)

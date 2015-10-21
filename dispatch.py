@@ -20,6 +20,12 @@ parser.add_argument('--buildbot',
                     help=('Starts/stops buildbot instances '
                           '(package_file/bb port/neo4j port/neo4j addr)',))
 
+# Starts both a neo4j instance AND a buildbot instance on next port for each
+parser.add_argument('--combined',
+                    nargs=2, default=None,
+                    help=('Starts/stops instances '
+                          '(package_file/neo4j addr)',))
+
 args = vars(parser.parse_args())
 logging.basicConfig(level=logging.INFO)
 
@@ -172,7 +178,7 @@ def buildbot_start_API(**kwargs):
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
     cmd = bcmd.format(**kwargs)
-
+    print cmd
     # Run the process in the background
     subprocess.Popen(cmd, shell=True)
     
@@ -199,17 +205,19 @@ def buildbot_ps():
     for item in output[1:]:  # First row is a header
         if f_buildbot_api not in item:
             continue
+        if "python" not in item:
+            continue
         item = item.split()
         port = item[item.index("--BUILDBOT_PORT")+1]
         package_name = item[item.index("--buildbot_package")+1]
-        data[package_name] = port
+        data[port] = package_name
     return data
 
 def list_buildbot_ports():
     '''
     Lists all ports used by buildbot Flask apps.
     '''
-    return buildbot_ps().values()
+    return buildbot_ps().keys()
 
 def next_open_buildbot_port():
     starting_port = 5001
@@ -340,3 +348,33 @@ if args["buildbot"] is not None:
     else:
         print "UNKNOWN ACTION", action
         exit(3)
+
+####################################################################
+        
+if args["combined"] is not None:
+
+    n_args = len(args["combined"])
+    f_package,neo4j_db = args["combined"]
+
+    neo4j_port = next_open_neo4j_port()
+    buildbot_port = next_open_buildbot_port()
+    neo4j_addr = "localhost"
+    
+    ID = docker_start_neo4j(
+        NEO4J_PORT=neo4j_port,
+        NEO4J_DATABASE_LOCATION=neo4j_db,
+        **args)
+    
+    msg = "Started docker:neo4j {}".format(ID.strip())
+    logging.info(msg)
+    
+    time.sleep(10)
+    
+    ID = buildbot_start_API(
+        NEO4J_PORT=neo4j_port,
+        NEO4J_ADDR=neo4j_addr,
+        BUILDBOT_PORT=buildbot_port,
+        BUILDBOT_PACKAGE=f_package,**args)
+    msg = "Started buildbot:{}".format(ID.strip())
+    logging.info(msg)
+    
