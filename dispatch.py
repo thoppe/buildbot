@@ -159,28 +159,6 @@ def next_open_port():
     logging.error(msg)
     exit()
     
-
-if args["list"]:
-
-    #print "** Running Containers **"
-    data = docker_reduced_ps()
-    print json.dumps(data,indent=2)
-    exit(0)
-
-
-for container_name in required_containers:
-    try:
-        docker_inspect(container_name)
-        #msg = "Found required container {}.".format(container_name)
-        #logging.info(msg)
-    except subprocess.CalledProcessError:
-        msg = "Failed to load container {}.".format(container_name)
-        logging.error(msg)
-        msg = "Pulling image in 10 seconds if not canceled."
-        logging.warning(msg)
-        time.sleep(10)
-        docker_pull(container_name)
-
 ####################################################################
 
 def buildbot_start_API(**kwargs):
@@ -207,7 +185,52 @@ def buildbot_stop_API(**kwargs):
     return r.text
     
 ####################################################################
+
+
+def buildbot_ps():
+    # Uses UNIX ps to determine which python Flask were launched and what ports they were mapped to
     
+    cmd_args = ['ps', '-aF']
+    shell  = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
+    output = shell.communicate()[0].strip().split('\n')
+    f_buildbot_api = "buildbot/REST_API_buildbot.py"
+
+    data = {}
+    for item in output[1:]:  # First row is a header
+        if f_buildbot_api not in item:
+            continue
+        item = item.split()
+        port = item[item.index("--BUILDBOT_PORT")+1]
+        package_name = item[item.index("--buildbot_package")+1]
+        data[package_name] = port
+    return data
+
+if args["list"]:
+
+    #print "** Running Containers **"
+    data = {
+        "neo4j"    : docker_reduced_ps(),
+        "buildbot" : buildbot_ps()
+    }
+    print json.dumps(data,indent=2)
+    exit(0)
+
+
+for container_name in required_containers:
+    try:
+        docker_inspect(container_name)
+        #msg = "Found required container {}.".format(container_name)
+        #logging.info(msg)
+    except subprocess.CalledProcessError:
+        msg = "Failed to load container {}.".format(container_name)
+        logging.error(msg)
+        msg = "Pulling image in 10 seconds if not canceled."
+        logging.warning(msg)
+        time.sleep(10)
+        docker_pull(container_name)
+
+####################################################################
+
 if args["neo4j"] is not None:
 
     action = args["neo4j"][0].lower()
