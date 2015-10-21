@@ -55,7 +55,6 @@ def docker_stop_neo4j(**kwargs):
 
     cmd = "docker rm {name}".format(**kwargs)
     output = subprocess.check_output(cmd, shell=True)
-
     
 
 def docker_start_neo4j(**kwargs):
@@ -368,7 +367,7 @@ if args["combined"] is not None:
     msg = "Started docker:neo4j {}".format(ID.strip())
     logging.info(msg)
     
-    time.sleep(10)
+    time.sleep(5)
     
     ID = buildbot_start_API(
         NEO4J_PORT=neo4j_port,
