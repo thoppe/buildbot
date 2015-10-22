@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO)
 
 _default_location = "database/"
 
-required_containers = [
+_required_containers = [
     'tpires/neo4j',
 ]
 
@@ -288,7 +288,7 @@ def check_for_required_containers():
     Checks for any docker containers listed in required_containers
     and pulls them if they are missing.
     '''
-    for container_name in required_containers:
+    for container_name in _required_containers:
         try:
             docker_inspect(container_name)
             msg = "Found required container {}.".format(container_name)
