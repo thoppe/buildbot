@@ -26,17 +26,25 @@ homepage = '''
 def root_page():
     return homepage
 
-@API.route('/list')
-def list_pages():
-    output = subprocess.check_output(['./dispatch.py', '-l'])
+def run_dispatch(*args):
+    sub_args = ['./dispatch.py'] + list(args)
+    output = subprocess.check_output(sub_args)
     js = json.loads(output)
     return flask.jsonify(**js)
 
+@API.route('/list')
+def list_pages():
+    return run_dispatch("-l")
+
 @API.route('/shutdown')
 def shutdown_all():
-    output = subprocess.check_output(['./dispatch.py', '--shutdown'])
-    js = json.loads(output)
-    return flask.jsonify(**js)
+    return run_dispatch("--shutdown")
+
+#@API.route('/create_test_port')
+#def list_pages():
+#    output = subprocess.check_output(['./dispatch.py', '-l'])
+#    js = json.loads(output)
+#    return flask.jsonify(**js)
 
 if __name__ == "__main__":
 
