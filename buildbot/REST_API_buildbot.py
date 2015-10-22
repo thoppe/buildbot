@@ -6,8 +6,8 @@ from utils import neo4j_credentials_from_env
 import graphDB 
 
 '''
-The Flask APP needs to be started with the proper enviorment variables set,
-or run with command-line arguments.
+The Flask APP needs to be started with the proper enviorment
+variables set, or run with command-line arguments.
 '''
 
 if __name__ == "__main__":
@@ -59,11 +59,8 @@ for key in none_args:
 
 # Fire up a database connection
 neo4j_login = neo4j_credentials_from_env(**args)
-
-print neo4j_login
 gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
-
-#graphDB.hard_reset(gdb)
+#graphDB.hard_reset(gdb) 
 
 # Flask entry point
 API = Flask(__name__)

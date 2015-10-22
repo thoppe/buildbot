@@ -27,7 +27,7 @@ parser.add_argument('--start',
                           '(package_file/neo4j addr)'))
 
 # Starts both a neo4j instance AND a buildbot instance on next port for each
-parser.add_argument('--stopall',
+parser.add_argument('--shutdown',
                     default=False, action='store_true',
                     help='Stops all instances!')
 
@@ -58,7 +58,6 @@ def docker_stop_neo4j(**kwargs):
     info = docker_ps()
     
     if kwargs["NEO4J_PORT"] not in list_neo4j_ports():
-        print list_neo4j_ports(), kwargs["NEO4J_PORT"]
         msg = 'neo4j port {NEO4J_PORT} not open!'.format(**kwargs)
         logging.critical(msg)
         exit(3)
@@ -207,9 +206,7 @@ def wait_until_neo4j_is_up(attempts=50,**kwargs):
             logging.critical("Could not establish neo4j connection")
             exit()
         time.sleep(0.5)
-    logging.info("neo4j connection established!")
-        
-    exit()
+
     
 ####################################################################
 
@@ -224,7 +221,6 @@ def buildbot_start_API(**kwargs):
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
     cmd = bcmd.format(**kwargs)
-    print cmd
     # Run the process in the background
     subprocess.Popen(cmd, shell=True)
     
@@ -293,13 +289,14 @@ if args["list"]:
     print json.dumps(data,indent=2)
     exit(0)
 
-if args["stopall"]:
+if args["shutdown"]:
+
+    logging.warning("SHUTTING DOWN ALL NEO4J/BB instances")
 
     for port in list_neo4j_ports()[::-1]:
         docker_stop_neo4j(NEO4J_PORT=port,**args)
     for port in list_buildbot_ports()[::-1]:
-        buildbot_stop_API(BUILDBOT_PORT=port)
-            
+        buildbot_stop_API(BUILDBOT_PORT=port)            
     exit(0)
 
 for container_name in required_containers:
@@ -416,32 +413,26 @@ if args["start"] is not None:
     n_args = len(args["start"])
     f_package,neo4j_db = args["start"]
 
-    neo4j_port = next_open_neo4j_port()
-    buildbot_port = next_open_buildbot_port()
-    neo4j_addr = "localhost"
+    data = {
+        "NEO4J_PORT" : next_open_neo4j_port(),
+        "NEO4J_DATABASE_LOCATION" : neo4j_db,
+        "NEO4J_ADDR" : "localhost",
+        "BUILDBOT_PORT" : next_open_buildbot_port(), 
+        "BUILDBOT_PACKAGE" : f_package,
+    }
 
-    ID = docker_start_neo4j(
-        NEO4J_PORT=neo4j_port,
-        NEO4J_DATABASE_LOCATION=neo4j_db,
-        **args)
+    ID = docker_start_neo4j(**data)
         
     msg = "Started docker:neo4j {}".format(ID.strip())
     logging.info(msg)
 
-    wait_until_neo4j_is_up(
-        NEO4J_PORT=neo4j_port,
-        NEO4J_ADDR=neo4j_addr,
-        **args
-    )
-    exit()
+    wait_until_neo4j_is_up(**data)
+    logging.info("neo4j connection established!")
     
-    time.sleep(10)
-    
-    ID = buildbot_start_API(
-        NEO4J_PORT=neo4j_port,
-        NEO4J_ADDR=neo4j_addr,
-        BUILDBOT_PORT=buildbot_port,
-        BUILDBOT_PACKAGE=f_package,**args)
+    ID = buildbot_start_API(**data)
     msg = "Started buildbot:{}".format(ID.strip())
     logging.info(msg)
+
+    print json.dumps(data, indent=2)
+    exit(0)
     
