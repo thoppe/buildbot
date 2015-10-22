@@ -17,8 +17,7 @@ homepage = '''
 
 <ul>
   <li><a href="/list"><code>/list</code></a></li>
-  <li>Tea</li>
-  <li>Milk</li>
+  <li><a href="/shutdown"><code>/shutdown</code></a></li>
 </ul>  
 
 '''.format(_dispatch_version)
