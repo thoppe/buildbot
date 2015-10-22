@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import argparse, subprocess, json, logging, time, os
-from pprint import pprint
+import requests
 
 desc = '''Dispatcher for BuildBot'''
 parser = argparse.ArgumentParser(description=desc)
@@ -23,7 +23,7 @@ parser.add_argument('--buildbot',
 # Starts both a neo4j instance AND a buildbot instance on next port for each
 parser.add_argument('--start',
                     nargs=2, default=None,
-                    help=('Starts/stops instances '
+                    help=('Starts instances '
                           '(package_file/neo4j addr)'))
 
 # Starts both a neo4j instance AND a buildbot instance on next port for each
@@ -39,6 +39,10 @@ _default_location = "database/"
 required_containers = [
     'tpires/neo4j',
 ]
+
+# Requests module is very chatty, turn off the logging level for info
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 
 ### Verify if Flask exists
 import imp
@@ -183,6 +187,29 @@ def next_open_neo4j_port():
     msg = "Unable to find an open neo4j port"
     logging.error(msg)
     exit(4)
+
+def status_local_neo4j(**kwargs):
+    url = "http://{NEO4J_ADDR}:{NEO4J_PORT}".format(**kwargs)
+    r = requests.get(url)
+    return r.status_code == 200
+
+
+def wait_until_neo4j_is_up(attempts=50,**kwargs):
+    attempt_count = 0
+    while True:
+        attempt_count += 1
+        try:
+            if status_local_neo4j(**kwargs):
+                break
+        except requests.exceptions.ConnectionError:
+            pass
+        if attempt_count > attempts:
+            logging.critical("Could not establish neo4j connection")
+            exit()
+        time.sleep(0.5)
+    logging.info("neo4j connection established!")
+        
+    exit()
     
 ####################################################################
 
@@ -204,7 +231,6 @@ def buildbot_start_API(**kwargs):
     return kwargs["BUILDBOT_PORT"]
 
 def buildbot_stop_API(**kwargs):
-    import requests
     url = "http://localhost:{BUILDBOT_PORT}/shutdown"
     r = requests.post(url.format(**kwargs))
     msg = "Stoping buildbot instance on port {BUILDBOT_PORT}"
@@ -215,7 +241,10 @@ def buildbot_stop_API(**kwargs):
 
 
 def buildbot_ps():
-    # Uses UNIX ps to determine which python Flask were launched and what ports they were mapped to
+    '''
+    Uses UNIX ps to determine which python Flask were launched,
+    and what ports they were mapped to.
+    '''
     
     cmd_args = ['ps', '-aF']
     shell  = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
@@ -252,6 +281,8 @@ def next_open_buildbot_port():
     logging.error(msg)
     exit(4)
     
+#########################################################################
+# Run the actions from the command line arguments.
 #########################################################################
 
 if args["list"]:
@@ -388,14 +419,21 @@ if args["start"] is not None:
     neo4j_port = next_open_neo4j_port()
     buildbot_port = next_open_buildbot_port()
     neo4j_addr = "localhost"
-    
+
     ID = docker_start_neo4j(
         NEO4J_PORT=neo4j_port,
         NEO4J_DATABASE_LOCATION=neo4j_db,
         **args)
-    
+        
     msg = "Started docker:neo4j {}".format(ID.strip())
     logging.info(msg)
+
+    wait_until_neo4j_is_up(
+        NEO4J_PORT=neo4j_port,
+        NEO4J_ADDR=neo4j_addr,
+        **args
+    )
+    exit()
     
     time.sleep(10)
     
