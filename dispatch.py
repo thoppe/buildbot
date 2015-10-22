@@ -217,16 +217,17 @@ def wait_until_neo4j_is_up(attempts=50,**kwargs):
 def buildbot_start_API(**kwargs):
     # Starts the buildbot API
     bcmd = (
-        "python buildbot/REST_API_buildbot.py "
+        "./buildbot/REST_API_buildbot.py "
         "--BUILDBOT_PORT {BUILDBOT_PORT} "
         "--NEO4J_AUTH buildbot:tulsa "
         "--NEO4J_TCP_PORT {NEO4J_PORT} "
         "--NEO4J_TCP_ADDR {NEO4J_ADDR} "
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
-    cmd = bcmd.format(**kwargs)
+    cmd_args = bcmd.format(**kwargs).split()
+
     # Run the process in the background
-    subprocess.Popen(cmd, shell=True)
+    subprocess.Popen(cmd_args)
     
     return kwargs["BUILDBOT_PORT"]
 
