@@ -10,17 +10,6 @@ parser.add_argument('--list','-l',
                     action='store_true',
                     help='Returns the running buildbot instances.')
 
-## TO DO: Write a sub-parser for this command
-parser.add_argument('--neo4j',
-                    nargs='+', default=None,
-                    help='Starts/stops neo4j instances (DBlocation/port)',)
-
-## TO DO: Write a sub-parser for this command
-parser.add_argument('--buildbot',
-                    nargs='+', default=None,
-                    help=('Starts/stops buildbot instances '
-                          '(package_file/bb port/neo4j port/neo4j db loc)'))
-
 # Starts both a neo4j instance AND a buildbot instance on next port for each
 parser.add_argument('--start',
                     nargs=2, default=None,
@@ -31,6 +20,20 @@ parser.add_argument('--start',
 parser.add_argument('--shutdown',
                     default=False, action='store_true',
                     help='Stops all instances!')
+
+'''
+# These commands are depreciated
+## TO DO: Write a sub-parser for this command
+parser.add_argument('--neo4j',
+                    nargs='+', default=None,
+                    help='Starts/stops neo4j instances (DBlocation/port)',)
+
+## TO DO: Write a sub-parser for this command
+parser.add_argument('--buildbot',
+                    nargs='+', default=None,
+                    help=('Starts/stops buildbot instances '
+                          '(package_file/bb port/neo4j port/neo4j db loc)'))
+'''
 
 args = vars(parser.parse_args())
 logging.basicConfig(level=logging.INFO)
@@ -314,10 +317,16 @@ if args["shutdown"]:
 
     logging.warning("SHUTTING DOWN ALL NEO4J/BB instances")
 
-    for port in list_neo4j_ports()[::-1]:
+    data = {
+        "neo4j_ports"    : list_neo4j_ports()[::-1],
+        "buildbot_ports" : list_buildbot_ports()[::-1],
+    }
+
+    for port in data["neo4j_ports"]:
         docker_stop_neo4j(NEO4J_PORT=port,**args)
-    for port in list_buildbot_ports()[::-1]:
-        buildbot_stop_API(BUILDBOT_PORT=port)            
+    for port in data["buildbot_ports"]:
+        buildbot_stop_API(BUILDBOT_PORT=port)
+    print json.dumps(data,indent=2)
     exit(0)
 
 # Check and pull any missing containers

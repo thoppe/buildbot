@@ -32,6 +32,12 @@ def list_pages():
     js = json.loads(output)
     return flask.jsonify(**js)
 
+@API.route('/shutdown')
+def shutdown_all():
+    output = subprocess.check_output(['./dispatch.py', '--shutdown'])
+    js = json.loads(output)
+    return flask.jsonify(**js)
+
 if __name__ == "__main__":
 
     API.run(
