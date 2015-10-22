@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import argparse, subprocess, json, logging, time
+import argparse, subprocess, json, logging, time, os
 from pprint import pprint
 
 desc = '''Dispatcher for BuildBot'''
@@ -78,6 +78,13 @@ def docker_start_neo4j(**kwargs):
         msg = 'neo4j port {NEO4J_PORT} already in use!'
         logging.critical(msg.format(**kwargs))
         exit(3)
+
+    # Create the database location if it doesn't exist
+    f_db = kwargs["NEO4J_DATABASE_LOCATION"]
+    if not os.path.exists(f_db):
+        msg = "neo4j database location {NEO4J_DATABASE_LOCATION} doesn't exist. Creating."
+        logging.warning(msg.format(**kwargs))
+        os.system('mkdir -p '+f_db)
     
     kwargs["USERNAME"] = "buildbot"
     kwargs["PASSWORD"] = "tulsa"
