@@ -276,6 +276,26 @@ def next_open_buildbot_port():
     msg = "Unable to find an open buildbot port"
     logging.error(msg)
     exit(4)
+
+#########################################################################
+
+def check_for_required_containers():
+    '''
+    Checks for any docker containers listed in required_containers
+    and pulls them if they are missing.
+    '''
+    for container_name in required_containers:
+        try:
+            docker_inspect(container_name)
+            msg = "Found required container {}.".format(container_name)
+            logging.debug(msg)
+        except subprocess.CalledProcessError:
+            msg = "Failed to load container {}.".format(container_name)
+            logging.error(msg)
+            msg = "Pulling image in 10 seconds if not canceled."
+            logging.warning(msg)
+            time.sleep(10)
+            docker_pull(container_name)
     
 #########################################################################
 # Run the actions from the command line arguments.
@@ -299,18 +319,40 @@ if args["shutdown"]:
         buildbot_stop_API(BUILDBOT_PORT=port)            
     exit(0)
 
-for container_name in required_containers:
-    try:
-        docker_inspect(container_name)
-        #msg = "Found required container {}.".format(container_name)
-        #logging.info(msg)
-    except subprocess.CalledProcessError:
-        msg = "Failed to load container {}.".format(container_name)
-        logging.error(msg)
-        msg = "Pulling image in 10 seconds if not canceled."
-        logging.warning(msg)
-        time.sleep(10)
-        docker_pull(container_name)
+# Check and pull any missing containers
+check_for_required_containers()
+
+####################################################################
+        
+if args["start"] is not None:
+
+    n_args = len(args["start"])
+    f_package,neo4j_db = args["start"]
+
+    data = {
+        "NEO4J_PORT" : next_open_neo4j_port(),
+        "NEO4J_DATABASE_LOCATION" : neo4j_db,
+        "NEO4J_ADDR" : "localhost",
+        "BUILDBOT_PORT" : next_open_buildbot_port(), 
+        "BUILDBOT_PACKAGE" : f_package,
+    }
+
+    ID = docker_start_neo4j(**data)
+        
+    msg = "Started docker:neo4j {}".format(ID.strip())
+    logging.info(msg)
+
+    wait_until_neo4j_is_up(**data)
+    logging.info("neo4j connection established!")
+    
+    ID = buildbot_start_API(**data)
+    msg = "Started buildbot:{}".format(ID.strip())
+    logging.info(msg)
+
+    print json.dumps(data, indent=2)
+    exit(0)
+    
+'''
 
 ####################################################################
 
@@ -406,33 +448,4 @@ if args["buildbot"] is not None:
         print "UNKNOWN ACTION", action
         exit(3)
 
-####################################################################
-        
-if args["start"] is not None:
-
-    n_args = len(args["start"])
-    f_package,neo4j_db = args["start"]
-
-    data = {
-        "NEO4J_PORT" : next_open_neo4j_port(),
-        "NEO4J_DATABASE_LOCATION" : neo4j_db,
-        "NEO4J_ADDR" : "localhost",
-        "BUILDBOT_PORT" : next_open_buildbot_port(), 
-        "BUILDBOT_PACKAGE" : f_package,
-    }
-
-    ID = docker_start_neo4j(**data)
-        
-    msg = "Started docker:neo4j {}".format(ID.strip())
-    logging.info(msg)
-
-    wait_until_neo4j_is_up(**data)
-    logging.info("neo4j connection established!")
-    
-    ID = buildbot_start_API(**data)
-    msg = "Started buildbot:{}".format(ID.strip())
-    logging.info(msg)
-
-    print json.dumps(data, indent=2)
-    exit(0)
-    
+'''

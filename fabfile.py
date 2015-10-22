@@ -4,12 +4,12 @@ import fabric.api
 
 # Testing arguments
 ENV_VARS = {
-    "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/"),
+    "NEO4J_DATABASE_DIR"  : os.path.join(os.getcwd(), "database/db1"),
     "NEO4J_TCP_ADDR" : "localhost",
     "NEO4J_TCP_PORT" : "7474",
     "NEO4J_AUTH"     : "buildbot:tulsa",
     "BUILDBOT_PORT"  : "5001",
-    "buildbot_package"         : "packages/checkin/checkin.json",
+    "buildbot_package" : "packages/checkin/checkin.json",
 }
 
 # Split the ENV login keys if this is a local build
@@ -43,8 +43,9 @@ def test(args = "-x -v"):
         cmd = nose_cmd.format(f_test=f_test,args=args)
         
         if name in test_package_requirements:
-            os.environ["buildbot_package"] = test_package_requirements[name]
-
+            val = test_package_requirements[name]
+            os.environ["buildbot_package"] = val
+            
         local(cmd)
 
 
@@ -60,7 +61,7 @@ def push():
 
 def commit(): push() # Alias
 
-#########################################################################
+######################################################################
 
 def package():
     local("python buildbot/package_manager.py")
@@ -68,24 +69,22 @@ def package():
 def metadraw():
     local("python buildbot/utils.py")
 
-#########################################################################
+######################################################################
 
 def start():
     '''
-    Starts a test instance of NEO4J
+    Starts a new test instance of NEO4J/BB.
     '''
     with fabric.api.settings(warn_only=True):
-        local("./dispatch.py --neo4j start database {NEO4J_TCP_PORT}".format(**ENV_VARS))
-        time.sleep(5)
-        local("./dispatch.py --buildbot start packages/checkin/checkin.json {BUILDBOT_PORT} {NEO4J_TCP_PORT} {NEO4J_TCP_ADDR}".format(**ENV_VARS))
+        cmd = "python ./dispatch.py --start {buildbot_package} {NEO4J_DATABASE_DIR}"
+        local(cmd.format(**ENV_VARS))
 
 def stop():
     '''
-    Stops the test instance of NEO4J
+    Shutdown all instances of NEO4J.
     '''
     with fabric.api.settings(warn_only=True):
-        local("./dispatch.py --neo4j stop {NEO4J_TCP_PORT}".format(**ENV_VARS))
-        local("./dispatch.py --buildbot stop {BUILDBOT_PORT}".format(**ENV_VARS))
+        local("python dispatch.py --shutdown")
     
 def api():
     local("python buildbot/REST_API_buildbot.py")
