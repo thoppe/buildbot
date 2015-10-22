@@ -40,6 +40,14 @@ required_containers = [
     'tpires/neo4j',
 ]
 
+### Verify if Flask exists
+import imp
+try:
+    imp.find_module('flask')
+except ImportError:
+    logging.error("module flask not found, aborting early")
+    exit(2)
+
 def docker_stop_neo4j(**kwargs):
     # Stop the neo4j container running on a specific port
 
@@ -67,8 +75,8 @@ def docker_start_neo4j(**kwargs):
     Starts a new neo4j instances, returns the generated ID.
     '''
     if kwargs["NEO4J_PORT"] in list_neo4j_ports():
-        msg = 'neo4j port {NEO4J_PORT} already in use!'.format(**kwargs)
-        logging.critical(msg)
+        msg = 'neo4j port {NEO4J_PORT} already in use!'
+        logging.critical(msg.format(**kwargs))
         exit(3)
     
     kwargs["USERNAME"] = "buildbot"
