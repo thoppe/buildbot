@@ -86,12 +86,12 @@ def stop():
     with fabric.api.settings(warn_only=True):
         local("python dispatch.py --shutdown")
     
-def api():
-    local("python buildbot/REST_API_buildbot.py")
+#def api():
+#    local("python buildbot/REST_API_buildbot.py")
     
 def demo():
-    #local("python buildbot/package_manager.py")
     local("python demo.py")
+    #local("python buildbot/package_manager.py")
     #local("python buildbot/interface_package_swagger.py")
     #local("python buildbot/REST_API_buildbot.py")
 

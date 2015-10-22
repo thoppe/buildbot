@@ -1,9 +1,8 @@
 #!flask/bin/python
+import subprocess, logging, json, os
 import flask
-from flask import Flask, request, abort, render_template, redirect
-import logging, json
+from flask import Flask, request, abort, render_template, redirect, jsonify
 
-import subprocess
 
 _dispatch_version = 1.0
 _dispatch_port = 2001
@@ -18,6 +17,7 @@ homepage = '''
 <ul>
   <li><a href="/list"><code>/list</code></a></li>
   <li><a href="/shutdown"><code>/shutdown</code></a></li>
+  <li><a href="/create_test_instance"><code>/create_test_instance</code></a></li>
 </ul>  
 
 '''.format(_dispatch_version)
@@ -30,7 +30,7 @@ def run_dispatch(*args):
     sub_args = ['./dispatch.py'] + list(args)
     output = subprocess.check_output(sub_args)
     js = json.loads(output)
-    return flask.jsonify(**js)
+    return jsonify(**js)
 
 @API.route('/list')
 def list_pages():
@@ -40,11 +40,11 @@ def list_pages():
 def shutdown_all():
     return run_dispatch("--shutdown")
 
-#@API.route('/create_test_port')
-#def list_pages():
-#    output = subprocess.check_output(['./dispatch.py', '-l'])
-#    js = json.loads(output)
-#    return flask.jsonify(**js)
+@API.route('/create_test_instance')
+def create_test_instance():
+    bb_package = "packages/checkin/checkin.json"
+    db_loc = os.path.join(os.getcwd(), "database/db1")
+    return run_dispatch("--start",bb_package,db_loc)
 
 if __name__ == "__main__":
 
