@@ -18,13 +18,18 @@ parser.add_argument('--neo4j',
 parser.add_argument('--buildbot',
                     nargs='+', default=None,
                     help=('Starts/stops buildbot instances '
-                          '(package_file/bb port/neo4j port/neo4j addr)',))
+                          '(package_file/bb port/neo4j port/neo4j db loc)'))
 
 # Starts both a neo4j instance AND a buildbot instance on next port for each
-parser.add_argument('--combined',
+parser.add_argument('--start',
                     nargs=2, default=None,
                     help=('Starts/stops instances '
-                          '(package_file/neo4j addr)',))
+                          '(package_file/neo4j addr)'))
+
+# Starts both a neo4j instance AND a buildbot instance on next port for each
+parser.add_argument('--stopall',
+                    default=False, action='store_true',
+                    help='Stops all instances!')
 
 args = vars(parser.parse_args())
 logging.basicConfig(level=logging.INFO)
@@ -162,7 +167,7 @@ def next_open_neo4j_port():
             return port
     msg = "Unable to find an open neo4j port"
     logging.error(msg)
-    exit()
+    exit(4)
     
 ####################################################################
 
@@ -187,6 +192,8 @@ def buildbot_stop_API(**kwargs):
     import requests
     url = "http://localhost:{BUILDBOT_PORT}/shutdown"
     r = requests.post(url.format(**kwargs))
+    msg = "Stoping buildbot instance on port {BUILDBOT_PORT}"
+    logging.info(msg.format(**kwargs))
     return r.text
     
 ####################################################################
@@ -228,9 +235,9 @@ def next_open_buildbot_port():
             return port
     msg = "Unable to find an open buildbot port"
     logging.error(msg)
-    exit()
+    exit(4)
     
-####################################################################################
+#########################################################################
 
 if args["list"]:
     data = {
@@ -240,6 +247,14 @@ if args["list"]:
     print json.dumps(data,indent=2)
     exit(0)
 
+if args["stopall"]:
+
+    for port in list_neo4j_ports()[::-1]:
+        docker_stop_neo4j(NEO4J_PORT=port,**args)
+    for port in list_buildbot_ports()[::-1]:
+        buildbot_stop_API(BUILDBOT_PORT=port)
+            
+    exit(0)
 
 for container_name in required_containers:
     try:
@@ -350,10 +365,10 @@ if args["buildbot"] is not None:
 
 ####################################################################
         
-if args["combined"] is not None:
+if args["start"] is not None:
 
-    n_args = len(args["combined"])
-    f_package,neo4j_db = args["combined"]
+    n_args = len(args["start"])
+    f_package,neo4j_db = args["start"]
 
     neo4j_port = next_open_neo4j_port()
     buildbot_port = next_open_buildbot_port()
@@ -367,7 +382,7 @@ if args["combined"] is not None:
     msg = "Started docker:neo4j {}".format(ID.strip())
     logging.info(msg)
     
-    time.sleep(5)
+    time.sleep(10)
     
     ID = buildbot_start_API(
         NEO4J_PORT=neo4j_port,
