@@ -85,9 +85,19 @@ def stop():
     '''
     with fabric.api.settings(warn_only=True):
         local("python dispatch.py --shutdown")
-    
-#def api():
-#    local("python buildbot/REST_API_buildbot.py")
+
+def redis():
+    '''
+    Starts the redis service needed for dispatch_API
+    '''
+    local("redis-server")
+
+
+def celery():
+    '''
+    Starts the celery service needed for dispatch_API
+    '''
+    local("celery worker -A dispatch_API.celery --loglevel=info")
     
 def demo():
     local("python demo.py")
