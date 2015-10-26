@@ -27,14 +27,12 @@ homepage = '''
   <li><a href="/shutdown"><code>/shutdown</code></a></li>
   <li><a href="/create_test_instance"><code>/create_test_instance</code></a></li>
 </ul>
-
-
-<a href="{{foobar}}"><code>TEST_STATUS</code></a>  
-
 '''.format(_dispatch_version)
+
 
 import time
 
+'''
 @celery.task(bind=True)
 def sample_task(self, x):
     
@@ -54,11 +52,12 @@ def sample_task(self, x):
 
     results = [i,]
     return results
+'''
 
 @API.route('/status/<task_id>')
-def taskstatus(task_id):
+def taskstatus_dispatch(task_id):
     
-    task = sample_task.AsyncResult(task_id)
+    task = run_dispatch_async.AsyncResult(task_id)
     
     response = {
         "state" : task.state,
@@ -75,20 +74,29 @@ def taskstatus(task_id):
 
 ###################################################################
 
-@API.route('/')
-def root_page():
-    args = [10,]
-    
-    task = sample_task.apply_async(args=args)
-    print "Starting a new task", task.id
-    url = url_for('taskstatus',task_id=task.id)
-    return homepage.format(foobar=url)
-
-def run_dispatch(*args):
-    sub_args = ['./dispatch.py'] + list(args)
+def run_dispatch(sub_args):
     output = subprocess.check_output(sub_args)
     js = json.loads(output)
     return jsonify(**js)
+
+@celery.task(bind=True)
+def run_dispatch_async(self,*args):
+    sub_args = ['./dispatch.py'] + list(args)
+
+    self.update_state(
+        state="RUNNING",
+        meta={"cmd":sub_args}
+    )
+    
+    output = subprocess.check_output(sub_args)
+    js = json.loads(output)
+    return jsonify(**js)
+
+###################################################################
+
+@API.route('/')
+def root_page():
+    return homepage
 
 @API.route('/list')
 def list_pages():
@@ -102,7 +110,23 @@ def shutdown_all():
 def create_test_instance():
     bb_package = "packages/checkin/checkin.json"
     db_loc = os.path.join(os.getcwd(), "database/db1")
-    return run_dispatch("--start",bb_package,db_loc)
+
+    # Start the task async
+    args = ("--start",bb_package,db_loc)
+    task = run_dispatch_async.apply_async(args)
+
+    url = url_for('taskstatus_dispatch',task_id=task.id)
+    
+    # For test purposes return a clickable link!
+    html =  '''<a href={}>celery status</a>'''
+    return html.format(url)
+    
+    # JSONify the return params
+    js = {
+        "url" : url, 
+    }
+
+    return jsonify(**js)
 
 if __name__ == "__main__":
 
