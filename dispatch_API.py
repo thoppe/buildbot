@@ -13,14 +13,6 @@ _dispatch_port = 2001
 API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
 
-# Start the Celery server
-#BROKER_URL = 'redis://localhost:6379/0'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-#celery = Celery(API.name,
-#                backend=CELERY_RESULT_BACKEND,
-#                broker=BROKER_URL)
-#celery.conf.update(API.config)
-
 API.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
 API.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 
@@ -41,33 +33,38 @@ homepage = '''
 
 '''.format(_dispatch_version)
 
-@celery.task(bind=True)
-def gen_prime(self, x):
-    self.update_state(state="working!")
-    print "IN INSTANCE!",x
-    multiples = []
-    results = []
-    for i in xrange(2, x+1):
-        if i not in multiples:
-            results.append(i)
-            for j in xrange(i*i, x+1, i):
-                multiples.append(j)
+import time
 
-        #if results:
-        #    self.update_state(meta={"last_found":results[-1]})
-                
+@celery.task(bind=True)
+def sample_task(self, x):
+    
+    self.update_state(
+        state="starting...",
+        meta={"token":0}
+    )
+
+    for i in range(x):
+        print i,x
+        time.sleep(1)
+
+        self.update_state(
+            state="working...",
+            meta={"token":i}
+        )
+
+    results = [i,]
     return results
 
 @API.route('/status/<task_id>')
 def taskstatus(task_id):
     
-    task = gen_prime.AsyncResult(task_id)
+    task = sample_task.AsyncResult(task_id)
     
     response = {
         "state" : task.state,
         "id" : task.id,
         "backend" : str(task.backend),
-        #"meta": task.info["last_found"],
+        "meta": task.info,
     }
 
     if response["state"] == "SUCCESS":
@@ -80,9 +77,9 @@ def taskstatus(task_id):
 
 @API.route('/')
 def root_page():
-    args = [40000,]
+    args = [10,]
     
-    task = gen_prime.apply_async(args=args)
+    task = sample_task.apply_async(args=args)
     print "Starting a new task", task.id
     url = url_for('taskstatus',task_id=task.id)
     return homepage.format(foobar=url)
