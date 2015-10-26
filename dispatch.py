@@ -71,10 +71,10 @@ def docker_stop_neo4j(**kwargs):
     logging.info(msg.format(**kwargs))
 
     cmd = "docker stop {name}".format(**kwargs)
-    output = subprocess.check_output(cmd, shell=True)
+    output = subprocess.check_output(cmd.split())
 
     cmd = "docker rm {name}".format(**kwargs)
-    output = subprocess.check_output(cmd, shell=True)
+    output = subprocess.check_output(cmd.split())
     
 
 def docker_start_neo4j(**kwargs):
@@ -111,24 +111,25 @@ def docker_start_neo4j(**kwargs):
     )
     cmd = bcmd.format(**kwargs)
     #logging.info("Running {}".format(cmd))
-    output = subprocess.check_output(cmd, shell=True)
+    output = subprocess.check_output(cmd.split())
     return output
 
 def docker_pull(name):
     args = {"name": name}
     cmd = 'docker pull {name}'.format(**args)
-    output = subprocess.check_output(cmd, shell=True)
+    output = subprocess.check_output(cmd.split())
     return output
 
 def docker_inspect(name):
     args = {"name": name}
     cmd = 'docker inspect {name}'.format(**args)
-    output = subprocess.check_output(cmd, shell=True)
+    output = subprocess.check_output(cmd.split())
     return json.loads(output)
 
 def docker_ps(show_all=True):
     '''
-    Runs inpsect on all neo4j instances and returns a dict
+    [BLOCKING]
+    Runs inspect on all neo4j instances and returns a dict
     mapping names to dictionary of docker inspect.
     '''
 
@@ -144,8 +145,8 @@ def docker_ps(show_all=True):
     # Search only for containers with neo4j label
     cmd = 'docker ps {show_all} --format {format} --filter "label=neo4j=1"'
     cmd = cmd.format(**args)
-    
-    output = subprocess.check_output(cmd, shell=True).strip()
+    output = subprocess.check_output(cmd.split()).strip()
+
     if output:
         NAMES = output.split('\n')
     else:
@@ -154,21 +155,23 @@ def docker_ps(show_all=True):
     data = {}
     for name in NAMES:
         cmd = 'docker inspect {}'.format(name)
-        output = subprocess.check_output(cmd, shell=True)
+        output = subprocess.check_output(cmd.split())
         js = json.loads(output)[0]
         data[js["Name"]] = js
-
+    
     return data
 
 def docker_reduced_ps():
     rdata = {}
     for name,data in docker_ps().items():
+        
         rdata[name] = {
             "name"    : name,
             "created" : data["Created"],
             "running" : data["State"]["Running"],
             "port"    : data["Config"]["Labels"]["neo4j.port"],
         }
+
     return rdata
 
 
@@ -205,6 +208,8 @@ def wait_until_neo4j_is_up(attempts=50,**kwargs):
             if status_local_neo4j(**kwargs):
                 break
         except requests.exceptions.ConnectionError:
+            msg = "Waiting to establish neo4j connection {}"
+            logging.info(msg.format(attempt_count))
             pass
         if attempt_count > attempts:
             logging.critical("Could not establish neo4j connection")
