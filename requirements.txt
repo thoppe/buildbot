@@ -1,3 +1,6 @@
+celery==3.1.17
+redis==2.10.3
+
 Flask==0.10.1
 functools32==3.2.3.post2
 itsdangerous==0.24
@@ -12,3 +15,4 @@ swagger-spec-validator==1.1.0
 Werkzeug==0.10.4
 wheel==0.24.0
 git+https://github.com/tulsa/peacock.git
+

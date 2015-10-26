@@ -1,7 +1,9 @@
 #!flask/bin/python
 import subprocess, logging, json, os
 import flask
-from flask import Flask, request, abort, render_template, redirect, jsonify
+from flask import Flask, request, abort, render_template, redirect, jsonify, url_for
+
+from celery import Celery
 
 
 _dispatch_version = 1.0
@@ -11,6 +13,20 @@ _dispatch_port = 2001
 API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
 
+# Start the Celery server
+#BROKER_URL = 'redis://localhost:6379/0'
+#CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+#celery = Celery(API.name,
+#                backend=CELERY_RESULT_BACKEND,
+#                broker=BROKER_URL)
+#celery.conf.update(API.config)
+
+API.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+API.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+
+celery = Celery(API.name, broker=API.config['CELERY_BROKER_URL'])
+celery.conf.update(API.config)
+
 homepage = '''
 <h1>buildbot dispatch API version {}</h1>
 
@@ -18,13 +34,58 @@ homepage = '''
   <li><a href="/list"><code>/list</code></a></li>
   <li><a href="/shutdown"><code>/shutdown</code></a></li>
   <li><a href="/create_test_instance"><code>/create_test_instance</code></a></li>
-</ul>  
+</ul>
+
+
+<a href="{{foobar}}"><code>TEST_STATUS</code></a>  
 
 '''.format(_dispatch_version)
 
+@celery.task(bind=True)
+def gen_prime(self, x):
+    self.update_state(state="working!")
+    print "IN INSTANCE!",x
+    multiples = []
+    results = []
+    for i in xrange(2, x+1):
+        if i not in multiples:
+            results.append(i)
+            for j in xrange(i*i, x+1, i):
+                multiples.append(j)
+
+        #if results:
+        #    self.update_state(meta={"last_found":results[-1]})
+                
+    return results
+
+@API.route('/status/<task_id>')
+def taskstatus(task_id):
+    
+    task = gen_prime.AsyncResult(task_id)
+    
+    response = {
+        "state" : task.state,
+        "id" : task.id,
+        "backend" : str(task.backend),
+        #"meta": task.info["last_found"],
+    }
+
+    if response["state"] == "SUCCESS":
+        response["result"] = task.result
+    
+    return jsonify(response)
+
+
+###################################################################
+
 @API.route('/')
 def root_page():
-    return homepage
+    args = [40000,]
+    
+    task = gen_prime.apply_async(args=args)
+    print "Starting a new task", task.id
+    url = url_for('taskstatus',task_id=task.id)
+    return homepage.format(foobar=url)
 
 def run_dispatch(*args):
     sub_args = ['./dispatch.py'] + list(args)
