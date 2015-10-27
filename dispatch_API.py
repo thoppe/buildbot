@@ -66,8 +66,8 @@ def taskstatus_dispatch(task_id):
         "meta": task.info,
     }
 
-    if response["state"] == "SUCCESS":
-        response["result"] = task.result
+    #if response["state"] == "SUCCESS":
+    #    response["result"] = task.result
     
     return jsonify(response)
 
@@ -90,6 +90,12 @@ def run_dispatch_async(self,*args):
     
     output = subprocess.check_output(sub_args)
     js = json.loads(output)
+
+    self.update_state(
+        state="FINISHED",
+        meta={"cmd":sub_args}
+    )
+    
     return jsonify(**js)
 
 ###################################################################
