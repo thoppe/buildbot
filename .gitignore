@@ -14,3 +14,6 @@ database/*
 *.pem
 *.group
 *.EC2
+
+# Dump file from redis
+dump.rdb
