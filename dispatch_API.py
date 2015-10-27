@@ -1,10 +1,8 @@
 #!flask/bin/python
 import subprocess, logging, json, os
-import flask
-from flask import Flask, request, abort, render_template, redirect, jsonify, url_for
-
+from flask import Flask, request, abort, render_template
+from flask import redirect, jsonify, url_for
 from celery import Celery
-
 
 _dispatch_version = 1.0
 _dispatch_port = 2001
@@ -29,31 +27,6 @@ homepage = '''
 </ul>
 '''.format(_dispatch_version)
 
-
-import time
-
-'''
-@celery.task(bind=True)
-def sample_task(self, x):
-    
-    self.update_state(
-        state="starting...",
-        meta={"token":0}
-    )
-
-    for i in range(x):
-        print i,x
-        time.sleep(1)
-
-        self.update_state(
-            state="working...",
-            meta={"token":i}
-        )
-
-    results = [i,]
-    return results
-'''
-
 @API.route('/status/<task_id>')
 def taskstatus_dispatch(task_id):
     
@@ -74,29 +47,29 @@ def taskstatus_dispatch(task_id):
 
 ###################################################################
 
-def run_dispatch(sub_args):
+def run_dispatch(args):
+    sub_args = ['./dispatch.py'] + list(args)
     output = subprocess.check_output(sub_args)
-    js = json.loads(output)
-    return jsonify(**js)
+    return json.loads(output)
 
 @celery.task(bind=True)
-def run_dispatch_async(self,*args):
-    sub_args = ['./dispatch.py'] + list(args)
-
+def run_dispatch_async(self,*args):   
     self.update_state(
         state="RUNNING",
-        meta={"cmd":sub_args}
+        meta={"dispatch_args":args}
     )
-    
-    output = subprocess.check_output(sub_args)
-    js = json.loads(output)
 
+    return run_dispatch(args)
+
+
+@celery.task(bind=True)
+def sample_function(self,*args):
     self.update_state(
-        state="FINISHED",
-        meta={"cmd":sub_args}
+        state="RUNNING",
+        meta={"dispatch_args":args}
     )
-    
-    return jsonify(**js)
+
+    return {"stuff":"here"}
 
 ###################################################################
 
@@ -106,11 +79,13 @@ def root_page():
 
 @API.route('/list')
 def list_pages():
-    return run_dispatch("-l")
+    data = run_dispatch(["-l"])
+    return jsonify(data)
 
 @API.route('/shutdown')
 def shutdown_all():
-    return run_dispatch("--shutdown")
+    data = run_dispatch(["--shutdown"])
+    return jsonify(data)
 
 @API.route('/create_test_instance')
 def create_test_instance():

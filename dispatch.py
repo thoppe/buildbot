@@ -354,12 +354,12 @@ if args["start"] is not None:
         "BUILDBOT_PACKAGE" : f_package,
     }
 
-    #ID = docker_start_neo4j(**data)
-    #msg = "Started docker:neo4j {}".format(ID.strip())
-    #logging.info(msg)
+    ID = docker_start_neo4j(**data)
+    msg = "Started docker:neo4j {}".format(ID.strip())
+    logging.info(msg)
 
-    #wait_until_neo4j_is_up(**data)
-    #logging.info("neo4j connection established!")
+    wait_until_neo4j_is_up(**data)
+    logging.info("neo4j connection established!")
     
     #ID = buildbot_start_API(**data)
     #msg = "Started buildbot:{}".format(ID.strip())
