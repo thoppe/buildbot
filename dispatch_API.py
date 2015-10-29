@@ -29,7 +29,7 @@ homepage = '''
 
 @API.route('/status/<task_id>')
 def taskstatus_dispatch(task_id):
-    
+
     task = run_dispatch_async.AsyncResult(task_id)
     
     response = {
@@ -60,16 +60,6 @@ def run_dispatch_async(self,*args):
     )
 
     return run_dispatch(args)
-
-
-@celery.task(bind=True)
-def sample_function(self,*args):
-    self.update_state(
-        state="RUNNING",
-        meta={"dispatch_args":args}
-    )
-
-    return {"stuff":"here"}
 
 ###################################################################
 

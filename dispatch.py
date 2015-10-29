@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, subprocess, json, logging, time, os
+import argparse, subprocess, json, logging, time, os, shlex
 import requests
 
 desc = '''Dispatcher for BuildBot'''
@@ -20,6 +20,8 @@ parser.add_argument('--start',
 parser.add_argument('--shutdown',
                     default=False, action='store_true',
                     help='Stops all instances!')
+
+_WSGI_HEADER = "wsgi:gunicorn_load"
 
 '''
 # These commands are depreciated
@@ -222,15 +224,24 @@ def wait_until_neo4j_is_up(attempts=50,**kwargs):
 
 def buildbot_start_API(**kwargs):
     # Starts the buildbot API
-    bcmd = (
-        "./buildbot/REST_API_buildbot.py "
+    #cmd_args = 'gunicorn wsgi:app --bind 0.0.0.0:{}'
+    #cmd_args = cmd_args.format(next_open_buildbot_port())
+
+    #"./buildbot/REST_API_buildbot.py "
+    
+    API_args = (
         "--BUILDBOT_PORT {BUILDBOT_PORT} "
         "--NEO4J_AUTH buildbot:tulsa "
         "--NEO4J_TCP_PORT {NEO4J_PORT} "
         "--NEO4J_TCP_ADDR {NEO4J_ADDR} "
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
-    cmd_args = bcmd.format(**kwargs).split()
+    API_args = API_args.format(**kwargs)
+    cmd = '''gunicorn '{}("{}")' '''.format(_WSGI_HEADER,API_args)
+    print API_args
+    print cmd
+    exit()
+    
 
     # Run the process in the background
     subprocess.Popen(cmd_args)
@@ -253,32 +264,38 @@ def buildbot_ps():
     and what ports they were mapped to.
     '''
     
-    cmd_args = ['ps', '-aF']
+    cmd_args = ['ps', '-Af']
     shell  = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
     output = shell.communicate()[0].strip().split('\n')
-    f_buildbot_api = "buildbot/REST_API_buildbot.py"
 
-    data = {}
+    search_string = "gunicorn " + _WSGI_HEADER
+    data = set()
+
     for item in output[1:]:  # First row is a header
-        if f_buildbot_api not in item:
+        if search_string not in item:
             continue
         if "python" not in item:
             continue
+
         item = item.split()
-        port = item[item.index("--BUILDBOT_PORT")+1]
-        package_name = item[item.index("--buildbot_package")+1]
-        data[port] = package_name
+        bind_string = item[item.index("--bind")+1]
+        port = bind_string.split(':')[-1]
+        data.add(port)
+        #package_name = item[item.index("--buildbot_package")+1]
+        #data[port] = "package" #package_name
+
     return data
 
 def list_buildbot_ports():
     '''
     Lists all ports used by buildbot Flask apps.
     '''
-    return buildbot_ps().keys()
+    return sorted(list(buildbot_ps()))
 
 def next_open_buildbot_port():
     starting_port = 5001
     maximum_port  = 7000
+
     known_ports   = list_buildbot_ports()
     for n in xrange(starting_port, maximum_port):
         port = str(n)
@@ -326,7 +343,7 @@ if args["shutdown"]:
 
     data = {
         "neo4j_ports"    : list_neo4j_ports()[::-1],
-        "buildbot_ports" : list_buildbot_ports()[::-1],
+        "buildbot_ports" : list_buildbot_ports(),
     }
 
     for port in data["neo4j_ports"]:
@@ -342,9 +359,23 @@ check_for_required_containers()
 ####################################################################
         
 if args["start"] is not None:
-
     n_args = len(args["start"])
     f_package,neo4j_db = args["start"]
+
+    '''
+    cmd_args = 'gunicorn wsgi:app --bind 0.0.0.0:{}'
+    cmd_args = cmd_args.format(next_open_buildbot_port())
+    
+    subprocess.Popen(cmd_args,shell=True)
+    print 
+    print cmd_args
+    exit()
+    #subprocess.Popen(' '.join(cmd_args),shell=True)
+    os.system(cmd_args)
+    print {"ugly":"bash"}
+    exit(0)
+    ### DEBUG ABOVE
+    '''
 
     data = {
         "NEO4J_PORT" : next_open_neo4j_port(),
@@ -354,16 +385,17 @@ if args["start"] is not None:
         "BUILDBOT_PACKAGE" : f_package,
     }
 
-    ID = docker_start_neo4j(**data)
-    msg = "Started docker:neo4j {}".format(ID.strip())
-    logging.info(msg)
-
-    wait_until_neo4j_is_up(**data)
-    logging.info("neo4j connection established!")
-    
-    #ID = buildbot_start_API(**data)
-    #msg = "Started buildbot:{}".format(ID.strip())
+    #ID = docker_start_neo4j(**data)
+    #msg = "Started docker:neo4j {}".format(ID.strip())
     #logging.info(msg)
+
+    #wait_until_neo4j_is_up(**data)
+    #logging.info("neo4j connection established!")
+
+    ID = buildbot_start_API(**data)
+    msg = "Started buildbot:{}".format(ID.strip())
+    logging.info(msg)
+    exit()
     
     print json.dumps(data, indent=2)
     exit(0)

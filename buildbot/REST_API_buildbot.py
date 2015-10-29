@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, request, abort, render_template, redirect
 
-import json, logging, argparse, os
+import json, logging, argparse, os, shlex
 from utils import neo4j_credentials_from_env
 import graphDB 
 
@@ -9,43 +9,55 @@ import graphDB
 The Flask APP needs to be started with the proper enviorment
 variables set, or run with command-line arguments.
 '''
+desc = '''BuildBot API'''
+parser = argparse.ArgumentParser(description=desc)
+
+parser.add_argument('--BUILDBOT_PORT','-b',
+                    default=None,
+                    help="buildbot's port")
+
+parser.add_argument('--NEO4J_TCP_PORT','-p',
+                    default=None,
+                    help='NEO4J port')
+
+parser.add_argument('--NEO4J_TCP_ADDR','-a',
+                    default=None,
+                    help='NEO4J TCP address')
+
+parser.add_argument('--NEO4J_AUTH','-l',
+                    default=None,
+                    help='NEO4J username:password')
+
+parser.add_argument('--buildbot_package','-f',
+                    default=None,
+                    help='BuildBot package file to load')
+
+parser.add_argument('--debug','-d',
+                    default=True,
+                    action="store_false",
+                    help='Turns off debug mode for Flask')
 
 if __name__ == "__main__":
-
-    desc = '''BuildBot API'''
-    parser = argparse.ArgumentParser(description=desc)
-
-    parser.add_argument('--BUILDBOT_PORT','-b',
-                        default=None,
-                        help="buildbot's port")
-
-    parser.add_argument('--NEO4J_TCP_PORT','-p',
-                        default=None,
-                        help='NEO4J port')
-
-    parser.add_argument('--NEO4J_TCP_ADDR','-a',
-                        default=None,
-                        help='NEO4J TCP address')
-
-    parser.add_argument('--NEO4J_AUTH','-l',
-                        default=None,
-                        help='NEO4J username:password')
-
-    parser.add_argument('--buildbot_package','-f',
-                        default=None,
-                        help='BuildBot package file to load')
-
-    parser.add_argument('--debug','-d',
-                        default=True,
-                        action="store_false",
-                        help='Turns off debug mode for Flask')
+    
     args = vars(parser.parse_args())
 
     if args["BUILDBOT_PORT"] is not None:
         os.environ["BUILDBOT_PORT"] = args["BUILDBOT_PORT"]
-
 else:
     args = {"debug": True}
+
+###########################################################################
+
+def gunicorn_load(cmdline_args):
+    '''
+    Launcher for gunicorn! Parse the arguments passed in.
+    '''
+    args = shlex.split(cmdline_args)
+    args = vars(parser.parse_args(args))
+    return API
+
+###########################################################################
+
 
 '''
 Remove command line arguments that are None (they will try to load
@@ -58,13 +70,22 @@ for key in none_args:
 #####################################################################
 
 # Fire up a database connection
-neo4j_login = neo4j_credentials_from_env(**args)
-gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
-#graphDB.hard_reset(gdb) 
+#neo4j_login = neo4j_credentials_from_env(**args)
+#gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
+
+class TMP():
+    def __init__(self):
+        class x:
+            nodes = {}
+            relationships = {}
+        self.package = x()   
+gdb = TMP()
+args = {"BUILDBOT_PORT":-1,"buildbot_package":"sdfhsdfjhdf","debug":1}
 
 # Flask entry point
 API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
+
 
 info_msg = "Started BuildBot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
 all_args = args.copy()
@@ -77,6 +98,7 @@ neo2node  = lambda x:inter.convert_neo4j2node_container(x,gdb.package)
 neo2edge  = lambda x:inter.convert_neo4j2edge_container(x,gdb.package)
 json2node = lambda x,**a:inter.convert_json2node_container(x,gdb.package,**a)
 json2edge = lambda x,**a:inter.convert_json2edge_container(x,gdb.package,**a)
+      
 
 # API_DOCS
 rel_API = "<string:start_label>/<string:rel_label>/<string:end_label>"
@@ -87,7 +109,7 @@ API_DOCS["create_node"] = {
     "description" : "Create a new node.",
     "url" : '/buildbot/api/v1.0/node/<string:label>/create',
     "labels" : gdb.package.nodes.keys()
-    }
+}
 
 API_DOCS["update_node"] = {
     "methods" : ["POST"],
@@ -300,7 +322,6 @@ def shutdown():
     return 'Server shutting down...'
 
 ###########################################################################
-
 
 if __name__ == "__main__":
 
