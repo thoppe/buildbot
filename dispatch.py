@@ -202,7 +202,6 @@ def status_local_neo4j(**kwargs):
     r = requests.get(url)
     return r.status_code == 200
 
-
 def wait_until_neo4j_is_up(attempts=50,**kwargs):
     attempt_count = 0
     while True:
@@ -229,7 +228,7 @@ def buildbot_start_API(**kwargs):
 
     #"./buildbot/REST_API_buildbot.py "
     
-    API_args = (
+    API_args = (" "
         "--BUILDBOT_PORT {BUILDBOT_PORT} "
         "--NEO4J_AUTH buildbot:tulsa "
         "--NEO4J_TCP_PORT {NEO4J_PORT} "
@@ -237,23 +236,32 @@ def buildbot_start_API(**kwargs):
         "--buildbot_package {BUILDBOT_PACKAGE} "
     )
     API_args = API_args.format(**kwargs)
-    cmd = '''gunicorn '{}("{}")' '''.format(_WSGI_HEADER,API_args)
-    print API_args
-    print cmd
+    cmd  = '''gunicorn '{}("{}")' '''.format(_WSGI_HEADER,API_args)
+    cmd += "--bind 0.0.0.0:{BUILDBOT_PORT}".format(**kwargs)
+
+
+    # Run the process in the background
+    subprocess.Popen(cmd,shell=True)
     exit()
     
 
-    # Run the process in the background
-    subprocess.Popen(cmd_args)
     
     return kwargs["BUILDBOT_PORT"]
 
 def buildbot_stop_API(**kwargs):
-    url = "http://localhost:{BUILDBOT_PORT}/shutdown"
-    r = requests.post(url.format(**kwargs))
     msg = "Stoping buildbot instance on port {BUILDBOT_PORT}"
     logging.info(msg.format(**kwargs))
-    return r.text
+
+    url = "http://localhost:{BUILDBOT_PORT}/shutdown"
+    r = requests.post(url.format(**kwargs))
+
+    if r.status_code == 400:
+        data = buildbot_ps()
+        item = data[kwargs["BUILDBOT_PORT"]]
+        pid  = item["pid"]
+        cmd = ["kill","-HUP",pid]
+        output = subprocess.check_output(cmd)
+
     
 ####################################################################
 
@@ -269,7 +277,7 @@ def buildbot_ps():
     output = shell.communicate()[0].strip().split('\n')
 
     search_string = "gunicorn " + _WSGI_HEADER
-    data = set()
+    data = {}
 
     for item in output[1:]:  # First row is a header
         if search_string not in item:
@@ -278,11 +286,10 @@ def buildbot_ps():
             continue
 
         item = item.split()
-        bind_string = item[item.index("--bind")+1]
-        port = bind_string.split(':')[-1]
-        data.add(port)
-        #package_name = item[item.index("--buildbot_package")+1]
-        #data[port] = "package" #package_name
+        pid  = item[1]
+        port = item[item.index("--BUILDBOT_PORT")+1]
+        package_name = item[item.index("--buildbot_package")+1]
+        data[port] = {"package_name":package_name, "pid":pid}
 
     return data
 
@@ -290,7 +297,7 @@ def list_buildbot_ports():
     '''
     Lists all ports used by buildbot Flask apps.
     '''
-    return sorted(list(buildbot_ps()))
+    return buildbot_ps().keys()
 
 def next_open_buildbot_port():
     starting_port = 5001
@@ -332,7 +339,7 @@ def check_for_required_containers():
 if args["list"]:
     data = {
         "neo4j"    : docker_reduced_ps(),
-        "buildbot" : buildbot_ps()
+        "buildbot" : buildbot_ps(),
     }
     print json.dumps(data,indent=2)
     exit(0)

@@ -54,22 +54,25 @@ def gunicorn_load(cmdline_args):
     '''
     args = shlex.split(cmdline_args)
     args = vars(parser.parse_args(args))
+    print "GUNICORN!"
+    logging.info("Starting BuildBot through gunicorn {}".format(args))
     return API
 
 ###########################################################################
 
-
-'''
-Remove command line arguments that are None (they will try to load
-from an env variable instead).
-'''
-none_args = [key for key,val in args.items() if val is None]
-for key in none_args:
-    del args[key]
+def parse_cmd_line_args():
+    '''
+    Remove command line arguments that are None (they will try to load
+    from an env variable instead).
+    '''
+    none_args = [key for key,val in args.items() if val is None]
+    for key in none_args:
+        del args[key]
 
 #####################################################################
 
 # Fire up a database connection
+parse_cmd_line_args()
 #neo4j_login = neo4j_credentials_from_env(**args)
 #gdb = graphDB.enhanced_GraphDatabase(**neo4j_login)
 
@@ -85,7 +88,6 @@ args = {"BUILDBOT_PORT":-1,"buildbot_package":"sdfhsdfjhdf","debug":1}
 # Flask entry point
 API = Flask(__name__)
 API.logger.setLevel(logging.INFO)
-
 
 info_msg = "Started BuildBot API port:{BUILDBOT_PORT} package:{buildbot_package} debug:{debug}"
 all_args = args.copy()
@@ -312,14 +314,16 @@ def update_node(label):
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
+    if func is not None:
+        func()
+        return 200
+    else:
+        logging.warning('Not running with the Werkzeug Server')
+        return 400
 
 @API.route('/shutdown', methods=['POST'])
 def shutdown():
-    shutdown_server()
-    return 'Server shutting down...'
+    return 'Server shutting down...', shutdown_server()
 
 ###########################################################################
 
