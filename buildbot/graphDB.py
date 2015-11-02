@@ -19,17 +19,26 @@ def hard_reset(gdb):
     '''
     return gdb.query(q)
 
-
 class enhanced_GraphDatabase(GraphDatabase):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, package_location):
+        # IN PROGRESS - dont launch a db connection on init
         
         # Load the package/schema
-        f_package_name = kwargs.pop("buildbot_package")
-        with open(f_package_name) as FIN:
+        with open(package_location) as FIN:
             raw = FIN.read()
             self.package = buildbot_package(raw)
-        super(enhanced_GraphDatabase,self).__init__(*args,**kwargs)
+            
+
+        #assert(not any(args))
+        #assert(not any(kwargs))
+        #pass
+
+    def launch(self, url):
+        '''
+        Launch the neo4j instance at the given url.
+        '''
+        super(enhanced_GraphDatabase,self).__init__(url)
 
     def validate_node(self,node):
         '''

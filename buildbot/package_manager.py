@@ -32,6 +32,12 @@ class buildbot_package(object):
         }
         return json.dumps(data,indent=1)
 
+    def get_name(self):
+        '''
+        Returns the cannonical name for the package author/title
+        '''
+        return "{author}/{title}".format(**self.meta)
+
     def update(self, other_package):
         self.nodes.update(other_package.nodes)
         self.relationships.update(other_package.relationships)
