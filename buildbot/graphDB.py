@@ -69,7 +69,7 @@ class enhanced_GraphDatabase(neo4jrestclient.client.GraphDatabase):
 
     def _select_direct_node_from_idx(self, idx):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)
-        return self.scalar_query(q,returns=(neo.Node,))
+        return self.scalar_query(q,returns=(neo4jrestclient.client.Node,))
 
     def __getitem__(self, idx):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)

@@ -1,11 +1,13 @@
 from nose.tools import *
 from unittest import TestCase
+import os
 
 from buildbot.graphDB import enhanced_GraphDatabase
 from buildbot.utils import neo4j_credentials_from_env
+from buildbot.package import buildbot_package
 
-neo4j_login = neo4j_credentials_from_env()
-neo4j_login["buildbot_package"] = 'packages/project_management.json'
+_TEST_PACKAGE_LOCATION = "packages/project_management"
+_TEST_PACKAGE_NAME =     "app.json"
 
 # Test basic graph operations
 
@@ -13,7 +15,19 @@ class buildbot_test_suite(TestCase):
     test_desc = u"UNITTEST -- delete when complete."
     
     def setUp(self):
-        self.gdb = enhanced_GraphDatabase(**neo4j_login)
+        # Startup the package manager with the PM package
+        f_package = os.path.join(_TEST_PACKAGE_LOCATION,
+                                 _TEST_PACKAGE_NAME)
+        with open(f_package) as FIN:
+            raw = FIN.read()
+
+        self.package = buildbot_package()
+        self.package.load_package(raw, _TEST_PACKAGE_LOCATION)
+
+        # Startup the database connection
+        neo4j_login = neo4j_credentials_from_env()
+        self.gdb = enhanced_GraphDatabase()
+        self.gdb.launch(**neo4j_login)
     
     def tearDown(self):
         q = '''
@@ -41,8 +55,8 @@ class test_basic_graph_operations(buildbot_test_suite):
     def test_add_flow(self):
         status_level = 0.7
         
-        # Create a flow node, return the idx created.
-        flow = self.gdb.package.nodes["flow"]
+        # Create a flow node, return the idx created.    
+        flow = self.package.nodes["flow"]
         node = flow(description=self.test_desc,status=status_level)
 
         # Add to the graph
@@ -60,13 +74,13 @@ class test_basic_graph_operations(buildbot_test_suite):
         time_cost = 7.8
         
         # Create the nodes
-        v1 = self.gdb.package.nodes["flow"](description=self.test_desc)
-        v2 = self.gdb.package.nodes["job"](description=self.test_desc)
+        v1 = self.package.nodes["flow"](description=self.test_desc)
+        v2 = self.package.nodes["job"](description=self.test_desc)
 
         self.gdb.add_node(v1)
         self.gdb.add_node(v2)
         
-        edge_func = self.gdb.package.relationships[("flow","requires","job")]
+        edge_func = self.package.relationships[("flow","requires","job")]
         rel = edge_func(v1,v2,time=time_cost)
 
         # Add to the graph
@@ -104,7 +118,7 @@ class test_basic_graph_operations(buildbot_test_suite):
 
     def test_update_node(self):
         status_level = 0.67
-        flow = self.gdb.package.nodes["flow"]
+        flow = self.package.nodes["flow"]
         node = flow(description=self.test_desc,status=status_level)
         obj  = self.gdb.add_node(node)
 
@@ -121,9 +135,9 @@ class test_utility_functions(buildbot_test_suite):
     def test_time_calculation_proprogation(self):
         # Test if the time calculation proprogates upward to parent flows
 
-        flow = self.gdb.package.nodes["flow"]
-        job  = self.gdb.package.nodes["job"]
-        depends = self.gdb.package.relationships[("flow","depends","flow")]
+        flow = self.package.nodes["flow"]
+        job  = self.package.nodes["job"]
+        depends = self.package.relationships[("flow","depends","flow")]
         
         f1 = self.gdb.add_node(flow(description=self.test_desc))
         f2 = self.gdb.add_node(flow(description=self.test_desc))
@@ -135,7 +149,7 @@ class test_utility_functions(buildbot_test_suite):
         self.gdb.add_relationship(depends(f3,f4))
 
         key = ("flow","requires","job")
-        job_required = self.gdb.package.relationships[key]
+        job_required = self.package.relationships[key]
         developer = self.gdb.add_node(job(description=self.test_desc))
         system_admin = self.gdb.add_node(job(description=self.test_desc))
         
