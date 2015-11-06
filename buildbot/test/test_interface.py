@@ -1,19 +1,25 @@
 from nose.tools import *
+import os
 from unittest import TestCase
-from buildbot.package_manager import buildbot_package
+from buildbot.package import buildbot_package
 import buildbot.interface_neo4j_json as interface
 
 from traits.trait_errors import TraitError
 
+_TEST_PACKAGE_LOCATION = "packages/project_management"
+_TEST_PACKAGE_NAME =     "app.json"
 
 class interface_test_suite(TestCase):
     
     def setUp(self):
         # Startup the package manager with the PM package
-        f_flows = "packages/project_management.json"
-        with open(f_flows) as FIN:
+        f_package = os.path.join(_TEST_PACKAGE_LOCATION,
+                                 _TEST_PACKAGE_NAME)
+        with open(f_package) as FIN:
             raw = FIN.read()
-        self.package = buildbot_package(raw)
+
+        self.package = buildbot_package()
+        self.package.load_package(raw, _TEST_PACKAGE_LOCATION)
 
         self.flow_data = {
             "version"     : 0.2,

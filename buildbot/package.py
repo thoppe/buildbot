@@ -52,10 +52,11 @@ class buildbot_package(object):
             self.code_entry = ""
 
         if "requires" in js:
-            for filename in js["requires"]:
-                with open(filename,'r') as FIN:
-                    raw = FIN.read()
-                    px = buildbot_package(raw)
+            for f_require in js["requires"]:
+                f_require = os.path.join(local_dir, f_require)
+                with open(f_require,'r') as FIN:
+                    px = buildbot_package()
+                    px.load_package(FIN.read())
                     self.update(px)
                     
         if "meta" in js:
@@ -71,6 +72,8 @@ class buildbot_package(object):
         if "contracts" in js:
             for name in js["contracts"]:
                 f_contract = os.path.join(local_dir, name)
+                print "HEREEEEEEEEE", local_dir
+                
                 self.contracts[name] = buildbot_contract(f_contract)
 
         # Load the actions if they exist

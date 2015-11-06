@@ -7,7 +7,9 @@
         "version"     : "0.0.1"
     },
 
-    "requires" : ["packages/flows.json"],
+    "requires" : ["flows.json"],
+
+    "contracts" : [ ],
     
     "nodes" : {
         "flow" : {
@@ -32,8 +34,6 @@
             "description" : ""
         },
         "person" : {
-            "@context": "http://schema.org",
-            "@type": "Person",
             "name" : "",
             "username" : "",
             "userid" : 0

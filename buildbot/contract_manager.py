@@ -14,6 +14,7 @@ class buildbot_contract(object):
         self.paths = self.data["paths"]
 
     def load_contract(self, f_swagger):
+        
         with open(f_swagger) as FIN:
             raw = FIN.read()
             js  = json.loads(raw)
