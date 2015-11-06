@@ -6,7 +6,7 @@
         "version"     : "0.0.1"
     },
     "requires" : [],
-    "code_entry" : "packages/checkin/logic.js",
+    "code_entry" : "logic.js",
     
     "nodes" : {
         "ping" : {
@@ -19,7 +19,7 @@
     "relationships" : [ ],
 
     "contracts" : [
-        "contracts/ipify.swagger" 
+        "ipify.swagger" 
     ],
 
     "actions" : {

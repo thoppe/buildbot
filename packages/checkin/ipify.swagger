@@ -1,0 +1,103 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "ipify",
+        "description": "A Simple IP Address API",
+        "termsOfService": "https://github.com/rdegges/ipify-api",
+        "contact": {
+            "name": "Randall Degges"
+        },
+        "license": {
+            "name": "UNLICENCE"
+        }
+    },
+    "host": "api.ipify.org",
+    "basePath": "/",
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Using ipify is ridiculously simple. You have three options. You can get your public IP directly (in plain text), you can get your public IP in JSON format, or you can get your public IP information in JSONP format (useful for Javascript developers).",
+                "produces": [
+                    "application/json",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "output format",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+
+                    "200": {
+                        "description": "ip response",
+                        "schema": {
+                          "type": "string",
+                          "items": {
+                            "$ref": "#/definitions/ip_address"
+                          }
+                        },
+                        "headers": {
+                          "x-expires": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorModel"
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    "definitions": {
+
+        "ip_address": {
+              "type": "object",
+              "required": [
+                "ip"
+              ],
+              "properties": {
+                "ip": {
+                  "type"  : "string",
+                  "format": "ip-address"
+                }
+              }
+            },
+
+
+        "ErrorModel": {
+            "type": "object",
+            "required": [
+                "code",
+                "message"
+            ],
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

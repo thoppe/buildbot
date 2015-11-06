@@ -17,11 +17,8 @@ from contract_manager  import buildbot_contract, buildbot_action
 
 class buildbot_package(object):
 
-    def __init__(self, string_input):
-        self.load_package(string_input)
-
-        # Build a swagger def of myself
-        self.swagger = export_package_to_swagger(self)
+    def __init__(self):
+        pass
 
     def __repr__(self):
         data = {
@@ -42,8 +39,8 @@ class buildbot_package(object):
         self.nodes.update(other_package.nodes)
         self.relationships.update(other_package.relationships)
 
-    def load_package(self, string_input):
-        js = json.loads(string_input)
+    def load_package(self, text=None, local_dir="", **kwargs):
+        js = json.loads(text)
         
         self.nodes = {}
         self.relationships = {}
@@ -74,12 +71,19 @@ class buildbot_package(object):
         # Load the contracts if they exist
         if "contracts" in js:
             for name in js["contracts"]:
-                self.contracts[name] = buildbot_contract(name)
+                f_contract = os.path.join(local_dir, name)
+                self.contracts[name] = buildbot_contract(f_contract)
 
         # Load the actions if they exist
         if "actions" in js:
             for name,data in js["actions"].items():
                 self.actions[name] = buildbot_action(name,data,self)
+
+        # Build a swagger def of myself
+        self.swagger = export_package_to_swagger(self)
+
+    def export(self):
+        return export_package_to_swagger(self)
         
     def add_node(self, key, schema_data):
 
@@ -156,7 +160,7 @@ def export_package_to_swagger(p):
     S.info.description = p.meta["description"]
     S.info.contact = peacock.Contact(name=p.meta["author"])
     S.basePath = "/buildbot/api/v1.0"
-    S.host = "localhost:{BUILDBOT_PORT}".format(**os.environ)
+    #S.host = "localhost:{BUILDBOT_PORT}".format(**os.environ)
 
     # Definitions taken from package nodes
     S.definitions = defs = peacock.Definitions()

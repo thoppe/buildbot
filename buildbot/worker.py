@@ -1,7 +1,6 @@
-'''
-'''
-# Main entry point for BuildBot, manages a single instance
+import os
 from graphDB import enhanced_GraphDatabase
+from package import buildbot_package
 
 class worker(object):
     '''
@@ -10,7 +9,10 @@ class worker(object):
     '''
     def __init__(self):
         self.neo4j = {}  # neo4j credentials
-        self.gdb = enhanced_GraphDatabase()
+        self.package_args = {}
+        
+        self.gdb  = enhanced_GraphDatabase()
+        self.pack = buildbot_package()
 
     def launch_db(self, **kwargs):
         '''
@@ -26,41 +28,64 @@ class worker(object):
 
         self.gdb.launch(**self.neo4j)
 
-    #def load_package(self, 
+    def load_package(self, **kwargs):
+        '''
+        Load, from disk, a buildbot package, requires that
+        'location' has been set.
+        '''
+        self.package_args.update(kwargs)
+        
+        msg = "{key} not set when launching neo4j"
+        for key in ("location",):
+            if key not in self.package_args:
+                raise KeyError(msg.format(key=key))
 
-A = worker()
+        loc = self.package_args["location"]
 
-neo4j_args = {
-    "username":"buildbot",
-    "password":"tulsa",
-    "url":"http://localhost:7474",
-}
-A.launch_db(**neo4j_args)
+        # Set the package location
+        self.package_args["local_dir"] = os.path.dirname(os.path.realpath(loc))
 
-#for x in A.gdb:
-#    print x
+        # Check if the file exists
+        if not os.path.exists(loc):
+            msg = "Package file {} not found."
+            raise OSError(msg.format(loc))
+        
+        # Load the file from disk
+        with open(loc) as FIN:
+            self.package_args["text"] = FIN.read()
 
-print A.gdb.count_nodes()
+        self.pack.load_package(**self.package_args)
+
+    def swagger(self):
+        '''
+        Returns the loaded package swagger file.
+        '''
+        return self.pack.export()
 
 
+if __name__ == "__main__":
 
-#B = worker()
-#name = B.load(package_location = "packages/checkin/app.json")
-#url = "http://localhost:7474/db/data/"
-#B[name].launch(url)
-#print B
-#print name
-#print B[name]
+    A = worker()
+
+    package_args = {
+        'location' : "../packages/checkin/app.json"
+    }
+    A.load_package(**package_args)
+
+    neo4j_args = {
+        "username":"buildbot",
+        "password":"tulsa",
+        "url":"http://localhost:7474",
+    }
+
+    A.launch_db(**neo4j_args)
+    print "known nodes", A.gdb.count_nodes()
+    print "length of package", len(str(A.pack))
+    print "length of swagger file",len(str(A.swagger()))
+
 
 # Code below was ripped out of graphDB
 '''
-     # from package_manager import buildbot_package      
-     # Load the package/schema
-        with open(package_location) as FIN:
-            raw = FIN.read()
-            self.package = buildbot_package(raw)
-
-
     def validate_node(self,node):
         #''
         #Returns True only is the input object defined in the package.
