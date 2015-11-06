@@ -33,8 +33,14 @@ class enhanced_GraphDatabase(neo4jrestclient.client.GraphDatabase):
         '''
         url = kwargs.pop('url')
         init_func = super(enhanced_GraphDatabase,self).__init__
+
+        neo_kwargs = {
+            "username" : kwargs["username"],
+            "password" : kwargs["password"],
+        }
+        
         try:
-            init_func(url, **kwargs)
+            init_func(url, **neo_kwargs)
         except requests.exceptions.ConnectionError:
             msg = "neo4j database connection at {url} failed. Does it exist?"
             raise IOError(msg.format(url=url))

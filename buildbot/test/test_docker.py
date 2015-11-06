@@ -10,9 +10,10 @@ def test_neo4j_credentials_exist():
 
 def test_neo4j_docker_connection():
     neo4j_login = neo4j_credentials_from_env()
+    gdb = enhanced_GraphDatabase()
     print neo4j_login
     try:
-        gdb = enhanced_GraphDatabase(**neo4j_login)
+        gdb.launch(**neo4j_login)
     except Exception as Ex:
         subprocess.call(["docker inspect buildbot_neo4j"],
                         shell=True, stderr=subprocess.PIPE)
