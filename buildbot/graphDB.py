@@ -1,6 +1,8 @@
 import os
-from neo4jrestclient.client import GraphDatabase, Node
-from package_manager import buildbot_package
+import requests
+
+import neo4jrestclient
+import neo4jrestclient.client
 
 def wrap_query_type(item):
     (key, val) = item
@@ -19,43 +21,26 @@ def hard_reset(gdb):
     '''
     return gdb.query(q)
 
-class enhanced_GraphDatabase(GraphDatabase):
+class enhanced_GraphDatabase(neo4jrestclient.client.GraphDatabase):
 
-    def __init__(self, package_location):
-        # IN PROGRESS - dont launch a db connection on init
-        
-        # Load the package/schema
-        with open(package_location) as FIN:
-            raw = FIN.read()
-            self.package = buildbot_package(raw)
-            
+    def __init__(self):
+        # Don't launch a db connection on init, use .launch
+        pass
 
-        #assert(not any(args))
-        #assert(not any(kwargs))
-        #pass
-
-    def launch(self, url):
+    def launch(self, **kwargs):
         '''
         Launch the neo4j instance at the given url.
         '''
-        super(enhanced_GraphDatabase,self).__init__(url)
-
-    def validate_node(self,node):
-        '''
-        Returns True only is the input object defined in the package.
-        '''
-        if node.label not in self.package.nodes:
-            msg = "{} object is not a known node-type"
-            raise TypeError(msg.format(node))
-    
-    def validate_relationship(self, rel):
-        '''
-        Returns True only is the input object is defined in the package.
-        '''
-        key = (rel.start, rel.label, rel.end)
-        if key not in self.package.relationships:
-            msg = "{} object is not a known relationship"
-            raise TypeError(msg.format(rel))
+        url = kwargs.pop('url')
+        init_func = super(enhanced_GraphDatabase,self).__init__
+        try:
+            init_func(url, **kwargs)
+        except requests.exceptions.ConnectionError:
+            msg = "neo4j database connection at {url} failed. Does it exist?"
+            raise IOError(msg.format(url=url))
+        except neo4jrestclient.exceptions.StatusException:
+            msg = "neo4j login credentials failed at {url}."
+            raise IOError(msg.format(url=url))        
 
     def scalar_query(self, q,returns=[]):
         qval = self.query(q,returns=returns)
@@ -78,7 +63,7 @@ class enhanced_GraphDatabase(GraphDatabase):
 
     def _select_direct_node_from_idx(self, idx):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)
-        return self.scalar_query(q,returns=(Node,))
+        return self.scalar_query(q,returns=(neo.Node,))
 
     def __getitem__(self, idx):
         q = "MATCH n WHERE ID(n)={} RETURN n".format(idx)
@@ -88,13 +73,12 @@ class enhanced_GraphDatabase(GraphDatabase):
             msg = "Node {} not found".format(idx)
             raise KeyError(msg)
         
-
     def count_nodes(self):
         q = "START n=node(*) return count(n);"
         return self.scalar_query(q)
 
     def update_node(self, node):
-        self.validate_node(node)
+        #self.validate_node(node)
 
         # Make sure node has ID
         if node.id is None:
@@ -112,7 +96,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         return node
 
     def add_node(self, node):
-        self.validate_node(node)
+        #self.validate_node(node)
         data = dict(**node)
 
         obj = self.node(**node)
@@ -123,7 +107,7 @@ class enhanced_GraphDatabase(GraphDatabase):
         return node
 
     def add_relationship(self, rel):
-        self.validate_relationship(rel)
+        #self.validate_relationship(rel)
 
         data = dict(**rel)
 

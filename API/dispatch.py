@@ -369,21 +369,6 @@ if args["start"] is not None:
     n_args = len(args["start"])
     f_package,neo4j_db = args["start"]
 
-    '''
-    cmd_args = 'gunicorn wsgi:app --bind 0.0.0.0:{}'
-    cmd_args = cmd_args.format(next_open_buildbot_port())
-    
-    subprocess.Popen(cmd_args,shell=True)
-    print 
-    print cmd_args
-    exit()
-    #subprocess.Popen(' '.join(cmd_args),shell=True)
-    os.system(cmd_args)
-    print {"ugly":"bash"}
-    exit(0)
-    ### DEBUG ABOVE
-    '''
-
     data = {
         "NEO4J_PORT" : next_open_neo4j_port(),
         "NEO4J_DATABASE_LOCATION" : neo4j_db,
@@ -392,12 +377,13 @@ if args["start"] is not None:
         "BUILDBOT_PACKAGE" : f_package,
     }
 
-    #ID = docker_start_neo4j(**data)
-    #msg = "Started docker:neo4j {}".format(ID.strip())
-    #logging.info(msg)
+    ID = docker_start_neo4j(**data)
+    msg = "Started docker:neo4j {}".format(ID.strip())
+    logging.info(msg)
 
-    #wait_until_neo4j_is_up(**data)
-    #logging.info("neo4j connection established!")
+    wait_until_neo4j_is_up(**data)
+    logging.info("neo4j connection established!")
+    exit()
 
     ID = buildbot_start_API(**data)
     msg = "Started buildbot:{}".format(ID.strip())
