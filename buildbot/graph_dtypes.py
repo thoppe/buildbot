@@ -1,6 +1,5 @@
 import json
 from copy import deepcopy
-from schemas.schema_org_manager import schema_org
 from traits.api import Int, Str, Float, Either, Dict, Any, Unicode
 from traits.api import HasPrivateTraits
 
@@ -11,19 +10,20 @@ _python_traits_mapper = {
     float : Float,
 }
 
-def load_context(context):
-    if not context:
-        return {}
 
-    if context["@context"] == u'http://schema.org':
-        field_keys = schema_org[context["@type"]]
-    else:
-        msg = "Context {} unknown".format(context["@context"])
-        raise KeyError(msg)
-
-    # Assume field_keys are defaulted to strings
-    defaults = [u""]*len(field_keys)
-    return dict(zip(field_keys,defaults))
+# Schema.org code disabled for now
+# from schemas.schema_org_manager import schema_org
+#def load_context(context):
+#    if not context:
+#        return {}
+#    if context["@context"] == u'http://schema.org':
+#        field_keys = schema_org[context["@type"]]
+#    else:
+#        msg = "Context {} unknown".format(context["@context"])
+#        raise KeyError(msg)
+#    # Assume field_keys are defaulted to strings
+#    defaults = [u""]*len(field_keys)
+#    return dict(zip(field_keys,defaults))
 
 class neo4j_container(HasPrivateTraits):
     ''' This shouldn't be called to create a node/edge, but to create an instance of one. '''
@@ -67,11 +67,6 @@ class neo4j_container(HasPrivateTraits):
 
     #def types(self):
     #    return self._obj_types
-
-    # TODO: UPDATE
-    # Download any context if needed
-    #self._context_defaults = load_context(self._context)
-    #self.data.update(self._context_defaults)
 
 #####################################################################################
 
@@ -163,22 +158,15 @@ def edge_container(**container_kwargs):
         
     
 if __name__ == "__main__":
-    
-    simple = node_container(dog="a",mom=3,x=20)
-    a = simple(dog="cat")
-    a.label= 'foo'
-    a.mom= 4
+    pass
 
-    pair = node_container(x=3, y=4)
-    b = pair()
+    #simple = node_container(dog="a",mom=3,x=20)
+    #a = simple(dog="cat")
+    #a.label= 'foo'
+    #a.mom= 4
 
-    print a
-    print b
-
-    #b = node_container(mom='today')
-    #c = deepcopy(a)
-    #print a,c
+    #pair = node_container(x=3, y=4)
+    #b = pair()
     #print a
-    #help(a)
-    
-            
+    #print b
+

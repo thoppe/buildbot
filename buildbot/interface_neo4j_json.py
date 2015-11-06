@@ -1,7 +1,5 @@
 import json
-
-from generic_datatypes import node_container
-from generic_datatypes import edge_container
+from graph_dtypes import node_container, edge_container
 
 _required_edge_members = ["start", "label", "end",
                           "start_id", "end_id", "id"]
@@ -11,7 +9,8 @@ def convert_neo4j2node_container(obj,package):
     '''
     Converts a neo4j result node into a buildbot node.
     Will validate:
-    + That there is a exactly one label that overlaps with packages nodes.
+    + That there is a exactly one label that overlaps with
+      packages nodes.
 
     '''
     node_id = obj['metadata']['id']
@@ -34,7 +33,9 @@ def convert_neo4j2node_container(obj,package):
 
 def convert_json2node_container(js, package, ignore_id_check=False):
     '''
-    Converts a json string to a node_container json object. Will validate:
+    Converts a json string to a node_container json object.
+    Will validate that:
+    
     + That js is a valid json string
     + That `label` exists as a key in js
     + That the label is a defined in the package.
@@ -71,11 +72,13 @@ def convert_json2node_container(js, package, ignore_id_check=False):
     return node
 
 
-############################################################################
+#####################################################################
 
 def convert_json2edge_container(js, package, ignore_id_check=False):
     '''
-    Converts a json string to a edge_container json object. Will validate:
+    Converts a json string to a edge_container json object.
+    Will validate that:
+    
     + That js is a valid json string
     + That start_id,rel,end_id exists as a key in js
     + That the start_id,rel,end_id is in the package.
@@ -115,9 +118,3 @@ def convert_json2edge_container(js, package, ignore_id_check=False):
         setattr(edge, name, value)
 
     return edge
-                                      
-
-############################################################################
-# To do at some point (class-ify this whole package manager mess)
-# class neo4j2containers(object):
-    

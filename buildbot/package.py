@@ -6,8 +6,7 @@ import json
 import peacock
 import os
 
-from generic_datatypes import node_container
-from generic_datatypes import edge_container
+from graph_dtypes import node_container, edge_container
 from contract_manager  import buildbot_contract, buildbot_action
 
 # TO DO: let a buildbot_package be constrained by traits
