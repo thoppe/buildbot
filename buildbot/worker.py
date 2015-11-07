@@ -35,7 +35,7 @@ class worker(object):
         '''
         self.package_args.update(kwargs)
         
-        msg = "{key} not set when launching neo4j"
+        msg = "{key} not set when launching package"
         for key in ("location",):
             if key not in self.package_args:
                 raise KeyError(msg.format(key=key))
