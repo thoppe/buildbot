@@ -1,6 +1,7 @@
 import os
 from graphDB import enhanced_GraphDatabase
 from package import buildbot_package
+from interface_neo4j_json import convert_neo4j2node_container
 
 class worker(object):
     '''
@@ -60,7 +61,7 @@ class worker(object):
 
         # Expose the nodes and edges
         self.nodes = self._pack.nodes
-        self.relationsips = self._pack.relationships
+        self.relationships = self._pack.relationships
 
     def swagger(self):
         '''
@@ -68,17 +69,43 @@ class worker(object):
         '''
         return self._pack.export()
 
+    ###############################################################
+    # Node C.R.U.D.
+    ###############################################################
+
     def add_node(self, name, **kwargs):
         '''
         Adds a node and validates that it is proper.
-        '''
+        '''        
         obj  = self.nodes[name](**kwargs)
         node = self._gdb.add_node(obj)
         return node
-        #print type(node)
-        #print type(node)
-        # Add to the graph
-        #node = self.gdb.add_node(node)
+
+    def get_node_container(self, node_id):
+        obj  = self._gdb[node_id]
+        return convert_neo4j2node_container(obj, self._pack)
+
+    def get_node(self, node_id):
+        return self._gdb[node_id]["data"]
+
+    def update_node(self, node_id, **kwargs):
+        cnode = self.get_node_container(node_id)
+        for key,val in kwargs.items():
+            cnode[key] = val
+        return self._gdb.update_node(cnode)   
+
+    def remove_node(self, node_id):
+        return self._gdb[node_id]["data"]
+
+    def add_relationship(self, n1_id, n2_id, name, **kwargs):
+        '''
+        Adds a relationship and validates that it is proper.
+        '''
+        obj  = self.relationships[name](**kwargs)
+        rel  = self._gdb.add_relationship(obj)
+        return rel
+
+    
 
 
 if __name__ == "__main__":
