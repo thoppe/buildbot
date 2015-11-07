@@ -2,9 +2,8 @@ from nose.tools import *
 from unittest import TestCase
 import os, json
 
+from traits.trait_errors import TraitError
 from buildbot.utils import neo4j_credentials_from_env
-#from buildbot.graphDB import enhanced_GraphDatabase
-#from buildbot.package import buildbot_package
 from buildbot.worker import worker
 
 _TEST_PACKAGE = "packages/project_management/app.json"
@@ -29,11 +28,26 @@ class test_worker_operations(buildbot_worker_test_suite):
         s = self.W.swagger()
         js = json.loads(str(s))        
 
-    def test_package_length(self):
-        # Check that the package length is non-zero (quick check if loaded)
-        assert( str(self.W.pack) )
-
     def test_count_nodes_in_db(self):
-        # Perform an operation on the database
+        # Perform a simple operation on the database.
         self.test_startup_db_from_env()
-        self.W.gdb.count_nodes()
+        self.W._gdb.count_nodes()
+
+    def test_add_node(self):
+        # Test adding a node
+        self.test_startup_db_from_env()
+        self.W.add_node("flow",status=0.75)
+
+    @raises(KeyError)
+    def test_add_improper_node_name(self):
+        # Try to add a node not defined in the app
+        self.test_startup_db_from_env()
+        self.W.add_node("UNDEFINED")
+
+    @raises(TraitError)  
+    def test_add_improper_node_args(self):
+        # Try to add a node not defined in the app
+        self.test_startup_db_from_env()
+        self.W.add_node("flow",UNDEFINED=2)
+
+        

@@ -72,8 +72,6 @@ class buildbot_package(object):
         if "contracts" in js:
             for name in js["contracts"]:
                 f_contract = os.path.join(local_dir, name)
-                print "HEREEEEEEEEE", local_dir
-                
                 self.contracts[name] = buildbot_contract(f_contract)
 
         # Load the actions if they exist

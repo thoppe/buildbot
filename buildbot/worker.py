@@ -11,8 +11,10 @@ class worker(object):
         self.neo4j = {}  # neo4j credentials
         self.package_args = {}
         
-        self.gdb  = enhanced_GraphDatabase()
-        self.pack = buildbot_package()
+        self._gdb  = enhanced_GraphDatabase()
+        self._pack = buildbot_package()
+
+        self.nodes, self.relationships = None, None
 
     def launch_db(self, **kwargs):
         '''
@@ -26,7 +28,7 @@ class worker(object):
             if key not in self.neo4j:
                 raise KeyError(msg.format(key=key))
 
-        self.gdb.launch(**self.neo4j)
+        self._gdb.launch(**self.neo4j)
 
     def load_package(self, **kwargs):
         '''
@@ -54,13 +56,29 @@ class worker(object):
         with open(loc) as FIN:
             self.package_args["text"] = FIN.read()
 
-        self.pack.load_package(**self.package_args)
+        self._pack.load_package(**self.package_args)
+
+        # Expose the nodes and edges
+        self.nodes = self._pack.nodes
+        self.relationsips = self._pack.relationships
 
     def swagger(self):
         '''
         Returns the loaded package swagger file.
         '''
-        return self.pack.export()
+        return self._pack.export()
+
+    def add_node(self, name, **kwargs):
+        '''
+        Adds a node and validates that it is proper.
+        '''
+        obj  = self.nodes[name](**kwargs)
+        node = self._gdb.add_node(obj)
+        return node
+        #print type(node)
+        #print type(node)
+        # Add to the graph
+        #node = self.gdb.add_node(node)
 
 
 if __name__ == "__main__":
@@ -80,26 +98,9 @@ if __name__ == "__main__":
 
     A.launch_db(**neo4j_args)
     print "known nodes", A.gdb.count_nodes()
-    print "length of package", len(str(A.pack))
+    print "length of package", len(str(A._pack))
     print "length of swagger file",len(str(A.swagger()))
 
+    print A.nodes
+    A.add_node('ping', timestamp=20)
 
-# Code below was ripped out of graphDB
-'''
-    def validate_node(self,node):
-        #''
-        #Returns True only is the input object defined in the package.
-        #''
-        if node.label not in self.package.nodes:
-            msg = "{} object is not a known node-type"
-            raise TypeError(msg.format(node))
-    
-    def validate_relationship(self, rel):
-        #''
-        #Returns True only is the input object is defined in the package.
-        #''
-        key = (rel.start, rel.label, rel.end)
-        if key not in self.package.relationships:
-            msg = "{} object is not a known relationship"
-            raise TypeError(msg.format(rel))
-'''
